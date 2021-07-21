@@ -14,7 +14,10 @@ from email.mime.text import MIMEText
 import socket
 import random
 from datetime import datetime
+
 import time
+
+import logging
 
 import asyncio
 from aioapns import APNs, NotificationRequest, PushType
@@ -55,69 +58,128 @@ def list_db_tables(mydb, response_dict):
     mydb.commit()
     mydb.close()
 
-
-def show_table_ttypes(mydb, response_dict):
-    mydb.connect()
-    mycursor = mydb.cursor()
-    mycursor.execute('SELECT * FROM ttypes ORDER BY rid')
-    columns = [desc[0] for desc in mycursor.description]
-    response_dict['ttypes'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
-    mydb.commit()
-    mydb.close()
-
-
-def show_table_users(mydb, response_dict):
-    mydb.connect()
-    mycursor = mydb.cursor()
-    mycursor.execute('SELECT * FROM users ORDER BY rid')
-    columns = [desc[0] for desc in mycursor.description]
-    response_dict['users'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
-    mydb.commit()
-    mydb.close()
-
-
 def dump_date(thing):
     if isinstance(thing, datetime):
         return thing.isoformat()
     return str(thing)
 
+# def send_notification(response_dict):
+#     token_hex = '67833776a59441dbe80af454c153b2bc84345babe2baa7960140001d08e104c2'
+#
+#     async def run():
+#         apns_cert_client = APNs(
+#             client_cert='/etc/ssl/Certificates.pem',
+#             use_sandbox=True,
+#         )
+#         # apns_key_client = APNs(
+#         #     key='AuthKey_8J93N9S525.p8',
+#         #     key_id='8J93N9S525',
+#         #     team_id='8FRM8M93L5',
+#         #     topic='site.aleksa.forFun',  # Bundle ID
+#         #     use_sandbox=True,
+#         # )
+#         request = NotificationRequest(
+#             device_token=token_hex,
+#             message={
+#                 "aps": {"alert": "Hello from forFun"
+#                     , "sound": "default"
+#                     , "badge": "1"
+#                 }
+#             },
+#             # notification_id=str(uuid4()),  # optional
+#             # time_to_live=3,                # optional
+#             # push_type=PushType.ALERT,      # optional
+#         )
+#         await apns_cert_client.send_notification(request)
+#         # await apns_key_client.send_notification(request)
+#
+#     loop = asyncio.get_event_loop()
+#     loop.run_until_complete(run())
+#
+#
+#
+#     response_dict['wnotification'] = 'Sent'
+#     return response_dict
 
-def send_notification(response_dict):
-    token_hex = '67833776a59441dbe80af454c153b2bc84345babe2baa7960140001d08e104c2'
 
-    async def run():
-        apns_cert_client = APNs(
-            client_cert='/etc/ssl/Certificates.pem',
-            use_sandbox=True,
-        )
-        # apns_key_client = APNs(
-        #     key='AuthKey_8J93N9S525.p8',
-        #     key_id='8J93N9S525',
-        #     team_id='8FRM8M93L5',
-        #     topic='site.aleksa.forFun',  # Bundle ID
-        #     use_sandbox=True,
-        # )
-        request = NotificationRequest(
-            device_token=token_hex,
-            message={
-                "aps": {"alert": "Hello from forFun"
-                    , "sound": "default"
-                    , "badge": "1"
-                }
-            },
-            # notification_id=str(uuid4()),  # optional
-            # time_to_live=3,                # optional
-            # push_type=PushType.ALERT,      # optional
-        )
-        await apns_cert_client.send_notification(request)
-        # await apns_key_client.send_notification(request)
+def send_notification(mydb, query_dict, response_dict):
+    try:
+        mydb.connect()
+        mycursor = mydb.cursor()
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
+        for i in range(1, 10):
+            mycursor.execute("SELECT n.*, t.nick AS tnick, u.nick, u.uid "
+                             "FROM notification AS n "
+                             "LEFT JOIN (transport AS t, user AS u) "
+                             "ON (n.tid = t.tid AND t.uid = u.uid) "
+                             "WHERE type = 'T' AND date <= current_date() AND (prev_sent < current_date() OR prev_sent IS NULL) "
+                             "LIMIT 1")
 
+            columns = [desc[0] for desc in mycursor.description]
+            notif = [dict(zip(columns, row)) for row in mycursor.fetchall()]
 
+            if notif == []:
+                break
 
-    response_dict['wnotification'] = 'Sent'
+            mycursor.execute("SELECT email FROM email AS e WHERE e.uid = %d AND e.send = 1" % (notif[0]['uid']))
+            emails = [row[0] for row in mycursor.fetchall()]
+
+            if emails == []:
+                mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+                mydb.commit()
+                continue
+
+            mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = """
+                    <html lang="ru">
+                    <head>
+                    </head>
+                    <body>
+                    <div style="font-size: 1em">
+                    Здравствуйте, """ + notif[0]['nick'] + """!
+                    <br>
+                    <br>
+                    Уведомление: """ + notif[0]['notification'] + """
+                    <br>
+                    На время: """ + str(notif[0]['date']) + """
+                    <br>
+                    Для транспортного средства: """ + notif[0]['tnick'] + """
+                    </div>
+                    <br>
+                    <br>
+                    <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                    </body>
+                    </html>
+                    """
+
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            s.send_message(msg)
+
+            del msg
+
+            mydb.commit()
+
+        response_dict['send_notification'] = {'sent' : 1}
+    except Exception as error:
+        logger = logging.getLogger('ftpuploader')
+        logger.error('Error: ' + str(error))
+        response_dict['send_notification'] = {'server_error': 1}
+    finally:
+        mydb.close()
+
     return response_dict
 
 
@@ -135,22 +197,36 @@ def connect_device(mydb, query_dict, response_dict):
         s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
         msg = MIMEMultipart()
 
-        message_template = 'Превед! :)\n\nНе отвечайте на это письмо!\n\nКод проверки: ' + code
+        message_template = """
+        <html lang="ru">
+        <head>
+        </head>
+        <body>
+        <div style="font-size: 1.2em">Здравствуйте!</div>
+        <br>
+        <div style="font-size: 1.2em">Код подтверждения: <b>""" + code + """</b></div>
+        <br>
+        <br>
+        <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+        </body>
+        </html>
+        """
+
         message = message_template  # .substitute(PERSON_NAME=name.title())
 
         msg['From'] = 'noreply@argonauts.online'
         msg['To'] = email
         msg['BCC'] = 'sent@argonauts.online'
-        msg['Subject'] = 'confirmation code'
+        msg['Subject'] = 'Код подтверждения'
 
-        msg.attach(MIMEText(message, 'plain'))
+        msg.attach(MIMEText(message, 'html'))
         s.send_message(msg)
 
         del msg
 
-        response_dict['message'] = {'email': email, 'code': code}
+        response_dict['connect_device'] = {'email': email, 'code': code}
     except:
-        response_dict['message'] = {'server_error': 1}
+        response_dict['connect_device'] = {'server_error': 1}
 
     return response_dict
 
@@ -186,8 +262,8 @@ def add_user(mydb, query_dict, response_dict):
         mycursor.execute("SELECT LAST_INSERT_ID()")
 
         uid = mycursor.fetchone()[0]
-        mycursor.execute("INSERT INTO email (uid, email) VALUES (%d, '%s')" % (uid, email))
-
+        mycursor.execute("INSERT INTO email (uid, email, send) VALUES (%s, '%s', 0)" % (uid, email))
+        
         mydb.commit()
         response_dict['new_user'] = {'email': email, 'nick': nick, 'uid': uid}
     except mysql.connector.Error as error:
@@ -290,6 +366,10 @@ def add_transp(mydb, query_dict, response_dict):
         now = datetime.now()
         date_string = now.strftime('%Y-%m-%d %H:%M:%S')
 
+        total_fuel = 0
+        mycursor.execute("UPDATE transport SET total_fuel = %s WHERE tid = %d" % (total_fuel, tid))
+        mycursor.execute("UPDATE transport SET fuel_date = '%s' WHERE tid = %d" % (date_string, tid))
+
         if 'producted' in query_dict:
             mycursor.execute("UPDATE transport SET producted = %s WHERE tid = %d" % (query_dict['producted'][0], tid))
             resp['producted'] = query_dict['producted'][0]
@@ -333,17 +413,122 @@ def get_user_info(mydb, query_dict, response_dict):
 
         mydb.connect()
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT nick from user WHERE uid = (SELECT uid FROM email WHERE email = '%s')" % (email))
-        nick = mycursor.fetchall()
+        mycursor.execute("SELECT e.*, u.nick FROM email AS e LEFT JOIN user AS u ON e.uid = u.uid WHERE e.uid = (SELECT uid FROM email WHERE email = '%s')" % (email))
 
-        response_dict['user_info'] = {'nick' : nick[0][0]}
+        columns = [desc[0] for desc in mycursor.description]
+        response_dict['get_user_info'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
-        response_dict['user_info'] = {'server_error': 1, 'err_code': err_code}
+        response_dict['get_user_info'] = {'server_error': 1, 'err_code': err_code}
     finally:
         mydb.close()
 
     return response_dict
+
+def get_email(mydb, query_dict, response_dict):
+    try:
+        email = query_dict['email'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT * FROM email WHERE uid = (SELECT uid FROM email WHERE email = '%s')" % (email))
+
+        columns = [desc[0] for desc in mycursor.description]
+        response_dict['get_email'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['get_email'] = [{'server_error' : 1, 'err_code' : err_code}]
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def add_email(mydb, query_dict, response_dict):
+    try:
+        email = query_dict['email'][0]
+        new_email = query_dict['new_email'][0]
+        send = '0'
+        resp = dict()
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+
+        mycursor.execute("INSERT INTO email(uid, email, send) SELECT uid, '%s', %s FROM email WHERE email = '%s'" % (new_email, send, email))
+
+        mycursor.execute("SELECT LAST_INSERT_ID()")
+        eid = mycursor.fetchone()[0]
+
+        resp['eid'] = eid
+        resp['email'] = email
+        resp['new_email'] = new_email
+        resp['send'] = 0
+
+        mydb.commit()
+
+        response_dict['add_email'] = resp
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['add_email'] = {'server_error' : 1, 'err_code' : err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def delete_email(mydb, query_dict, response_dict):
+    try:
+        email = query_dict['email'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("DELETE FROM email WHERE email = '%s'" % (email))
+
+        mydb.commit()
+        response_dict['delete_email'] = {'deleted_email': email}
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['delete_email'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def change_email_send(mydb, query_dict, response_dict):
+    try:
+        email = query_dict['email'][0]
+        send = query_dict['send'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("UPDATE email SET send = %s WHERE email = '%s'" % (send, email))
+
+        mydb.commit()
+
+        response_dict['change_email_send'] = {'done' : 'a'}
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['change_email_send'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def get_mileage(mydb, query_dict, response_dict):
     try:
@@ -353,8 +538,8 @@ def get_mileage(mydb, query_dict, response_dict):
         mycursor = mydb.cursor()
 
         mycursor.execute("SELECT * FROM mileage WHERE tid = %s ORDER BY date DESC" % (tid))
-        columns = [desc[0] for desc in mycursor.description]
 
+        columns = [desc[0] for desc in mycursor.description]
         response_dict['get_mileage'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
@@ -526,11 +711,12 @@ def add_fuel(mydb, query_dict, response_dict):
                 mycursor.execute("SELECT LAST_INSERT_ID()")
                 fid = mycursor.fetchone()[0]
                 mycursor.execute("UPDATE transport SET mileage = (SELECT MAX(mileage) FROM mileage WHERE tid = %s) WHERE tid = %s" % (tid, tid))
+                mycursor.execute("UPDATE transport AS t SET total_fuel = (SELECT SUM(fuel) FROM fuel WHERE tid = %s AND date >= t.fuel_date ) WHERE tid = %s" % (tid, tid))
 
                 resp['fid'] = fid
                 resp['date'] = date
                 resp['mileage'] = int(mileage)
-                resp['fuel'] = int(fuel)
+                resp['fuel'] = float(fuel)
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
         response_dict['add_fuel'] = {'server_error': 1, 'err_code': err_code}
@@ -568,6 +754,7 @@ def delete_fuel(mydb, query_dict, response_dict):
         mycursor.execute("DELETE FROM mileage WHERE tid = %s AND date = (SELECT date FROM fuel WHERE fid = %s)" % (tid, fid))
         mycursor.execute("DELETE FROM fuel WHERE fid = %s" % (fid))
         mycursor.execute("UPDATE transport SET mileage = (SELECT MAX(mileage) FROM mileage WHERE tid = %s) WHERE tid = %s" % (tid, tid))
+        mycursor.execute("UPDATE transport AS t SET total_fuel = (SELECT SUM(fuel) FROM fuel WHERE tid = %s AND date >= t.fuel_date ) WHERE tid = %s" % (tid, tid))
 
         mydb.commit()
         response_dict['delete_fuel'] = {'deleted_fid': fid}
@@ -751,6 +938,121 @@ def delete_material(mydb, query_dict, response_dict):
 
     return response_dict
 
+def get_notification(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("SELECT * FROM notification WHERE tid = %s" % (tid))
+        columns = [desc[0] for desc in mycursor.description]
+
+        response_dict['get_notification'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['get_notification'] = [{'server_error': 1, 'err_code': err_code}]
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def add_notification(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+        type = query_dict['type'][0]
+        notification = query_dict['notification'][0]
+        resp = dict()
+
+        resp['tid'] = int(tid)
+        resp['type'] = type
+        resp['notification'] = notification
+
+        if 'date' in query_dict:
+            date = query_dict['date'][0]
+
+            mydb.connect()
+            mycursor = mydb.cursor()
+
+            mycursor.execute("INSERT INTO notification (tid, type, date, notification) VALUES (%s, '%s', '%s', '%s')" % (tid, type, date, notification))
+            resp['date'] = date
+        elif 'value2' in query_dict:
+            value1 = query_dict['value1'][0]
+            value2 = query_dict['value2'][0]
+
+            mydb.connect()
+            mycursor = mydb.cursor()
+
+            mycursor.execute("INSERT INTO notification (tid, type, value1, value2, notification) VALUES (%s, '%s', %s, %s, '%s')" % (tid, type, value1, value2, notification))
+            resp['value1'] = int(value1)
+            resp['value2'] = int(value2)
+        else:
+            value1 = query_dict['value1'][0]
+
+            mydb.connect()
+            mycursor = mydb.cursor()
+
+            mycursor.execute("INSERT INTO notification (tid, type, value1, notification) VALUES (%s, '%s', %s, '%s')" % (tid, type, value1, notification))
+            resp['value1'] = int(value1)
+
+        mycursor.execute("SELECT LAST_INSERT_ID()")
+        nid = mycursor.fetchone()[0]
+        mydb.commit()
+        resp['nid'] = nid
+        response_dict['add_notification'] = resp
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['add_notification'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def delete_notification(mydb, query_dict, response_dict):
+    try:
+        nid = query_dict['nid'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("DELETE FROM notification WHERE nid = %s" % (nid))
+
+        mydb.commit()
+        response_dict['delete_notification'] = {'deleted_nid': nid}
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['delete_notification'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def discard_fuel(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+        now = datetime.now()
+        date_string = now.strftime('%Y-%m-%d')
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("UPDATE transport SET total_fuel = '0.0', fuel_date = '%s' WHERE tid = %s" % (date_string, tid))
+
+        mydb.commit()
+        response_dict['discard_fuel'] = {'tid' : tid}
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['discard_fuel'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+
+
+
+
+
 
 
 
@@ -801,13 +1103,9 @@ def application(environ, start_response):
 
     request_mission = query_dict.get('mission', [''])[0]
 
-    if request_mission == 'show_table_ttypes':
-        show_table_ttypes(argodb, response_dict)
-    elif request_mission == 'show_table_users':
-        show_table_users(argodb, response_dict)
-    elif request_mission == 'send_notification':
-        send_notification(response_dict)
-    elif request_mission == 'connect_device':
+    if request_mission == 'send_notification':
+        send_notification(argodb, query_dict, response_dict)
+    if request_mission == 'connect_device':
         connect_device(argodb, query_dict, response_dict)
     elif request_mission == 'is_email_exists':
         is_email_exists(argodb, query_dict, response_dict)
@@ -821,39 +1119,63 @@ def application(environ, start_response):
         get_transport_info(argodb, query_dict, response_dict)
     elif request_mission == 'update_transp_info':
         update_transp_info(argodb, query_dict, response_dict)
+    # user
     elif request_mission == 'get_user_info':
         get_user_info(argodb, query_dict, response_dict)
-    elif request_mission == 'add_mileage':
-        add_mileage(argodb, query_dict, response_dict)
+    elif request_mission == 'get_email':
+        get_email(argodb, query_dict, response_dict)
+    elif request_mission == 'add_email':
+        add_email(argodb, query_dict, response_dict)
+    elif request_mission == 'delete_email':
+        delete_email(argodb, query_dict, response_dict)
+    elif request_mission == 'change_email_send':
+        change_email_send(argodb, query_dict, response_dict)
+    # mileage
     elif request_mission == 'get_mileage':
         get_mileage(argodb, query_dict, response_dict)
+    elif request_mission == 'add_mileage':
+        add_mileage(argodb, query_dict, response_dict)
     elif request_mission == 'delete_mileage':
         delete_mileage(argodb, query_dict, response_dict)
+    # eng_hour
     elif request_mission == 'get_eng_hour':
         get_eng_hour(argodb, query_dict, response_dict)
     elif request_mission == 'add_eng_hour':
         add_eng_hour(argodb, query_dict, response_dict)
     elif request_mission == 'delete_eng_hour':
         delete_eng_hour(argodb, query_dict, response_dict)
+    # fuel
     elif request_mission == 'get_fuel':
         get_fuel(argodb, query_dict, response_dict)
     elif request_mission == 'add_fuel':
         add_fuel(argodb, query_dict, response_dict)
     elif request_mission == 'delete_fuel':
         delete_fuel(argodb, query_dict, response_dict)
+    #service
     elif request_mission == 'get_service':
         get_service(argodb, query_dict, response_dict)
     elif request_mission == 'add_service':
         add_service(argodb, query_dict, response_dict)
     elif request_mission == 'delete_service':
         delete_service(argodb, query_dict, response_dict)
+    # material
     elif request_mission == 'get_material':
         get_material(argodb, query_dict, response_dict)
     elif request_mission == 'add_material':
         add_material(argodb, query_dict, response_dict)
     elif request_mission == 'delete_material':
         delete_material(argodb, query_dict, response_dict)
-    
+    # notification
+    elif request_mission == 'get_notification':
+        get_notification(argodb, query_dict, response_dict)
+    elif request_mission == 'add_notification':
+        add_notification(argodb, query_dict, response_dict)
+    elif request_mission == 'delete_notification':
+        delete_notification(argodb, query_dict, response_dict)
+
+    elif request_mission == 'discard_fuel':
+        discard_fuel(argodb, query_dict, response_dict)
+
     response_status = '200 OK'
     response_json = bytes(json.dumps(response_dict, default=dump_date, indent=2, ensure_ascii=False, sort_keys=True), encoding='utf-8')
     response_headers = [('Content-type', 'text/plain; charset=utf-8'), ('Content-Length', str(len(response_json)))]

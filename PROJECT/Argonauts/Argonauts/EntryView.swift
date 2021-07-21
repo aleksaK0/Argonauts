@@ -16,11 +16,13 @@ enum Views: String {
     case createAccount = "CreateAccountView"
     case addTransp = "AddTranspView"
     case home = "HomeView"
+    
+    case enterPin = "EnterPinView"
 }
 
 struct EntryView: View {
     @StateObject var globalObj: GlobalObj = GlobalObj()
-    @State var switcher: Views = .enterEmail
+    @State var switcher: Views
     
     var body: some View {
         if switcher == .enterEmail {
@@ -36,7 +38,9 @@ struct EntryView: View {
         } else if switcher == .addTransp {
             AddTranspView(switcher: $switcher).environmentObject(globalObj) // добавление автомобиля
         } else if switcher == .home {
-            HomeView().environmentObject(globalObj) // домашний экран
+            HomeView(switcher: $switcher).environmentObject(globalObj) // домашний экран
+        } else if switcher == .enterPin {
+            EnterPinView(switcher: $switcher).environmentObject(globalObj) // ввод пин-кода
         }
     }
 }

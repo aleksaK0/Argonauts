@@ -10,85 +10,79 @@ import LocalAuthentication
 
 struct EnterPinView: View {
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var pin: String = ""
     @State var text: String = "Введите пин"
     @State var pinInfo: [String] = []
     @State var isLoading: Bool = false
     
-    @State var showNext: Bool = false
-    
     var body: some View {
-        if showNext {
-            HomeView()
-        } else {
-            ZStack {
-                VStack {
-                    Text(text)
-                    Text(pin)
-                        .onChange(of: pin) { pin in
-                            if pin.count == 4 {
-                                if pin == pinInfo[1] {
-                                    showNext = true
-                                } else {
-                                    text = "Попробуйте снова"
-                                }
+        ZStack {
+            VStack {
+                Text(text)
+                Text(pin)
+                    .onChange(of: pin) { pin in
+                        if pin.count == 4 {
+                            if pin == pinInfo[1] {
+                                switcher = .home
                             } else {
-                                text = "Введите пин"
+                                text = "Попробуйте снова"
                             }
+                        } else {
+                            text = "Введите пин"
                         }
-                    ForEach(buttonsWithBio, id: \.self) { row in
-                        HStack {
-                            ForEach(row, id: \.self) { item in
-                                Button(action: {
-                                    switch item.rawValue {
-                                    case "bio":
-                                        authenticate()
-                                    case "del":
-                                        if pin != "" {
-                                            pin.removeLast()
-                                        }
-                                    default:
-                                        pin.append(item.rawValue)
+                    }
+                ForEach(buttonsWithBio, id: \.self) { row in
+                    HStack {
+                        ForEach(row, id: \.self) { item in
+                            Button(action: {
+                                switch item.rawValue {
+                                case "bio":
+                                    authenticate()
+                                case "del":
+                                    if pin != "" {
+                                        pin.removeLast()
                                     }
-                                }, label: {
-                                    if item.rawValue == "del" {
-                                        Image(systemName: "delete.left")
-                                    } else if item.rawValue == "bio" {
-                                        if globalObj.biometryType == "faceID" {
-                                            Image(systemName: "faceid")
-                                        } else if globalObj.biometryType == "touchID" {
-                                            Image(systemName: "touchid")
-                                        } else {
-                                            Text("")
-                                        }
+                                default:
+                                    pin.append(item.rawValue)
+                                }
+                            }, label: {
+                                if item.rawValue == "del" {
+                                    Image(systemName: "delete.left")
+                                } else if item.rawValue == "bio" {
+                                    if globalObj.biometryType == "faceID" {
+                                        Image(systemName: "faceid")
+                                    } else if globalObj.biometryType == "touchID" {
+                                        Image(systemName: "touchid")
                                     } else {
-                                        Text(item.rawValue)
+                                        Text("")
                                     }
-                                })
-                            }
+                                } else {
+                                    Text(item.rawValue)
+                                }
+                            })
                         }
                     }
                 }
-                if isLoading {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.5))
-                        .allowsHitTesting(true)
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .pink))
-                }
             }
-            .onAppear {
-                loadDataAsync()
-                authenticate()
+            if isLoading {
+                Rectangle()
+                    .fill(Color.white.opacity(0.5))
+                    .allowsHitTesting(true)
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
             }
+        }
+        .onAppear {
+            loadDataAsync()
+            authenticate()
         }
     }
     
     func loadDataAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            writeToDocDir(filename: "pinInfo", text: "Oo@ll.aa\n2222")
             readPinInfo()
             DispatchQueue.main.async {
                 isLoading = false
@@ -121,7 +115,7 @@ struct EnterPinView: View {
                 // authentication has now completed
                 DispatchQueue.main.async {
                     if success {
-                        showNext = true
+                        switcher = .home
                         // authenticated successfully
                     } else {
                         // there was a problem
@@ -154,11 +148,5 @@ struct EnterPinView: View {
         } catch let error as NSError {
             print("EnterPinView.readPinInfo(): \(error)")
         }
-    }
-}
-
-struct EnterPinView_Previews: PreviewProvider {
-    static var previews: some View {
-        EnterPinView().environmentObject(GlobalObj())
     }
 }

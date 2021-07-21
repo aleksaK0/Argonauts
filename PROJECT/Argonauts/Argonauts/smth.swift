@@ -44,6 +44,43 @@ extension String {
    }
 }
 
+func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool) -> [Transport] {
+    let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_tid_tnick&email=" + email
+    let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+    let url = URL(string: encodedUrl!)
+    if let data = try? Data(contentsOf: url!) {
+        do {
+            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                let info = json["tid_nick"] as! [[String : Any]]
+                print("TransportsView.getTidTnick(): \(info)")
+                var transports: [Transport] = []
+                
+                if info.isEmpty {
+                    // empty
+                } else if info[0]["server_error"] != nil {
+                    alertMessage = "Ошибка сервера"
+                    showAlert = true
+                } else {
+                    alertMessage = ""
+                    for el in info {
+                        let transport = Transport(tid: el["tid"] as! Int, nick: el["nick"] as! String, producted: nil, mileage: nil, engHours: nil, diagDate: nil, osagoDate: nil, totalFuel: nil, fuelDate: nil)
+                        transports.append(transport)
+                    }
+                    return transports
+                }
+            }
+        } catch let error as NSError {
+            print("Failed to load: \(error.localizedDescription)")
+            alertMessage = "Ошибка"
+            showAlert = true
+        }
+    } else {
+        alertMessage = "Ошибка"
+        showAlert = true
+    }
+    return []
+}
+
 let buttonsNoBio: [[numPadButton]] = [
     [.one, .two, .three],
     [.four, .five, .six],
@@ -77,8 +114,10 @@ class Transport: ObservableObject, Identifiable {
     var engHours: Int?
     var diagDate: Date?
     var osagoDate: Date?
+    var totalFuel: Double?
+    var fuelDate: Date?
     
-    init(tid: Int, nick: String, producted: Int?, mileage: Int?, engHours: Int?, diagDate: Date?, osagoDate: Date?) {
+    init(tid: Int, nick: String, producted: Int?, mileage: Int?, engHours: Int?, diagDate: Date?, osagoDate: Date?, totalFuel: Double?, fuelDate: Date?) {
         self.tid = tid
         self.nick = nick
         self.producted = producted
@@ -86,10 +125,24 @@ class Transport: ObservableObject, Identifiable {
         self.engHours = engHours
         self.diagDate = diagDate
         self.osagoDate = osagoDate
+        self.totalFuel = totalFuel
+        self.fuelDate = fuelDate
     }
 }
 
-class Mileage: ObservableObject, Identifiable {
+class Email {
+    var eid: Int
+    var email: String
+    var send: Int
+    
+    init(eid: Int, email: String, send: Int) {
+        self.eid = eid
+        self.email = email
+        self.send = send
+    }
+}
+
+class Mileage {
     var mid: Int
     var date: String
     var mileage: Int
@@ -101,7 +154,7 @@ class Mileage: ObservableObject, Identifiable {
     }
 }
 
-class EngHour: ObservableObject, Identifiable {
+class EngHour {
     var ehid: Int
     var date: String
     var engHour: Int
@@ -116,13 +169,13 @@ class EngHour: ObservableObject, Identifiable {
 class Fuel {
     var fid: Int
     var date: String
-    var fuel: Int
+    var fuel: Double
     var mileage: Int?
     var fillBrand: String?
     var fuelBrand: String?
     var fuelCost: Double?
     
-    init(fid: Int, date: String, fuel: Int, mileage: Int?, fillBrand: String?, fuelBrand: String?, fuelCost: Double?) {
+    init(fid: Int, date: String, fuel: Double, mileage: Int?, fillBrand: String?, fuelBrand: String?, fuelCost: Double?) {
         self.fid = fid
         self.date = date
         self.fuel = fuel
@@ -164,6 +217,26 @@ class Material {
         self.wrkType = wrkType
         self.matCost = matCost
         self.wrkCost = wrkCost
+    }
+}
+
+class Notification {
+    var nid: Int
+    var tid: Int
+    var type: String
+    var date: String?
+    var value1: Int?
+    var value2: Int?
+    var notification: String
+    
+    init(nid: Int, tid: Int, type: String, date: String?, value1: Int?, value2: Int?, notification: String) {
+        self.nid = nid
+        self.tid = tid
+        self.type = type
+        self.date = date
+        self.value1 = value1
+        self.value2 = value2
+        self.notification = notification
     }
 }
 

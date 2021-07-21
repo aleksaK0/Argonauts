@@ -14,8 +14,8 @@ extension UIApplication {
 }
 
 struct EnterEmailView: View {
-    @Binding var switcher: Views
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var email: String = ""
     @State var alertMessage: String = ""

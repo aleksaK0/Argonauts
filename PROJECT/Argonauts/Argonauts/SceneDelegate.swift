@@ -25,30 +25,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         
+//        writeToDocDir(filename: "pinInfo", text: "Oo@ll.aa\n2222")
+//        removePinFile()
         
-        //        removePinFile()
         
+        let entryView = EntryView(switcher: isPinFileExists()).environment(\.managedObjectContext, context).environmentObject(GlobalObj())
         
-        if isPinFileExists() {
-            let entryView = EnterPinView().environment(\.managedObjectContext, context).environmentObject(GlobalObj())
-            
-            // Use a UIHostingController as window root view controller.
-            if let windowScene = scene as? UIWindowScene {
-                let window = UIWindow(windowScene: windowScene)
-                window.rootViewController = UIHostingController(rootView: entryView)
-                self.window = window
-                window.makeKeyAndVisible()
-            }
-        } else {
-            let entryView = EntryView().environment(\.managedObjectContext, context).environmentObject(GlobalObj())
-            
-            // Use a UIHostingController as window root view controller.
-            if let windowScene = scene as? UIWindowScene {
-                let window = UIWindow(windowScene: windowScene)
-                window.rootViewController = UIHostingController(rootView: entryView)
-                self.window = window
-                window.makeKeyAndVisible()
-            }
+        // Use a UIHostingController as window root view controller.
+        if let windowScene = scene as? UIWindowScene {
+            let window = UIWindow(windowScene: windowScene)
+            window.rootViewController = UIHostingController(rootView: entryView)
+            self.window = window
+            window.makeKeyAndVisible()
         }
     }
     
@@ -83,16 +71,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
     
-    func isPinFileExists() -> Bool {
+    func isPinFileExists() -> Views {
         let filename = "pinInfo"
         let ext = "txt"
         let DocDirURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         let fileURL = DocDirURL.appendingPathComponent(filename).appendingPathExtension(ext)
         
         if FileManager.default.fileExists(atPath: fileURL.path) {
-            return true
+            return .enterPin
         } else {
-            return false
+            return .enterEmail
         }
     }
     

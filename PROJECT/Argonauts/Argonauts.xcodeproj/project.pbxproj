@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		5503D66626A016260092DE9F /* ServiceMaterialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5503D66526A016260092DE9F /* ServiceMaterialView.swift */; };
+		5510064126A5CA4C0046C1FB /* TranspAddNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */; };
 		5523E21B2665525800DAC79A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21A2665525800DAC79A /* AppDelegate.swift */; };
 		5523E21D2665525800DAC79A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21C2665525800DAC79A /* SceneDelegate.swift */; };
-		5523E21F2665525800DAC79A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21E2665525800DAC79A /* ContentView.swift */; };
 		5523E2222665525800DAC79A /* Argonauts.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5523E2202665525800DAC79A /* Argonauts.xcdatamodeld */; };
 		5523E2242665525900DAC79A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5523E2232665525900DAC79A /* Assets.xcassets */; };
 		5523E2272665525900DAC79A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5523E2262665525900DAC79A /* Preview Assets.xcassets */; };
@@ -27,7 +27,11 @@
 		55698BFE2680A3F100A8F3F3 /* EntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55698BFD2680A3F100A8F3F3 /* EntryView.swift */; };
 		556F3440268C6642004859C5 /* EnterPinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556F343F268C6642004859C5 /* EnterPinView.swift */; };
 		556F3442268C8A5F004859C5 /* TranspDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556F3441268C8A5F004859C5 /* TranspDetailView.swift */; };
+		5580809F26A6E3B400CEBBD4 /* AccountEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */; };
 		55814E842684B075008CBB5A /* RepeatPinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55814E832684B075008CBB5A /* RepeatPinView.swift */; };
+		55822BAA26A183F8009FBBBE /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55822BA926A183F8009FBBBE /* NotificationView.swift */; };
+		55822BAC26A19741009FBBBE /* AccountEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55822BAB26A19741009FBBBE /* AccountEditView.swift */; };
+		55822BAE26A19C56009FBBBE /* NotificationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */; };
 		5588B0AC2695A2CA00C81A8C /* MileageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5588B0AB2695A2CA00C81A8C /* MileageView.swift */; };
 		5588B0AE2695E7C100C81A8C /* MileageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5588B0AD2695E7C100C81A8C /* MileageDetailView.swift */; };
 		5589E8C026A037DC00B2DDFD /* RowMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5589E8BF26A037DC00B2DDFD /* RowMaterial.swift */; };
@@ -36,6 +40,7 @@
 		559376FE269F33DA00D8A683 /* HubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559376FD269F33DA00D8A683 /* HubView.swift */; };
 		55B8136726821B47005BB9D7 /* EnterPassCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B8136626821B47005BB9D7 /* EnterPassCodeView.swift */; };
 		55BFBED6268336BF0034F4B9 /* SetPinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55BFBED5268336BF0034F4B9 /* SetPinView.swift */; };
+		55C6F52326A839980012A827 /* AddTranspNotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C6F52226A839980012A827 /* AddTranspNotView.swift */; };
 		55D8FACF2689B42D005657DC /* AddTranspView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D8FACE2689B42D005657DC /* AddTranspView.swift */; };
 		55E0995E269202E00066D0E7 /* EnterEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E0995D269202E00066D0E7 /* EnterEmailView.swift */; };
 		55E56D7226836EC000DDD801 /* smth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E56D7126836EC000DDD801 /* smth.swift */; };
@@ -44,10 +49,10 @@
 
 /* Begin PBXFileReference section */
 		5503D66526A016260092DE9F /* ServiceMaterialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMaterialView.swift; sourceTree = "<group>"; };
+		5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranspAddNotification.swift; sourceTree = "<group>"; };
 		5523E2172665525800DAC79A /* Argonauts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Argonauts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5523E21A2665525800DAC79A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5523E21C2665525800DAC79A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		5523E21E2665525800DAC79A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5523E2212665525800DAC79A /* Argonauts.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Argonauts.xcdatamodel; sourceTree = "<group>"; };
 		5523E2232665525900DAC79A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5523E2262665525900DAC79A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -65,7 +70,11 @@
 		55698BFD2680A3F100A8F3F3 /* EntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryView.swift; sourceTree = "<group>"; };
 		556F343F268C6642004859C5 /* EnterPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterPinView.swift; sourceTree = "<group>"; };
 		556F3441268C8A5F004859C5 /* TranspDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranspDetailView.swift; sourceTree = "<group>"; };
+		5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEmailView.swift; sourceTree = "<group>"; };
 		55814E832684B075008CBB5A /* RepeatPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatPinView.swift; sourceTree = "<group>"; };
+		55822BA926A183F8009FBBBE /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
+		55822BAB26A19741009FBBBE /* AccountEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditView.swift; sourceTree = "<group>"; };
+		55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDetailView.swift; sourceTree = "<group>"; };
 		5588B0AB2695A2CA00C81A8C /* MileageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MileageView.swift; sourceTree = "<group>"; };
 		5588B0AD2695E7C100C81A8C /* MileageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MileageDetailView.swift; sourceTree = "<group>"; };
 		5589E8BF26A037DC00B2DDFD /* RowMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowMaterial.swift; sourceTree = "<group>"; };
@@ -74,6 +83,7 @@
 		559376FD269F33DA00D8A683 /* HubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubView.swift; sourceTree = "<group>"; };
 		55B8136626821B47005BB9D7 /* EnterPassCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterPassCodeView.swift; sourceTree = "<group>"; };
 		55BFBED5268336BF0034F4B9 /* SetPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetPinView.swift; sourceTree = "<group>"; };
+		55C6F52226A839980012A827 /* AddTranspNotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTranspNotView.swift; sourceTree = "<group>"; };
 		55D8FACE2689B42D005657DC /* AddTranspView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTranspView.swift; sourceTree = "<group>"; };
 		55E0995D269202E00066D0E7 /* EnterEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterEmailView.swift; sourceTree = "<group>"; };
 		55E56D7126836EC000DDD801 /* smth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = smth.swift; sourceTree = "<group>"; };
@@ -94,13 +104,13 @@
 		550CDED526933E4100377829 /* registration */ = {
 			isa = PBXGroup;
 			children = (
-				55698BFD2680A3F100A8F3F3 /* EntryView.swift */,
 				55E0995D269202E00066D0E7 /* EnterEmailView.swift */,
 				55B8136626821B47005BB9D7 /* EnterPassCodeView.swift */,
 				55BFBED5268336BF0034F4B9 /* SetPinView.swift */,
 				55814E832684B075008CBB5A /* RepeatPinView.swift */,
 				55E79EA426863D930043B2C3 /* CreateAccountView.swift */,
 				55D8FACE2689B42D005657DC /* AddTranspView.swift */,
+				55C6F52226A839980012A827 /* AddTranspNotView.swift */,
 			);
 			path = registration;
 			sourceTree = "<group>";
@@ -124,13 +134,14 @@
 		5523E2192665525800DAC79A /* Argonauts */ = {
 			isa = PBXGroup;
 			children = (
+				55C6F52626A85AD40012A827 /* RowModel */,
 				5523E21A2665525800DAC79A /* AppDelegate.swift */,
 				5523E21C2665525800DAC79A /* SceneDelegate.swift */,
-				5523E21E2665525800DAC79A /* ContentView.swift */,
 				5523E2232665525900DAC79A /* Assets.xcassets */,
 				5523E2282665525900DAC79A /* LaunchScreen.storyboard */,
 				5523E22B2665525900DAC79A /* Info.plist */,
 				5523E2202665525800DAC79A /* Argonauts.xcdatamodeld */,
+				55698BFD2680A3F100A8F3F3 /* EntryView.swift */,
 				550CDED526933E4100377829 /* registration */,
 				55E56D7126836EC000DDD801 /* smth.swift */,
 				556F343F268C6642004859C5 /* EnterPinView.swift */,
@@ -143,12 +154,15 @@
 				5566AD1926982CC50032D7C9 /* EngHourView.swift */,
 				5566AD1B269833240032D7C9 /* EngHourDetailView.swift */,
 				55332653268B309400ED67C3 /* AccountView.swift */,
+				5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */,
+				55822BAB26A19741009FBBBE /* AccountEditView.swift */,
 				559376F9269EF20F00D8A683 /* ServiceView.swift */,
 				559376FB269EF34600D8A683 /* ServiceDetailView.swift */,
 				5503D66526A016260092DE9F /* ServiceMaterialView.swift */,
 				559376FD269F33DA00D8A683 /* HubView.swift */,
+				55822BA926A183F8009FBBBE /* NotificationView.swift */,
+				55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */,
 				5523E2252665525900DAC79A /* Preview Content */,
-				5589E8BF26A037DC00B2DDFD /* RowMaterial.swift */,
 			);
 			path = Argonauts;
 			sourceTree = "<group>";
@@ -168,8 +182,17 @@
 				556F3441268C8A5F004859C5 /* TranspDetailView.swift */,
 				555B4452268E099E0034884E /* TranspDetailEditView.swift */,
 				5538917E2690A96B0069B1B7 /* TranspAddView.swift */,
+				5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */,
 			);
 			path = TransportsView;
+			sourceTree = "<group>";
+		};
+		55C6F52626A85AD40012A827 /* RowModel */ = {
+			isa = PBXGroup;
+			children = (
+				5589E8BF26A037DC00B2DDFD /* RowMaterial.swift */,
+			);
+			path = RowModel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -245,10 +268,12 @@
 				559376FA269EF20F00D8A683 /* ServiceView.swift in Sources */,
 				5588B0AC2695A2CA00C81A8C /* MileageView.swift in Sources */,
 				5566AD1A26982CC50032D7C9 /* EngHourView.swift in Sources */,
+				55822BAE26A19C56009FBBBE /* NotificationDetailView.swift in Sources */,
 				55D8FACF2689B42D005657DC /* AddTranspView.swift in Sources */,
 				55E0995E269202E00066D0E7 /* EnterEmailView.swift in Sources */,
 				556F3442268C8A5F004859C5 /* TranspDetailView.swift in Sources */,
 				5523E21B2665525800DAC79A /* AppDelegate.swift in Sources */,
+				55822BAA26A183F8009FBBBE /* NotificationView.swift in Sources */,
 				559376FC269EF34600D8A683 /* ServiceDetailView.swift in Sources */,
 				5523E21D2665525800DAC79A /* SceneDelegate.swift in Sources */,
 				5588B0AE2695E7C100C81A8C /* MileageDetailView.swift in Sources */,
@@ -264,14 +289,17 @@
 				5589E8C026A037DC00B2DDFD /* RowMaterial.swift in Sources */,
 				55332656268B30A800ED67C3 /* TransportsView.swift in Sources */,
 				555B4453268E099E0034884E /* TranspDetailEditView.swift in Sources */,
+				5580809F26A6E3B400CEBBD4 /* AccountEmailView.swift in Sources */,
 				5503D66626A016260092DE9F /* ServiceMaterialView.swift in Sources */,
 				55E79EA526863D930043B2C3 /* CreateAccountView.swift in Sources */,
 				5523E2222665525800DAC79A /* Argonauts.xcdatamodeld in Sources */,
 				55B8136726821B47005BB9D7 /* EnterPassCodeView.swift in Sources */,
+				5510064126A5CA4C0046C1FB /* TranspAddNotification.swift in Sources */,
+				55C6F52326A839980012A827 /* AddTranspNotView.swift in Sources */,
 				552476AA269D6EEC00E64DF7 /* FuelDetailView.swift in Sources */,
 				55E56D7226836EC000DDD801 /* smth.swift in Sources */,
 				5566AD1C269833240032D7C9 /* EngHourDetailView.swift in Sources */,
-				5523E21F2665525800DAC79A /* ContentView.swift in Sources */,
+				55822BAC26A19741009FBBBE /* AccountEditView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

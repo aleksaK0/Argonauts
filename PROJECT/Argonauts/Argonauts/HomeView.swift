@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     var body: some View {
         NavigationView {
@@ -41,21 +42,7 @@ struct HomeView: View {
                     .environmentObject(globalObj)
                     .navigationBarHidden(true)
                 
-                //                EngHourView()
-                //                    .tabItem {
-                //                        Label("Моточасы", systemImage: "bolt")
-                //                    }
-                //                    .environmentObject(globalObj)
-                //                    .navigationBarHidden(true)
-                
-//                MileageView()
-//                    .tabItem {
-//                        Label("Пробег", systemImage: "timer")
-//                    }
-//                    .environmentObject(globalObj)
-//                    .navigationBarHidden(true)
-                
-                AccountView()
+                AccountView(switcher: $switcher)
                     .tabItem {
                         Label("Аккаунт", systemImage: "person")
                     }
@@ -63,6 +50,5 @@ struct HomeView: View {
                     .navigationBarHidden(true)
             }
         }
-        //        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

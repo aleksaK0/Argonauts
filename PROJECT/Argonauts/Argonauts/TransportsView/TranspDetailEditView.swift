@@ -19,7 +19,6 @@ struct TranspDetailEditView: View {
     @State var keys: [String] = ["Ник", "Год выпуска", "Пробег", "Моточасы", "Дата диаг. карты", "Дата ОСАГО"]
     @State var diagDateChanged: Bool
     @State var osagoDateChanged: Bool
-    @Binding var values: [String]
     
     @State var alertMessage: String = ""
     
@@ -50,7 +49,6 @@ struct TranspDetailEditView: View {
                 DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
-                    .disabled(!diagDateChanged)
                 HStack {
                     Text("Дата оформления действующего\nполиса ОСАГО")
                         .multilineTextAlignment(.center)
@@ -60,7 +58,6 @@ struct TranspDetailEditView: View {
                 }
                 DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
-                    .disabled(!osagoDateChanged)
                     .labelsHidden()
             }
             if isLoading {
@@ -88,7 +85,6 @@ struct TranspDetailEditView: View {
                 }, label: {
                     Text("Сохранить")
                 })
-                .disabled(nick.isEmpty)
         )
     }
     
@@ -105,10 +101,6 @@ struct TranspDetailEditView: View {
             DispatchQueue.main.async {
                 isLoading = false
                 if alertMessage == "" {
-                    values[0] = nick
-                    values[1] = producted
-                    values[4] = diagDateStr
-                    values[5] = osagoDateStr
                     isPresented = false
                 }
             }

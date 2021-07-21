@@ -10,6 +10,7 @@ import SwiftUI
 struct TranspAddView: View {
     @Binding var isPresented: Bool
     
+    @State var tid: Int = 0
     @State var nick: String = ""
     @State var producted: String = ""
     @State var mileage: String = ""
@@ -24,6 +25,7 @@ struct TranspAddView: View {
     @State var isOn4: Bool = false
     @State var isOn5: Bool = false
     
+    @State var showTranspAddNot: Bool = false
     @State var showAlert: Bool = false
     @State var alertMessage: String = ""
     @State var isLoading: Bool = false
@@ -34,38 +36,11 @@ struct TranspAddView: View {
         ZStack {
             ScrollView(.vertical, showsIndicators: false) {
                 Text("Обязательное поле")
-                    .font(.system(size: 15))
                 TextField("Ник", text: $nick)
-                    .disableAutocorrection(true)
                 Text("Дополнительные поля")
-                    .font(.system(size: 15))
-                HStack {
-                    TextField("Год выпуска", text: $producted)
-                        .disabled(!isOn1)
-                    Toggle("", isOn: $isOn1)
-                        .labelsHidden()
-                        .onChange(of: isOn1, perform: { _ in
-                            producted = ""
-                        })
-                }
-                HStack {
-                    TextField("Текущий пробег", text: $mileage)
-                        .disabled(!isOn2)
-                    Toggle("", isOn: $isOn2)
-                        .labelsHidden()
-                        .onChange(of: isOn2, perform: { _ in
-                            mileage = ""
-                        })
-                }
-                HStack {
-                    TextField("Моточасы", text: $engHour)
-                        .disabled(!isOn3)
-                    Toggle("", isOn: $isOn3)
-                        .labelsHidden()
-                        .onChange(of: isOn3, perform: { _ in
-                            engHour = ""
-                        })
-                }
+                TextField("Год выпуска", text: $producted)
+                TextField("Текущий пробег", text: $mileage)
+                TextField("Моточасы", text: $engHour)
                 HStack {
                     Text("Дата получения действующей\nдиагностической карты")
                         .multilineTextAlignment(.center)
@@ -76,7 +51,6 @@ struct TranspAddView: View {
                 DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
-                    .disabled(!isOn4)
                 HStack {
                     Text("Дата оформления действующего\nполиса ОСАГО")
                         .multilineTextAlignment(.center)
@@ -86,7 +60,6 @@ struct TranspAddView: View {
                 }
                 DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
-                    .disabled(!isOn5)
                     .labelsHidden()
             }
             if isLoading {
@@ -98,8 +71,25 @@ struct TranspAddView: View {
             }
         }
         .alert(isPresented: $showAlert) {
-            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            if alertMessage == "Добавить уведомления?" {
+                return Alert(title: Text("Уведомления"),
+                             message: Text(alertMessage),
+                             primaryButton: .default(Text("Позже")) {
+                                isPresented = false
+                             },
+                             secondaryButton: .default(Text("Добавить")) {
+                                showTranspAddNot = true
+                             }
+                )
+            } else {
+                return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            }
         }
+        .fullScreenCover(isPresented: $showTranspAddNot, content: {
+            NavigationView {
+                TranspAddNotification(tid: tid, nick: nick, isPresented: $isPresented, showTranspAddNot: $showTranspAddNot).environmentObject(globalObj)
+            }
+        })
         .navigationBarBackButtonHidden(true)
         .navigationBarTitle("Добавление", displayMode: .inline)
         .navigationBarItems(
@@ -111,23 +101,18 @@ struct TranspAddView: View {
                 }),
             trailing:
                 Button(action: {
-                    loadDataAsync()
+                    addTranspAsync()
                 }, label: {
                     Text("Добавить")
                 })
-                .alert(isPresented: $showAlert, content: {
-                    Alert(title: Text("Ошибка"), message: Text(alertMessage))
-                })
-                .disabled(nick.isEmpty)
         )
     }
     
-    func loadDataAsync() {
+    func addTranspAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             var diagDateFormatted = ""
             var osagoDateFormatted = ""
-            
             if isOn4 {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "YYYY-MM-dd"
@@ -139,13 +124,13 @@ struct TranspAddView: View {
                 formatter.dateFormat = "YYYY-MM-dd"
                 osagoDateFormatted = formatter.string(from: osagoDate)
             }
-            
             addTransp(email: globalObj.email, nick: nick, producted: producted, mileage: mileage, engHour: engHour, diagDate: diagDateFormatted, osagoDate: osagoDateFormatted)
             DispatchQueue.main.async {
-                if alertMessage == "" {
-                    isPresented = false
-                }
                 isLoading = false
+                if alertMessage == "" {
+                    alertMessage = "Добавить уведомления?"
+                    showAlert = true
+                }
             }
         }
     }
@@ -182,18 +167,17 @@ struct TranspAddView: View {
                         }
                     } else {
                         alertMessage = ""
+                        tid = info["tid"] as! Int
                     }
                 }
             } catch let error as NSError {
                 print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
             }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
         }
     }
 }
-
-//struct TranspAddView_Previews: PreviewProvider {
-//    @State var isp = true
-//    static var previews: some View {
-//        TranspAddView()
-//    }
-//}

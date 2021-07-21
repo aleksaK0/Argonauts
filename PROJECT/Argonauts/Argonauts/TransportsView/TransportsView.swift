@@ -57,7 +57,7 @@ struct TransportsView: View {
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
-        .sheet(isPresented: $showTranspAdd) {
+        .fullScreenCover(isPresented: $showTranspAdd) {
             NavigationView {
                 TranspAddView(isPresented: $showTranspAdd).environmentObject(globalObj)
                     .onDisappear {
@@ -74,54 +74,11 @@ struct TransportsView: View {
         isLoading = true
         globalObj.transports = []
         DispatchQueue.global(qos: .userInitiated).async {
-            let transports = getTidTnick(email: globalObj.email)
+            let transports = getTidTnick(email: globalObj.email, alertMessage: &alertMessage, showAlert: &showAlert)
             DispatchQueue.main.async {
                 globalObj.transports = transports
                 isLoading = false
             }
         }
-    }
-    
-    func getTidTnick(email: String) -> [Transport] {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_tid_tnick&email=" + email
-        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-        let url = URL(string: encodedUrl!)
-        if let data = try? Data(contentsOf: url!) {
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["tid_nick"] as! [[String : Any]]
-                    print("TransportsView.getTidTnick(): \(info)")
-                    var transports: [Transport] = []
-                    
-                    if info.isEmpty {
-                        // empty
-                    } else if info[0]["server_error"] != nil {
-                        alertMessage = "Ошибка сервера"
-                        showAlert = true
-                    } else {
-                        alertMessage = ""
-                        for el in info {
-                            let transport = Transport(tid: el["tid"] as! Int, nick: el["nick"] as! String, producted: nil, mileage: nil, engHours: nil, diagDate: nil, osagoDate: nil)
-                            transports.append(transport)
-                        }
-                        return transports
-                    }
-                }
-            } catch let error as NSError {
-                print("Failed to load: \(error.localizedDescription)")
-                alertMessage = "Ошибка"
-                showAlert = true
-            }
-        } else {
-            alertMessage = "Ошибка"
-            showAlert = true
-        }
-        return []
-    }
-}
-
-struct TransportsView_Previews: PreviewProvider {
-    static var previews: some View {
-        TransportsView().environmentObject(GlobalObj())
     }
 }

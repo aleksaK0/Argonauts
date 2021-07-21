@@ -33,9 +33,7 @@ struct RepeatPinView: View {
                     .onChange(of: pinRepeat) { pinRepeat in
                         if pinRepeat.count == 4 {
                             if self.pinRepeat == globalObj.pin {
-                                let textToWrite = globalObj.email + "\n" + globalObj.pin
-                                writeToDocDir(filename: "pinInfo", text: textToWrite)
-                                loadDataAsync()
+                                isEmailExistsAsync()
                             } else {
                                 text = "Попробуйте еще раз"
                             }
@@ -83,13 +81,15 @@ struct RepeatPinView: View {
         }
     }
     
-    func loadDataAsync() {
+    func isEmailExistsAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             isEmailExists(email: globalObj.email)
             DispatchQueue.main.async {
                 isLoading = false
                 if isExists {
+                    let textToWrite = globalObj.email + "\n" + globalObj.pin
+                    writeToDocDir(filename: "pinInfo", text: textToWrite)
                     switcher = .home
                 } else if isExists == false && alertMessage == "" {
                     switcher = .createAccount
@@ -105,12 +105,12 @@ struct RepeatPinView: View {
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let dop = json["user"] as! [String : Any]
-                    print("RepeatPinView.isEmailExists(): \(dop)")
-                    if dop["server_error"] != nil {
+                    let info = json["user"] as! [String : Any]
+                    print("RepeatPinView.isEmailExists(): \(info)")
+                    if info["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
-                    } else if dop["no"] != nil {
+                    } else if info["no"] != nil {
                         alertMessage = ""
                         isExists = false
                     } else {
@@ -129,9 +129,3 @@ struct RepeatPinView: View {
         }
     }
 }
-
-//struct RepeatPinView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        RepeatPinView()
-//    }
-//}

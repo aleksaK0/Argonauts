@@ -9,18 +9,45 @@ import SwiftUI
 
 struct AccountView: View {
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
+    @State var showAccountEdit: Bool = false
+    @State var showAccountEmail: Bool = false
+    @State var fileRemoved: Bool = false
     
     @State var alertMessage: String = ""
-    @State var nick: String = ""
+    @State var nick: String = "Александра"
+    @State var selection: String? = nil
     
     var body: some View {
         ZStack {
             VStack {
+                NavigationLink(destination: AccountEmailView(email: globalObj.email), tag: "Почта", selection: $selection, label: { EmptyView() })
+                Button(action: {
+                    showAccountEdit = true
+                }, label: {
+                    Text("Изменить")
+                })
                 Text(nick)
                 Text(globalObj.email)
+                List {
+                    HStack {
+                        Button(action: {
+                            selection = "Почта"
+                        }, label: {
+                            Text("Почта")
+                        })
+                    }
+                }
+                
+                Button(action: {
+                    alertMessage = "Вы уверены, что хотите выйти из аккаунта?"
+                    showAlert = true
+                }, label: {
+                    Text("Выйти")
+                })
             }
             if isLoading {
                 Rectangle()
@@ -31,10 +58,56 @@ struct AccountView: View {
             }
         }
         .alert(isPresented: $showAlert) {
-            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            if alertMessage == "Вы уверены, что хотите выйти из аккаунта?" {
+                return Alert(
+                    title: Text("Выход"),
+                    message: Text(alertMessage),
+                    primaryButton: .destructive(Text("Выйти")) {
+                        removePinFileAsync()
+//                        exit = true
+                    },
+                    secondaryButton: .cancel()
+                )
+            } else {
+                return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            }
         }
+        //        .fullScreenCover(isPresented: $showAccountEdit, content: {
+        //            AccountEditView(nick: nick).environmentObject(globalObj)
+        //        })
         .onAppear {
             loadDataAsync()
+        }
+    }
+    
+    func removePinFileAsync() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            removePinFile()
+            DispatchQueue.main.async {
+                isLoading = false
+                if fileRemoved {
+                    switcher = .enterEmail
+                } else {
+                    alertMessage = "Ошибка"
+                    showAlert = true
+                }
+            }
+        }
+    }
+    
+    func removePinFile() {
+        let filename = "pinInfo"
+        let ext = "txt"
+        let DocDirURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        let fileURL = DocDirURL.appendingPathComponent(filename).appendingPathExtension(ext)
+        
+        do {
+            try FileManager.default.removeItem(at: fileURL)
+            fileRemoved = true
+        } catch let error as NSError {
+            print(error)
+            fileRemoved = false
         }
     }
     
@@ -55,14 +128,16 @@ struct AccountView: View {
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["user_info"] as! [String : Any]
+                    let info = json["get_user_info"] as! [[String : Any]]
                     print("AccountView.getUserInfo(): \(info)")
                     
-                    if info["server_error"] != nil {
+                    if info.isEmpty {
+//                        exit = true
+                    } else if info[0]["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
-                        nick = info["nick"] as! String
+                        alertMessage = ""
                     }
                 }
             } catch let error as NSError {
@@ -74,11 +149,5 @@ struct AccountView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-    }
-}
-
-struct AccountView_Previews: PreviewProvider {
-    static var previews: some View {
-        AccountView().environmentObject(GlobalObj())
     }
 }

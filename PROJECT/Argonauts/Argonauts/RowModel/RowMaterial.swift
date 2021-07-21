@@ -42,9 +42,3 @@ struct RowMaterial: View {
         return String(describing: obj)
     }
 }
-
-//struct RowMaterial_Previews: PreviewProvider {
-//    static var previews: some View {
-//        RowMaterial()
-//    }
-//}

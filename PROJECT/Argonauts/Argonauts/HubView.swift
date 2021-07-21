@@ -12,11 +12,13 @@ struct HubView: View {
     
     @State var showEngHourView: Bool = false
     @State var showMileageView: Bool = false
+    @State var showNotificationView: Bool = false
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             NavigationLink(destination: EngHourView().environmentObject(globalObj), isActive: $showEngHourView, label: { EmptyView() })
             NavigationLink(destination: MileageView().environmentObject(globalObj), isActive: $showMileageView, label: { EmptyView() })
+            NavigationLink(destination: NotificationView().environmentObject(globalObj), isActive: $showNotificationView, label: { EmptyView() })
             Button(action: {
                 showEngHourView = true
             }, label: {
@@ -26,6 +28,11 @@ struct HubView: View {
                 showMileageView = true
             }, label: {
                 Text("MileageView")
+            })
+            Button(action: {
+                showNotificationView = true
+            }, label: {
+                Text("NotificationView")
             })
         }
     }

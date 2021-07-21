@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct CreateAccountView: View {
-    @Binding var switcher: Views
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var nick: String = ""
     @State var alertMessage: String = ""
@@ -28,7 +28,7 @@ struct CreateAccountView: View {
                             
                           })
                 Button {
-                    loadDataAsync()
+                    addUserAsync()
                 } label: {
                     Text("Продолжить")
                 }
@@ -46,10 +46,13 @@ struct CreateAccountView: View {
         }
     }
     
-    func loadDataAsync() {
+    func addUserAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             addUser(email: globalObj.email, nick: nick)
+            if alertMessage == "" {
+                writeToDocDir(filename: "pinInfo", text: globalObj.email + "\n" + globalObj.pin)
+            }
             DispatchQueue.main.async {
                 isLoading = false
                 if alertMessage == "" {
@@ -87,9 +90,3 @@ struct CreateAccountView: View {
         }
     }
 }
-
-//struct CreateAccount_Previews: PreviewProvider {
-//    static var previews: some View {
-//        CreateAccount()
-//    }
-//}

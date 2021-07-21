@@ -8,14 +8,16 @@
 import SwiftUI
 
 struct AddTranspView: View {
-    @Binding var switcher: Views
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var alertMessage: String = ""
     @State var showOptional: Bool = false
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
+    @State var showTranspAddNot: Bool = false
     
+    @State var tid: Int = 0
     @State var nick: String = ""
     @State var producted: String = ""
     @State var mileage: String = ""
@@ -38,33 +40,9 @@ struct AddTranspView: View {
                 TextField("Ник транспортного средства", text: $nick)
                 Group {
                     Text("Дополнительные поля")
-                    HStack {
-                        TextField("Год выпуска", text: $producted)
-                            .disabled(!isOn1)
-                        Toggle("", isOn: $isOn1)
-                            .labelsHidden()
-                            .onChange(of: isOn1, perform: { _ in
-                                producted = ""
-                            })
-                    }
-                    HStack {
-                        TextField("Текущий пробег", text: $mileage)
-                            .disabled(!isOn2)
-                        Toggle("", isOn: $isOn2)
-                            .labelsHidden()
-                            .onChange(of: isOn2, perform: { _ in
-                                mileage = ""
-                            })
-                    }
-                    HStack {
-                        TextField("Моточасы", text: $engHour)
-                            .disabled(!isOn3)
-                        Toggle("", isOn: $isOn3)
-                            .labelsHidden()
-                            .onChange(of: isOn3, perform: { _ in
-                                engHour = ""
-                            })
-                    }
+                    TextField("Год выпуска", text: $producted)
+                    TextField("Текущий пробег", text: $mileage)
+                    TextField("Моточасы", text: $engHour)
                     HStack {
                         Text("Дата получения действующей\nдиагностической карты")
                             .multilineTextAlignment(.center)
@@ -75,7 +53,6 @@ struct AddTranspView: View {
                     DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
                         .datePickerStyle(WheelDatePickerStyle())
                         .labelsHidden()
-                        .disabled(!isOn4)
                     HStack {
                         Text("Дата оформления действующего\nполиса ОСАГО")
                             .multilineTextAlignment(.center)
@@ -85,16 +62,32 @@ struct AddTranspView: View {
                     }
                     DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)
                         .datePickerStyle(WheelDatePickerStyle())
-                        .disabled(!isOn5)
                         .labelsHidden()
                 }
                 Button {
-                    loadDataAsync()
+                    addTranspAsync()
                 } label: {
                     Text("Продолжить")
                 }
                 .alert(isPresented: $showAlert, content: {
-                    Alert(title: Text("Ошибка"), message: Text(alertMessage))
+                    if alertMessage == "Добавить уведомления?" {
+                        return Alert(title: Text("Уведомления"),
+                                     message: Text(alertMessage),
+                                     primaryButton: .default(Text("Позже")) {
+                                        switcher = .home
+                                     },
+                                     secondaryButton: .default(Text("Добавить")) {
+                                        showTranspAddNot = true
+                                     }
+                        )
+                    } else {
+                        return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+                    }
+                })
+                .fullScreenCover(isPresented: $showTranspAddNot, onDismiss: changeSwitcher, content: {
+                    NavigationView {
+                        AddTranspNotView(tid: tid, nick: nick, showTranspAddNot: $showTranspAddNot)
+                    }
                 })
             }
             if isLoading {
@@ -107,7 +100,11 @@ struct AddTranspView: View {
         }
     }
     
-    func loadDataAsync() {
+    func changeSwitcher() {
+        switcher = .home
+    }
+    
+    func addTranspAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             var diagDateFormatted = ""
@@ -126,7 +123,8 @@ struct AddTranspView: View {
             DispatchQueue.main.async {
                 isLoading = false
                 if alertMessage == "" {
-                    switcher = .home
+                    alertMessage = "Добавить уведомления?"
+                    showAlert = true
                 }
             }
         }
@@ -139,19 +137,19 @@ struct AddTranspView: View {
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let dop = json["add_transp"] as! [String : Any]
-                    print("AddTransp.addTransp(): \(dop)")
-                    
-                    if dop["bad_nick"] != nil {
-                        print("AddTransp.addTransp(): bad_nick")
-                        alertMessage = "У вас уже есть транспортное средство с таким ником, выберите другой"
-                        showAlert = true
-                    } else if dop["server_error"] != nil {
-                        print("AddTransp.addTransp(): server_error")
-                        alertMessage = "Ошибка сервера, попробуйте ещё раз позже"
-                        showAlert = true
+                    let info = json["add_transp"] as! [String : Any]
+                    print("AddTransp.addTransp(): \(info)")
+                    if info["server_error"] != nil {
+                        if info["err_code"] as! Int == 1062 {
+                            alertMessage = "У вас уже есть транспортное средство с таким ником, выберите другой"
+                            showAlert = true
+                        } else {
+                            alertMessage = "Ошибка сервера"
+                            showAlert = true
+                        }
                     } else {
                         alertMessage = ""
+                        tid = info["tid"] as! Int
                     }
                 }
             } catch let error as NSError {
@@ -165,9 +163,3 @@ struct AddTranspView: View {
         }
     }
 }
-
-//struct AddCarRequiredView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        AddTranspRequiredView().environmentObject(GlobalObj())
-//    }
-//}
