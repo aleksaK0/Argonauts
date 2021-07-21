@@ -20,9 +20,3 @@ struct AccountEditView: View {
         }
     }
 }
-
-//struct AccountEditView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        AccountEditView()
-//    }
-//}

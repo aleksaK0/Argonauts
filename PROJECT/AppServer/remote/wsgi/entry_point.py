@@ -101,8 +101,327 @@ def dump_date(thing):
 #     response_dict['wnotification'] = 'Sent'
 #     return response_dict
 
+def osago_notification(mydb, query_dict, response_dict):
+    try:
+        mydb.connect()
+        mycursor = mydb.cursor()
 
-def send_notification(mydb, query_dict, response_dict):
+        for i in range(1, 10):
+            mycursor.execute("SELECT n.*, t.nick AS tnick, u.nick, u.uid, date_add(n.date, INTERVAL 28 DAY) as date_exp "
+                             "FROM notification AS n "
+                             "LEFT JOIN (transport AS t, user AS u) "
+                             "ON (n.tid = t.tid AND t.uid = u.uid) "
+                             "WHERE n.type = 'D' AND n.notification = 'Истекает срок действия полиса ОСАГО' AND (prev_sent IS NULL OR prev_sent < current_date()) "
+                             "LIMIT 1")
+
+            columns = [desc[0] for desc in mycursor.description]
+            notif = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+
+            if notif == []:
+                break
+
+            mycursor.execute("SELECT email FROM email AS e WHERE e.uid = %d AND e.send = 1" % (notif[0]['uid']))
+            emails = [row[0] for row in mycursor.fetchall()]
+
+            if emails == []:
+                mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+                mydb.commit()
+                continue
+
+            mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = """
+                            <html lang="ru">
+                            <head>
+                            </head>
+                            <body>
+                            <div style="font-size: 1em">
+                            Здравствуйте, """ + notif[0]['nick'] + """!
+                            <br>
+                            <br>
+                            Уведомление: <b>""" + notif[0]['notification'] + """</b>
+                            <br>
+                            Истекает: """ + str(notif[0]['date_exp']) + """
+                            <br>
+                            Для транспортного средства: """ + notif[0]['tnick'] + """
+                            </div>
+                            <br>
+                            <br>
+                            <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                            </body>
+                            </html>
+                            """
+
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            s.send_message(msg)
+
+            del msg
+
+            mydb.commit()
+
+        response_dict['osago_notification'] = {'sent': 1}
+    except Exception as error:
+        # logger = logging.getLogger('ftpuploader')
+        # logger.error('Error: ' + str(error))
+        response_dict['osago_notification'] = {'server_error': 1}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def diag_notification(mydb, query_dict, response_dict):
+    try:
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        for i in range(1, 10):
+            mycursor.execute("SELECT n.*, t.nick AS tnick, u.nick, u.uid, date_add(n.date, INTERVAL 28 DAY) as date_exp "
+                             "FROM notification AS n "
+                             "LEFT JOIN (transport AS t, user AS u) "
+                             "ON (n.tid = t.tid AND t.uid = u.uid) "
+                             "WHERE n.type = 'D' AND n.notification = 'Истекает срок действия диагностической карты' AND (prev_sent IS NULL OR prev_sent < current_date()) "
+                             "LIMIT 1")
+
+            columns = [desc[0] for desc in mycursor.description]
+            notif = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+
+            if notif == []:
+                break
+
+            mycursor.execute("SELECT email FROM email AS e WHERE e.uid = %d AND e.send = 1" % (notif[0]['uid']))
+            emails = [row[0] for row in mycursor.fetchall()]
+
+            if emails == []:
+                mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+                mydb.commit()
+                continue
+
+            mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = """
+                            <html lang="ru">
+                            <head>
+                            </head>
+                            <body>
+                            <div style="font-size: 1em">
+                            Здравствуйте, """ + notif[0]['nick'] + """!
+                            <br>
+                            <br>
+                            Уведомление: <b>""" + notif[0]['notification'] + """</b>
+                            <br>
+                            Истекает: """ + str(notif[0]['date_exp']) + """
+                            <br>
+                            Для транспортного средства: """ + notif[0]['tnick'] + """
+                            </div>
+                            <br>
+                            <br>
+                            <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                            </body>
+                            </html>
+                            """
+
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            s.send_message(msg)
+
+            del msg
+
+            mydb.commit()
+
+        response_dict['diag_notification'] = {'sent': 1}
+    except Exception as error:
+        # logger = logging.getLogger('ftpuploader')
+        # logger.error('Error: ' + str(error))
+        response_dict['diag_notification'] = {'server_error': 1}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def fuel_post_notification(mydb, query_dict, response_dict):
+    try:
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        for i in range(1, 10):
+            mycursor.execute("SELECT n.*, t.nick AS tnick, u.nick, u.uid, t.total_fuel "
+                             "FROM notification AS n "
+                             "LEFT JOIN (transport AS t, user AS u) "
+                             "ON (n.tid = t.tid AND t.uid = u.uid) "
+                             "WHERE n.type = 'F' AND t.total_fuel >= n.value1 AND (prev_sent IS NULL OR prev_sent < current_date()) "
+                             "LIMIT 1")
+
+            columns = [desc[0] for desc in mycursor.description]
+            notif = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+
+            if notif == []:
+                break
+
+            mycursor.execute("SELECT email FROM email AS e WHERE e.uid = %d AND e.send = 1" % (notif[0]['uid']))
+            emails = [row[0] for row in mycursor.fetchall()]
+
+            if emails == []:
+                mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+                mydb.commit()
+                continue
+
+            mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = """
+                            <html lang="ru">
+                            <head>
+                            </head>
+                            <body>
+                            <div style="font-size: 1em">
+                            Здравствуйте, """ + notif[0]['nick'] + """!
+                            <br>
+                            <br>
+                            Уведомление: <b>""" + notif[0]['notification'] + """</b>
+                            <br>
+                            Суммарный расход топлива: """ + str(notif[0]['total_fuel']) + """
+                            <br>
+                            Для транспортного средства: """ + notif[0]['tnick'] + """
+                            </div>
+                            <br>
+                            <br>
+                            <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                            </body>
+                            </html>
+                            """
+
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            s.send_message(msg)
+
+            del msg
+
+            mydb.commit()
+
+        response_dict['fuel_post_notification'] = {'sent': 1}
+    except Exception as error:
+        # logger = logging.getLogger('ftpuploader')
+        # logger.error('Error: ' + str(error))
+        response_dict['fuel_post_notification'] = {'server_error': 1}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def fuel_pred_notification(mydb, query_dict, response_dict):
+    try:
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        for i in range(1, 10):
+            mycursor.execute("SELECT n.*, t.nick AS tnick, u.nick, u.uid, t.total_fuel "
+                             "FROM notification AS n "
+                             "LEFT JOIN (transport AS t, user AS u) "
+                             "ON (n.tid = t.tid AND t.uid = u.uid) "
+                             "WHERE n.type = 'F' AND (t.total_fuel >= n.value2 AND t.total_fuel < n.value1) AND prev_sent IS NULL "
+                             "LIMIT 1")
+
+            columns = [desc[0] for desc in mycursor.description]
+            notif = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+
+            if notif == []:
+                break
+
+            mycursor.execute("SELECT email FROM email AS e WHERE e.uid = %d AND e.send = 1" % (notif[0]['uid']))
+            emails = [row[0] for row in mycursor.fetchall()]
+
+            if emails == []:
+                mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+                mydb.commit()
+                continue
+
+            mycursor.execute("UPDATE notification SET prev_sent = current_date() WHERE nid = %s" % (notif[0]['nid']))
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = """
+                            <html lang="ru">
+                            <head>
+                            </head>
+                            <body>
+                            <div style="font-size: 1em">
+                            Здравствуйте, """ + notif[0]['nick'] + """!
+                            <br>
+                            <br>
+                            Приближающееся уведомление: <b>""" + notif[0]['notification'] + """</b>
+                            <br>
+                            Суммарный расход топлива: """ + str(notif[0]['total_fuel']) + """
+                            <br>
+                            Для транспортного средства: """ + notif[0]['tnick'] + """
+                            </div>
+                            <br>
+                            <br>
+                            <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                            </body>
+                            </html>
+                            """
+
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            s.send_message(msg)
+
+            del msg
+
+            mydb.commit()
+
+        response_dict['fuel_pred_notification'] = {'sent': 1}
+    except Exception as error:
+        # logger = logging.getLogger('ftpuploader')
+        # logger.error('Error: ' + str(error))
+        response_dict['fuel_pred_notification'] = {'server_error': 1}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def date_notification(mydb, query_dict, response_dict):
     try:
         mydb.connect()
         mycursor = mydb.cursor()
@@ -145,7 +464,7 @@ def send_notification(mydb, query_dict, response_dict):
                     Здравствуйте, """ + notif[0]['nick'] + """!
                     <br>
                     <br>
-                    Уведомление: """ + notif[0]['notification'] + """
+                    Уведомление: <b>""" + notif[0]['notification'] + """</b>
                     <br>
                     На время: """ + str(notif[0]['date']) + """
                     <br>
@@ -172,11 +491,11 @@ def send_notification(mydb, query_dict, response_dict):
 
             mydb.commit()
 
-        response_dict['send_notification'] = {'sent' : 1}
+        response_dict['date_notification'] = {'sent' : 1}
     except Exception as error:
         logger = logging.getLogger('ftpuploader')
         logger.error('Error: ' + str(error))
-        response_dict['send_notification'] = {'server_error': 1}
+        response_dict['date_notification'] = {'server_error': 1}
     finally:
         mydb.close()
 
@@ -204,7 +523,8 @@ def connect_device(mydb, query_dict, response_dict):
         <body>
         <div style="font-size: 1.2em">Здравствуйте!</div>
         <br>
-        <div style="font-size: 1.2em">Код подтверждения: <b>""" + code + """</b></div>
+        <div style="font-size: 1.2em">Код подтверждения: <b>""" + code + """</b>
+        </div>
         <br>
         <br>
         <font color="#696969" style="font-size: 1em">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
@@ -332,6 +652,7 @@ def update_transp_info(mydb, query_dict, response_dict):
         if 'osago_date' in query_dict:
             mycursor.execute("UPDATE transport SET osago_date = '%s' WHERE tid = %d" % (query_dict['osago_date'][0], tid))
             resp['osago_date'] = query_dict['osago_date'][0]
+
         mydb.commit()
         response_dict['update_transp_info'] = resp
     except mysql.connector.Error as error:
@@ -1119,9 +1440,18 @@ def application(environ, start_response):
 
     request_mission = query_dict.get('mission', [''])[0]
 
-    if request_mission == 'send_notification':
-        send_notification(argodb, query_dict, response_dict)
-    if request_mission == 'connect_device':
+    if request_mission == 'date_notification':
+        date_notification(argodb, query_dict, response_dict)
+    elif request_mission == 'fuel_pred_notification':
+        fuel_pred_notification(argodb, query_dict, response_dict)
+    elif request_mission == 'fuel_post_notification':
+        fuel_post_notification(argodb, query_dict, response_dict)
+    elif request_mission == 'diag_notification':
+        diag_notification(argodb, query_dict, response_dict)
+    elif request_mission == 'osago_notification':
+        osago_notification(argodb, query_dict, response_dict)
+
+    elif request_mission == 'connect_device':
         connect_device(argodb, query_dict, response_dict)
     elif request_mission == 'is_email_exists':
         is_email_exists(argodb, query_dict, response_dict)

@@ -82,12 +82,12 @@ struct TranspAddView: View {
                              }
                 )
             } else {
-                return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+                return Alert(title: Text("Ошибка"), message: Text(alertMessage == "" ? "empty" : alertMessage))
             }
         }
         .fullScreenCover(isPresented: $showTranspAddNot, content: {
             NavigationView {
-                TranspAddNotification(tid: tid, nick: nick, isPresented: $isPresented, showTranspAddNot: $showTranspAddNot).environmentObject(globalObj)
+                TranspAddNotification(tid: tid, nick: nick, isPresented: $isPresented, showTranspAddNot: $showTranspAddNot).environmentObject(globalObj).onAppear{print("--")}
             }
         })
         .navigationBarBackButtonHidden(true)
@@ -118,13 +118,20 @@ struct TranspAddView: View {
                 formatter.dateFormat = "YYYY-MM-dd"
                 diagDateFormatted = formatter.string(from: diagDate)
             }
-            
             if isOn5 {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "YYYY-MM-dd"
                 osagoDateFormatted = formatter.string(from: osagoDate)
             }
             addTransp(email: globalObj.email, nick: nick, producted: producted, mileage: mileage, engHour: engHour, diagDate: diagDateFormatted, osagoDate: osagoDateFormatted)
+            if alertMessage == "" {
+                if isOn4 {
+                    addNotification(tid: String(tid), dataType: "D", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                }
+                if isOn5 {
+                    addNotification(tid: String(tid), dataType: "D", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                }
+            }
             DispatchQueue.main.async {
                 isLoading = false
                 if alertMessage == "" {
@@ -132,6 +139,43 @@ struct TranspAddView: View {
                     showAlert = true
                 }
             }
+        }
+    }
+    
+    func addNotification(tid: String, dataType: String, date: Date, value1: String, value2: String, notification: String) {
+        var dateComponent = DateComponents()
+        dateComponent.day = 335
+        let dateExp = Calendar.current.date(byAdding: dateComponent, to: date)
+        
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateString = formatter.string(from: dateExp ?? Date())
+        
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=add_notification&tid=" + tid + "&type=" + dataType + "&date=" + dateString + "&notification=" + notification
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["add_notification"] as! [String : Any]
+                    print("ServiceMaterialView.addNotification(): \(info)")
+                    
+                    if info["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
+                    } else {
+                        alertMessage = ""
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
         }
     }
     

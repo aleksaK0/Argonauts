@@ -1,27 +1,27 @@
 //
-//  NotificationView.swift
+//  EngHourView.swift
 //  Argonauts
 //
-//  Created by Aleksa Khruleva on 16.07.2021.
+//  Created by Aleksa Khruleva on 09.07.2021.
 //
 
 import SwiftUI
 
-struct NotificationView: View {
+struct EngHourView: View {
     @EnvironmentObject var globalObj: GlobalObj
     
     @State var tid: Int = 0
     @State var nick: String = ""
     @State var alertMessage: String = ""
     
-    @State var showNotificationDetail: Bool = false
+    @State var showEngHourDetail: Bool = false
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
-                NavigationLink(destination: NotificationDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showNotificationDetail, label: { EmptyView() })
+                NavigationLink(destination: EngHourDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showEngHourDetail, label: { EmptyView() })
                 List(globalObj.transports) { transport in
                     HStack {
                         Text(transport.nick)
@@ -31,7 +31,7 @@ struct NotificationView: View {
                     .onTapGesture {
                         tid = transport.tid
                         nick = transport.nick
-                        showNotificationDetail = true
+                        showEngHourDetail = true
                     }
                 }
             }
@@ -43,7 +43,7 @@ struct NotificationView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .pink))
             }
         }
-        .navigationBarTitle("Уведомления", displayMode: .inline)
+        .navigationBarTitle("Моточасы", displayMode: .inline)
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
@@ -64,9 +64,3 @@ struct NotificationView: View {
         }
     }
 }
-
-//struct NotificationView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        NotificationView().environmentObject(GlobalObj())
-//    }
-//}

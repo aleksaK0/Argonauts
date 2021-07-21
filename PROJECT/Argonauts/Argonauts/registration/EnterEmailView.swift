@@ -128,9 +128,3 @@ struct EnterEmailView: View {
         return passCode
     }
 }
-
-//struct EnterEmailView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        EnterEmailView()
-//    }
-//}

@@ -134,34 +134,23 @@
 		5523E2192665525800DAC79A /* Argonauts */ = {
 			isa = PBXGroup;
 			children = (
-				55C6F52626A85AD40012A827 /* RowModel */,
 				5523E21A2665525800DAC79A /* AppDelegate.swift */,
 				5523E21C2665525800DAC79A /* SceneDelegate.swift */,
 				5523E2232665525900DAC79A /* Assets.xcassets */,
 				5523E2282665525900DAC79A /* LaunchScreen.storyboard */,
 				5523E22B2665525900DAC79A /* Info.plist */,
 				5523E2202665525800DAC79A /* Argonauts.xcdatamodeld */,
-				55698BFD2680A3F100A8F3F3 /* EntryView.swift */,
 				550CDED526933E4100377829 /* registration */,
-				55E56D7126836EC000DDD801 /* smth.swift */,
+				55698BFD2680A3F100A8F3F3 /* EntryView.swift */,
 				556F343F268C6642004859C5 /* EnterPinView.swift */,
 				5527014E2685F786000AD7FD /* HomeView.swift */,
 				552476A6269D6BAB00E64DF7 /* TransportsView */,
-				552476A7269D6D2A00E64DF7 /* FuelView.swift */,
-				552476A9269D6EEC00E64DF7 /* FuelDetailView.swift */,
-				5588B0AB2695A2CA00C81A8C /* MileageView.swift */,
-				5588B0AD2695E7C100C81A8C /* MileageDetailView.swift */,
-				5566AD1926982CC50032D7C9 /* EngHourView.swift */,
-				5566AD1B269833240032D7C9 /* EngHourDetailView.swift */,
-				55332653268B309400ED67C3 /* AccountView.swift */,
-				5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */,
-				55822BAB26A19741009FBBBE /* AccountEditView.swift */,
-				559376F9269EF20F00D8A683 /* ServiceView.swift */,
-				559376FB269EF34600D8A683 /* ServiceDetailView.swift */,
-				5503D66526A016260092DE9F /* ServiceMaterialView.swift */,
-				559376FD269F33DA00D8A683 /* HubView.swift */,
-				55822BA926A183F8009FBBBE /* NotificationView.swift */,
-				55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */,
+				55C6F52826A8C63E0012A827 /* HubView */,
+				55C6F52926A8C6620012A827 /* ServiceView */,
+				55C6F52A26A8C67F0012A827 /* FuelView */,
+				55C6F52726A8C61B0012A827 /* AccountView */,
+				55E56D7126836EC000DDD801 /* smth.swift */,
+				55C6F52626A85AD40012A827 /* RowModel */,
 				5523E2252665525900DAC79A /* Preview Content */,
 			);
 			path = Argonauts;
@@ -193,6 +182,49 @@
 				5589E8BF26A037DC00B2DDFD /* RowMaterial.swift */,
 			);
 			path = RowModel;
+			sourceTree = "<group>";
+		};
+		55C6F52726A8C61B0012A827 /* AccountView */ = {
+			isa = PBXGroup;
+			children = (
+				55332653268B309400ED67C3 /* AccountView.swift */,
+				5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */,
+				55822BAB26A19741009FBBBE /* AccountEditView.swift */,
+			);
+			path = AccountView;
+			sourceTree = "<group>";
+		};
+		55C6F52826A8C63E0012A827 /* HubView */ = {
+			isa = PBXGroup;
+			children = (
+				559376FD269F33DA00D8A683 /* HubView.swift */,
+				55822BA926A183F8009FBBBE /* NotificationView.swift */,
+				55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */,
+				5566AD1926982CC50032D7C9 /* EngHourView.swift */,
+				5566AD1B269833240032D7C9 /* EngHourDetailView.swift */,
+				5588B0AB2695A2CA00C81A8C /* MileageView.swift */,
+				5588B0AD2695E7C100C81A8C /* MileageDetailView.swift */,
+			);
+			path = HubView;
+			sourceTree = "<group>";
+		};
+		55C6F52926A8C6620012A827 /* ServiceView */ = {
+			isa = PBXGroup;
+			children = (
+				559376F9269EF20F00D8A683 /* ServiceView.swift */,
+				559376FB269EF34600D8A683 /* ServiceDetailView.swift */,
+				5503D66526A016260092DE9F /* ServiceMaterialView.swift */,
+			);
+			path = ServiceView;
+			sourceTree = "<group>";
+		};
+		55C6F52A26A8C67F0012A827 /* FuelView */ = {
+			isa = PBXGroup;
+			children = (
+				552476A7269D6D2A00E64DF7 /* FuelView.swift */,
+				552476A9269D6EEC00E64DF7 /* FuelDetailView.swift */,
+			);
+			path = FuelView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

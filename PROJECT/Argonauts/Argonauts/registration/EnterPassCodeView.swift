@@ -38,9 +38,3 @@ struct EnterPassCodeView: View {
         }
     }
 }
-
-//struct EnterPassCode_Previews: PreviewProvider {
-//    static var previews: some View {
-//        EnterPassCode(sentPassCode: "1234")
-//    }
-//}

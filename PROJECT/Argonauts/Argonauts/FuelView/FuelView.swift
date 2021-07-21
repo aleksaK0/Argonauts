@@ -63,9 +63,3 @@ struct FuelView: View {
         }
     }
 }
-
-//struct RefuelView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        RefuelView()
-//    }
-//}

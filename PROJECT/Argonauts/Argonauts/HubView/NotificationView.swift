@@ -1,27 +1,27 @@
 //
-//  EngHourView.swift
+//  NotificationView.swift
 //  Argonauts
 //
-//  Created by Aleksa Khruleva on 09.07.2021.
+//  Created by Aleksa Khruleva on 16.07.2021.
 //
 
 import SwiftUI
 
-struct EngHourView: View {
+struct NotificationView: View {
     @EnvironmentObject var globalObj: GlobalObj
     
     @State var tid: Int = 0
     @State var nick: String = ""
     @State var alertMessage: String = ""
     
-    @State var showEngHourDetail: Bool = false
+    @State var showNotificationDetail: Bool = false
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
-                NavigationLink(destination: EngHourDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showEngHourDetail, label: { EmptyView() })
+                NavigationLink(destination: NotificationDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showNotificationDetail, label: { EmptyView() })
                 List(globalObj.transports) { transport in
                     HStack {
                         Text(transport.nick)
@@ -31,7 +31,7 @@ struct EngHourView: View {
                     .onTapGesture {
                         tid = transport.tid
                         nick = transport.nick
-                        showEngHourDetail = true
+                        showNotificationDetail = true
                     }
                 }
             }
@@ -43,7 +43,7 @@ struct EngHourView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .pink))
             }
         }
-        .navigationBarTitle("Моточасы", displayMode: .inline)
+        .navigationBarTitle("Уведомления", displayMode: .inline)
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
@@ -64,9 +64,3 @@ struct EngHourView: View {
         }
     }
 }
-
-//struct EngHourView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        EngHourView()
-//    }
-//}

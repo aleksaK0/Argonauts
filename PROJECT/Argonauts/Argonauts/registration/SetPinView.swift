@@ -56,9 +56,3 @@ struct SetPinView: View {
         }
     }
 }
-
-//struct SetPinView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SetPinView()
-//    }
-//}
