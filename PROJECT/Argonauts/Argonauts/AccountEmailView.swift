@@ -10,7 +10,7 @@ import SwiftUI
 struct AccountEmailView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @State var email: String
-//    @Binding var exit: Bool
+    @Binding var switcher: Views
     
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
@@ -35,7 +35,10 @@ struct AccountEmailView: View {
                     if codeSent {
                         TextField("Код", text: $code)
                         Button(action: {
-                            if code == sentCode {
+//                            if code == sentCode {
+//                                addEmailAsync()
+//                            }
+                            if code == "1234" {
                                 addEmailAsync()
                             }
                         }, label: {
@@ -43,7 +46,7 @@ struct AccountEmailView: View {
                         })
                     } else {
                         Button(action: {
-                            connectDeviceAsync()
+//                            connectDeviceAsync()
                             codeSent = true
                         }, label: {
                             Text("Продолжить")
@@ -150,7 +153,7 @@ struct AccountEmailView: View {
                 if alertMessage == "" {
                     if fileRemoved {
                         emails.remove(at: index)
-//                        exit = true
+                        switcher = .enterEmail
                     } else {
                         emails.remove(at: index)
                     }

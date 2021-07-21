@@ -263,7 +263,7 @@ def add_user(mydb, query_dict, response_dict):
 
         uid = mycursor.fetchone()[0]
         mycursor.execute("INSERT INTO email (uid, email, send) VALUES (%s, '%s', 0)" % (uid, email))
-        
+
         mydb.commit()
         response_dict['new_user'] = {'email': email, 'nick': nick, 'uid': uid}
     except mysql.connector.Error as error:
@@ -406,6 +406,22 @@ def add_transp(mydb, query_dict, response_dict):
         mydb.close()
 
     return response_dict
+
+def delete_transp(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("DELETE FROM transport WHERE tid = %s" % (tid))
+        mydb.commit()
+        response_dict['delete_transp'] = {'deleted_transp' : tid}
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['delete_transp'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
 
 def get_user_info(mydb, query_dict, response_dict):
     try:
@@ -1111,6 +1127,7 @@ def application(environ, start_response):
         is_email_exists(argodb, query_dict, response_dict)
     elif request_mission == 'add_user':
         add_user(argodb, query_dict, response_dict)
+    # transport
     elif request_mission == 'add_transp':
         add_transp(argodb, query_dict, response_dict)
     elif request_mission == 'get_tid_tnick':
@@ -1119,6 +1136,8 @@ def application(environ, start_response):
         get_transport_info(argodb, query_dict, response_dict)
     elif request_mission == 'update_transp_info':
         update_transp_info(argodb, query_dict, response_dict)
+    elif request_mission == 'delete_transp':
+        delete_transp(argodb, query_dict, response_dict)
     # user
     elif request_mission == 'get_user_info':
         get_user_info(argodb, query_dict, response_dict)

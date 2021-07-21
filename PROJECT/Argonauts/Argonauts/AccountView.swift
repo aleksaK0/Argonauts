@@ -24,7 +24,7 @@ struct AccountView: View {
     var body: some View {
         ZStack {
             VStack {
-                NavigationLink(destination: AccountEmailView(email: globalObj.email), tag: "Почта", selection: $selection, label: { EmptyView() })
+                NavigationLink(destination: AccountEmailView(email: globalObj.email, switcher: $switcher), tag: "Почта", selection: $selection, label: { EmptyView() })
                 Button(action: {
                     showAccountEdit = true
                 }, label: {
@@ -41,7 +41,6 @@ struct AccountView: View {
                         })
                     }
                 }
-                
                 Button(action: {
                     alertMessage = "Вы уверены, что хотите выйти из аккаунта?"
                     showAlert = true

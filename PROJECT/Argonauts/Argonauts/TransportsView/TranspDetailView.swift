@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct TranspDetailView: View {
+    @EnvironmentObject var globalObj: GlobalObj
     @State var tid: Int
     @State var nick: String
-    @EnvironmentObject var globalObj: GlobalObj
+    
+    @Environment(\.presentationMode) var presentationMode
     
     @State var alertMessage: String = ""
     @State var transpInfo: [String : Any] = [:]
@@ -38,6 +40,12 @@ struct TranspDetailView: View {
                     }, label: {
                         Text("Сбросить топливо")
                     })
+                    Button(action: {
+                        alertMessage = "Вы уверены, что хотите удалить данное транспортное средство?"
+                        showAlert = true
+                    }, label: {
+                        Text("Удалить")
+                    })
                 }
             }
             if isLoading {
@@ -58,7 +66,16 @@ struct TranspDetailView: View {
                 })
         )
         .alert(isPresented: $showAlert) {
-            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            if alertMessage == "Вы уверены, что хотите удалить данное транспортное средство?" {
+                return Alert(title: Text("Внимание"),
+                             message: Text(alertMessage),
+                             primaryButton: .cancel(),
+                             secondaryButton: .destructive(Text("Удалить")) {
+                                deleteTranspAsync()
+                             })
+            } else {
+                return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            }
         }
         .fullScreenCover(isPresented: $showTranspEditDetail, onDismiss: loadDataAsync) {
             NavigationView {
@@ -83,6 +100,19 @@ struct TranspDetailView: View {
             getTransportInfo(tid: String(tid))
             DispatchQueue.main.async {
                 isLoading = false
+            }
+        }
+    }
+    
+    func deleteTranspAsync() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            deleteTransp(tid: String(tid))
+            DispatchQueue.main.async {
+                isLoading = false
+                if alertMessage == "" {
+                    presentationMode.wrappedValue.dismiss()
+                }
             }
         }
     }
@@ -123,7 +153,6 @@ struct TranspDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        
     }
     
     func getTransportInfo(tid: String) {
@@ -171,6 +200,34 @@ struct TranspDetailView: View {
                             let fuelDate = info["fuel_date"] as! String
                             values[7] = String(describing: fuelDate)
                         }
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
+        }
+    }
+    
+    func deleteTransp(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=delete_transp&tid=" + tid
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["delete_transp"] as! [String : Any]
+                    print("TranspDetailView.deleteTransp(): \(info)")
+                    
+                    if info["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
+                    } else {
+                        alertMessage = ""
                     }
                 }
             } catch let error as NSError {
