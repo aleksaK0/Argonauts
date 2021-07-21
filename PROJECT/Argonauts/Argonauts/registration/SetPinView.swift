@@ -6,11 +6,10 @@
 //
 
 import SwiftUI
-import LocalAuthentication
 
 struct SetPinView: View {
-    @Binding var switcher: Views
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var pin: String = ""
     

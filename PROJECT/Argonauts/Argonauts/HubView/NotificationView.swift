@@ -48,11 +48,11 @@ struct NotificationView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            loadDataAsync()
+            getTidTnickAsync()
         }
     }
     
-    func loadDataAsync() {
+    func getTidTnickAsync() {
         isLoading = true
         globalObj.transports = []
         DispatchQueue.global(qos: .userInitiated).async {

@@ -73,7 +73,28 @@ struct EngHourDetailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            loadDataAsync()
+            getEngHourAsync()
+        }
+    }
+    
+    func getEngHourAsync() {
+        engHours = []
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            getEngHour(tid: String(tid))
+            DispatchQueue.main.async {
+                isLoading = false
+            }
+        }
+    }
+    
+    func addEngHourAsync() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            addEngHour(tid: String(tid), date: date, engHour: engHour)
+            DispatchQueue.main.async {
+                isLoading = false
+            }
         }
     }
     
@@ -92,58 +113,7 @@ struct EngHourDetailView: View {
         }
     }
     
-    func addEngHourAsync() {
-        isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            addEngHour(tid: String(tid), date: date, engHour: engHour)
-            DispatchQueue.main.async {
-                engHour = ""
-                isLoading = false
-            }
-        }
-    }
-    
-    func loadDataAsync() {
-        engHours = []
-        isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let engHours = getEngHour(tid: String(tid))
-            DispatchQueue.main.async {
-                self.engHours = engHours
-                isLoading = false
-            }
-        }
-    }
-    
-    func deleteEngHour(ehid: String, tid: String) {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=delete_eng_hour&ehid=" + ehid + "&tid=" + tid
-        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-        let url = URL(string: encodedUrl!)
-        if let data = try? Data(contentsOf: url!) {
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["delete_eng_hour"] as! [String : Any]
-                    print("EngHourDetailView.deleteEngHour(): \(info)")
-                    
-                    if info["server_error"] != nil {
-                        alertMessage = "Ошибка сервера"
-                        showAlert = true
-                    } else {
-                        alertMessage = ""
-                    }
-                }
-            } catch let error as NSError {
-                print("Failed to load: \(error.localizedDescription)")
-                alertMessage = "Ошибка"
-                showAlert = true
-            }
-        } else {
-            alertMessage = "Ошибка"
-            showAlert = true
-        }
-    }
-    
-    func getEngHour(tid: String) -> [EngHour] {
+    func getEngHour(tid: String) {
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_eng_hour&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
@@ -159,7 +129,6 @@ struct EngHourDetailView: View {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
-                        var engHours: [EngHour] = []
                         alertMessage = ""
                         for el in info {
                             var date = el["date"] as! String
@@ -169,7 +138,6 @@ struct EngHourDetailView: View {
                             let engHour = EngHour(ehid: el["ehid"] as! Int, date: date, engHour: el["eng_hour"] as! Int)
                             engHours.append(engHour)
                         }
-                        return engHours
                     }
                 }
             } catch let error as NSError {
@@ -181,7 +149,6 @@ struct EngHourDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        return []
     }
     
     func addEngHour(tid: String, date: Date, engHour: String) {
@@ -213,6 +180,34 @@ struct EngHourDetailView: View {
                         alertMessage = ""
                         engHours.append(EngHour(ehid: info["ehid"] as! Int, date: dateString, engHour: Int(engHour)!))
                         engHours.sort { $0.date > $1.date }
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
+        }
+    }
+    
+    func deleteEngHour(ehid: String, tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=delete_eng_hour&ehid=" + ehid + "&tid=" + tid
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["delete_eng_hour"] as! [String : Any]
+                    print("EngHourDetailView.deleteEngHour(): \(info)")
+                    
+                    if info["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
+                    } else {
+                        alertMessage = ""
                     }
                 }
             } catch let error as NSError {

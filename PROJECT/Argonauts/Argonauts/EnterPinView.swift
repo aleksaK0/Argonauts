@@ -75,12 +75,12 @@ struct EnterPinView: View {
             }
         }
         .onAppear {
-            loadDataAsync()
+            readPinInfoAsync()
             authenticate()
         }
     }
     
-    func loadDataAsync() {
+    func readPinInfoAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             readPinInfo()
@@ -94,10 +94,8 @@ struct EnterPinView: View {
         let context = LAContext()
         var error: NSError?
         
-        // check whether biometric authentication is possible
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            // it's possible, so go ahead and use it
-            let reason = "We need to unlock your data"
+            let reason = "Вы сможете осуществлять вход в приложение с помощью биометрии"
             
             switch context.biometryType {
             case .faceID:
@@ -112,20 +110,14 @@ struct EnterPinView: View {
             }
             
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
-                // authentication has now completed
                 DispatchQueue.main.async {
                     if success {
                         switcher = .home
-                        // authenticated successfully
                     } else {
-                        // there was a problem
-                        print("EnterPinView.authenticate(): unsuccessful")
                     }
                 }
             }
         } else {
-            // no biometrics
-            print("EnterPinView.authenticate(): bio unavailable")
             globalObj.biometryType = "none"
         }
     }

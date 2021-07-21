@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LocalAuthentication
 
 struct CreateAccountView: View {
     @EnvironmentObject var globalObj: GlobalObj
@@ -55,6 +56,7 @@ struct CreateAccountView: View {
             }
             DispatchQueue.main.async {
                 isLoading = false
+                authenticate()
                 if alertMessage == "" {
                     switcher = .addTransp
                 }
@@ -87,6 +89,39 @@ struct CreateAccountView: View {
         } else {
             alertMessage = "Ошибка"
             showAlert = true
+        }
+    }
+    
+    func authenticate() {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "Вы сможете осуществлять вход в приложение с помощью биометрии"
+            
+            switch context.biometryType {
+            case .faceID:
+                print("EnterPinView.authenticate(): faceID")
+                globalObj.biometryType = "faceID"
+            case .touchID:
+                print("EnterPinView.authenticate(): touchID")
+                globalObj.biometryType = "touchID"
+            default:
+                print("EnterPinView.authenticate(): none")
+                globalObj.biometryType = "none"
+            }
+            
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        
+                    } else {
+                        
+                    }
+                }
+            }
+        } else {
+            globalObj.biometryType = "none"
         }
     }
 }

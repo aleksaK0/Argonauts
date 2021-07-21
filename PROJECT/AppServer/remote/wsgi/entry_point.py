@@ -613,7 +613,7 @@ def get_tid_tnick(mydb, query_dict, response_dict):
 
     return response_dict
 
-def get_transport_info(mydb, query_dict, response_dict):
+def get_transp(mydb, query_dict, response_dict):
     try:
         tid = int(query_dict['tid'][0])
 
@@ -623,10 +623,10 @@ def get_transport_info(mydb, query_dict, response_dict):
         mycursor.execute("SELECT * FROM transport WHERE tid = %d" % (tid))
         columns = [desc[0] for desc in mycursor.description]
 
-        response_dict['transport_info'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+        response_dict['get_transp'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
-        response_dict['transport_info'] = [{'server_error' : 1, 'err_code' : err_code}]
+        response_dict['get_transp'] = [{'server_error' : 1, 'err_code' : err_code}]
     finally:
         mydb.close()
 
@@ -1462,8 +1462,8 @@ def application(environ, start_response):
         add_transp(argodb, query_dict, response_dict)
     elif request_mission == 'get_tid_tnick':
         get_tid_tnick(argodb, query_dict, response_dict)
-    elif request_mission == 'get_transport_info':
-        get_transport_info(argodb, query_dict, response_dict)
+    elif request_mission == 'get_transp':
+        get_transp(argodb, query_dict, response_dict)
     elif request_mission == 'update_transp_info':
         update_transp_info(argodb, query_dict, response_dict)
     elif request_mission == 'delete_transp':

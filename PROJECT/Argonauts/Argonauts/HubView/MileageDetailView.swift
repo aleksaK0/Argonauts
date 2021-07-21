@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MileageDetailView: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var tid: Int
     @State var nick: String
     
@@ -72,17 +71,16 @@ struct MileageDetailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            loadDataAsync()
+            getMileageAsync()
         }
     }
     
-    func loadDataAsync() {
+    func getMileageAsync() {
         mileages = []
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let mileages = getMileage(tid: String(tid))
+            getMileage(tid: String(tid))
             DispatchQueue.main.async {
-                self.mileages = mileages
                 isLoading = false
             }
         }
@@ -113,7 +111,7 @@ struct MileageDetailView: View {
         }
     }
     
-    func getMileage(tid: String) -> [Mileage] {
+    func getMileage(tid: String) {
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_mileage&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
@@ -129,7 +127,6 @@ struct MileageDetailView: View {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
-                        var mileages: [Mileage] = []
                         alertMessage = ""
                         for el in info {
                             var date = el["date"] as! String
@@ -139,7 +136,6 @@ struct MileageDetailView: View {
                             let mileage = Mileage(mid: el["mid"] as! Int, date: date, mileage: el["mileage"] as! Int)
                             mileages.append(mileage)
                         }
-                        return mileages
                     }
                 }
             } catch let error as NSError {
@@ -151,7 +147,6 @@ struct MileageDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        return []
     }
     
     func addMileage(tid: String, date: Date, mileage: String) {

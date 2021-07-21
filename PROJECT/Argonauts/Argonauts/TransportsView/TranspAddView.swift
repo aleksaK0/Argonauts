@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TranspAddView: View {
+    @EnvironmentObject var globalObj: GlobalObj
     @Binding var isPresented: Bool
     
     @State var tid: Int = 0
@@ -29,8 +30,6 @@ struct TranspAddView: View {
     @State var showAlert: Bool = false
     @State var alertMessage: String = ""
     @State var isLoading: Bool = false
-    
-    @EnvironmentObject var globalObj: GlobalObj
     
     var body: some View {
         ZStack {
@@ -87,7 +86,8 @@ struct TranspAddView: View {
         }
         .fullScreenCover(isPresented: $showTranspAddNot, content: {
             NavigationView {
-                TranspAddNotification(tid: tid, nick: nick, isPresented: $isPresented, showTranspAddNot: $showTranspAddNot).environmentObject(globalObj).onAppear{print("--")}
+                TranspAddNotification(tid: tid, nick: nick, isPresented: $isPresented, showTranspAddNot: $showTranspAddNot)
+                    .environmentObject(globalObj)
             }
         })
         .navigationBarBackButtonHidden(true)

@@ -26,6 +26,18 @@ enum numPadButton: String {
     case dop = "dop"
 }
 
+enum Views: String {
+    case enterEmail = "EnterEmailView"
+    case enterPassCode = "EnterPassCodeView"
+    case setPin = "SetPinView"
+    case repeatPin = "RepeatPinView"
+    case createAccount = "CreateAccountView"
+    case addTransp = "AddTranspView"
+    case home = "HomeView"
+    
+    case enterPin = "EnterPinView"
+}
+
 func writeToDocDir(filename: String, text: String) {
     let ext = "txt"
     let docDirUrl = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -42,6 +54,28 @@ extension String {
    var isNumeric: Bool {
      return !(self.isEmpty) && self.allSatisfy { $0.isNumber }
    }
+}
+
+func isValidEmailAddress(email: String) -> Bool {
+    var isValid: Bool = true
+    do {
+        let emailRegEx =  "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        let regex = try NSRegularExpression(pattern: emailRegEx)
+        let nsString = email as NSString
+        let results = regex.matches(in: email, range: NSRange(location: 0, length: nsString.length))
+        if results.count != 1 { isValid = false }
+    } catch let error as NSError {
+        print("invalid regex: \(error.localizedDescription)")
+        isValid = false
+    }
+    return isValid
+}
+
+func convertDateToString(date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    let str = formatter.string(from: date)
+    return str
 }
 
 func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool) -> [Transport] {

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TranspDetailEditView: View {
+    @EnvironmentObject var globalObj: GlobalObj
     @Binding var isPresented: Bool
     @State var tid: String
     @State var nick: String
@@ -81,14 +82,14 @@ struct TranspDetailEditView: View {
                 }),
             trailing:
                 Button(action: {
-                    loadDataAsync()
+                    updateTranspInfoAsync()
                 }, label: {
                     Text("Сохранить")
                 })
         )
     }
     
-    func loadDataAsync() {
+    func updateTranspInfoAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             if diagDateChanged {
@@ -105,13 +106,6 @@ struct TranspDetailEditView: View {
                 }
             }
         }
-    }
-    
-    func convertDateToString(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let str = formatter.string(from: date)
-        return str
     }
     
     func updateTranspInfo(tid: String, nick: String, producted: String, diagDate: String, osagoDate: String) {

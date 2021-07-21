@@ -41,7 +41,7 @@ struct EnterEmailView: View {
                     isValid = isValidEmailAddress(email: email)
                     isValid = true
                     if isValid {
-                        loadDataAsync()
+                        connectDeviceAsync()
                     } else {
                         alertMessage = "Введён некорректный email, попробуйте ещё раз"
                         showAlert = true
@@ -66,7 +66,7 @@ struct EnterEmailView: View {
         }
     }
     
-    func loadDataAsync() {
+    func connectDeviceAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
 //            connectDevice(email: email, code: globalObj.sentPassCode)
@@ -78,21 +78,6 @@ struct EnterEmailView: View {
                 }
             }
         }
-    }
-    
-    func isValidEmailAddress(email: String) -> Bool {
-        var isValid: Bool = true
-        do {
-            let emailRegEx =  "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
-            let regex = try NSRegularExpression(pattern: emailRegEx)
-            let nsString = email as NSString
-            let results = regex.matches(in: email, range: NSRange(location: 0, length: nsString.length))
-            if results.count != 1 { isValid = false }
-        } catch let error as NSError {
-            print("invalid regex: \(error.localizedDescription)")
-            isValid = false
-        }
-        return isValid
     }
     
     func connectDevice(email: String, code: String) {

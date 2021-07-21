@@ -77,13 +77,14 @@ struct TranspDetailView: View {
                 return Alert(title: Text("Ошибка"), message: Text(alertMessage))
             }
         }
-        .fullScreenCover(isPresented: $showTranspEditDetail, onDismiss: loadDataAsync) {
+        .fullScreenCover(isPresented: $showTranspEditDetail, onDismiss: getTranspAsync) {
             NavigationView {
                 TranspDetailEditView(isPresented: $showTranspEditDetail, tid: String(tid), nick: values[0], producted: values[1], diagDate: convertStringToDate(string: values[4]), osagoDate: convertStringToDate(string: values[5]), diagDateStr: values[4], osagoDateStr: values[5], diagDateChanged: values[4] != "", osagoDateChanged: values[5] != "")
+                    .environmentObject(globalObj)
             }
         }
         .onAppear {
-            loadDataAsync()
+            getTranspAsync()
         }
     }
     
@@ -94,10 +95,10 @@ struct TranspDetailView: View {
         return date ?? Date()
     }
     
-    func loadDataAsync() {
+    func getTranspAsync() {
         values = ["", "", "", "", "", "", "", ""]
         DispatchQueue.global(qos: .userInitiated).async {
-            getTransportInfo(tid: String(tid))
+            getTransp(tid: String(tid))
             DispatchQueue.main.async {
                 isLoading = false
             }
@@ -121,7 +122,7 @@ struct TranspDetailView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             discardFuel(tid: String(tid))
-            getTransportInfo(tid: String(tid))
+            getTransp(tid: String(tid))
             DispatchQueue.main.async {
                 isLoading = false
             }
@@ -155,49 +156,48 @@ struct TranspDetailView: View {
         }
     }
     
-    func getTransportInfo(tid: String) {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_transport_info&tid=" + tid
+    func getTransp(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_transp&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let dop = json["transport_info"] as! [[String : Any]]
-                    let info = dop[0]
+                    let info = json["get_transp"] as! [[String : Any]]
                     print("TranspDetailView.getTransportInfo(): \(info)")
                     
-                    if info["server_error"] != nil {
+                    if info[0]["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        values[0] = info["nick"] as! String
-                        if info["producted"] is NSNull == false {
-                            let producted = info["producted"] as! Int
+                        values[0] = info[0]["nick"] as! String
+                        if info[0]["producted"] is NSNull == false {
+                            let producted = info[0]["producted"] as! Int
                             values[1] = String(producted)
                         }
-                        if info["mileage"] is NSNull == false {
-                            let mileage = info["mileage"] as! Int
+                        if info[0]["mileage"] is NSNull == false {
+                            let mileage = info[0]["mileage"] as! Int
                             values[2] = String(mileage)
                         }
-                        if info["eng_hour"] is NSNull == false {
-                            let engHour = info["eng_hour"] as! Int
+                        if info[0]["eng_hour"] is NSNull == false {
+                            let engHour = info[0]["eng_hour"] as! Int
                             values[3] = String(engHour)
                         }
-                        if info["diag_date"] is NSNull == false {
-                            let diagDate = info["diag_date"] as! String
+                        if info[0]["diag_date"] is NSNull == false {
+                            let diagDate = info[0]["diag_date"] as! String
                             values[4] = diagDate
                         }
-                        if info["osago_date"] is NSNull == false {
-                            let osagoDate = info["osago_date"] as! String
+                        if info[0]["osago_date"] is NSNull == false {
+                            let osagoDate = info[0]["osago_date"] as! String
                             values[5] = osagoDate
                         }
-                        if info["total_fuel"] is NSNull == false {
-                            let totalFuel = info["total_fuel"] as! Double
+                        if info[0]["total_fuel"] is NSNull == false {
+                            let totalFuel = info[0]["total_fuel"] as! Double
                             values[6] = String(describing: totalFuel)
                         }
-                        if info["fuel_date"] is NSNull == false {
-                            let fuelDate = info["fuel_date"] as! String
+                        if info[0]["fuel_date"] is NSNull == false {
+                            let fuelDate = info[0]["fuel_date"] as! String
                             values[7] = String(describing: fuelDate)
                         }
                     }

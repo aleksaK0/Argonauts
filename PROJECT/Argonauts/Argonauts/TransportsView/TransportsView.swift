@@ -14,7 +14,6 @@ struct TransportsView: View {
     @State var tid: Int = 0
     @State var nick: String = ""
     
-    
     @State var showTranspDetail: Bool = false
     @State var showTranspAdd: Bool = false
     @State var isLoading: Bool = true
@@ -57,27 +56,24 @@ struct TransportsView: View {
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
-        .fullScreenCover(isPresented: $showTranspAdd) {
+        .fullScreenCover(isPresented: $showTranspAdd, onDismiss: getTidTnickAsync) {
             NavigationView {
                 TranspAddView(isPresented: $showTranspAdd).environmentObject(globalObj)
-                    .onDisappear {
-                        loadDataAsync()
-                    }
             }
         }
         .onAppear {
-            loadDataAsync()
+            getTidTnickAsync()
         }
     }
     
-    func loadDataAsync() {
+    func getTidTnickAsync() {
         isLoading = true
         globalObj.transports = []
         DispatchQueue.global(qos: .userInitiated).async {
             let transports = getTidTnick(email: globalObj.email, alertMessage: &alertMessage, showAlert: &showAlert)
             DispatchQueue.main.async {
-                globalObj.transports = transports
                 isLoading = false
+                globalObj.transports = transports
             }
         }
     }

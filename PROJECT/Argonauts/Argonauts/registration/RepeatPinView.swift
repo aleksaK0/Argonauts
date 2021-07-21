@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct RepeatPinView: View {
-    @Binding var switcher: Views
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var pinRepeat: String = ""
     @State var text: String = "Введите пин повторно"
@@ -85,11 +85,13 @@ struct RepeatPinView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             isEmailExists(email: globalObj.email)
+            if isExists {
+                let textToWrite = globalObj.email + "\n" + globalObj.pin
+                writeToDocDir(filename: "pinInfo", text: textToWrite)
+            }
             DispatchQueue.main.async {
                 isLoading = false
                 if isExists {
-                    let textToWrite = globalObj.email + "\n" + globalObj.pin
-                    writeToDocDir(filename: "pinInfo", text: textToWrite)
                     switcher = .home
                 } else if isExists == false && alertMessage == "" {
                     switcher = .createAccount

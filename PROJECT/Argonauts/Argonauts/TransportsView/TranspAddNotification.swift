@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TranspAddNotification: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var tid: Int
     @State var nick: String
     @Binding var isPresented: Bool
@@ -106,9 +105,8 @@ struct TranspAddNotification: View {
         notifications = []
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let notifications = getNotification(tid: String(tid))
+            getNotification(tid: String(tid))
             DispatchQueue.main.async {
-                self.notifications = notifications
                 isLoading = false
             }
         }
@@ -139,7 +137,7 @@ struct TranspAddNotification: View {
         }
     }
     
-    func getNotification(tid: String) -> [Notification] {
+    func getNotification(tid: String) {
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_notification&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
@@ -156,12 +154,10 @@ struct TranspAddNotification: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        var notifications: [Notification] = []
                         for el in info {
                             let notification = Notification(nid: el["nid"] as! Int, tid: el["tid"] as! Int, type: el["type"] as! String, date: el["date"] as? String, value1: el["value1"] as? Int, value2: el["value2"] as? Int, notification: el["notification"] as! String)
                             notifications.append(notification)
                         }
-                        return notifications
                     }
                 }
             } catch let error as NSError {
@@ -173,7 +169,6 @@ struct TranspAddNotification: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        return []
     }
     
     func addNotification(tid: String, dataType: String, date: Date, value1: String, value2: String, notification: String) {

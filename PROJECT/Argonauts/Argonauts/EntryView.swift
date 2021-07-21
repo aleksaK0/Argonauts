@@ -6,19 +6,6 @@
 //
 
 import SwiftUI
-import LocalAuthentication
-
-enum Views: String {
-    case enterEmail = "EnterEmailView"
-    case enterPassCode = "EnterPassCodeView"
-    case setPin = "SetPinView"
-    case repeatPin = "RepeatPinView"
-    case createAccount = "CreateAccountView"
-    case addTransp = "AddTranspView"
-    case home = "HomeView"
-    
-    case enterPin = "EnterPinView"
-}
 
 struct EntryView: View {
     @StateObject var globalObj: GlobalObj = GlobalObj()
