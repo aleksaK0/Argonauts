@@ -99,6 +99,14 @@ struct TranspDetailEditView: View {
                 osagoDateStr = convertDateToString(date: osagoDate)
             }
             updateTranspInfo(tid: tid, nick: nick, producted: producted, diagDate: diagDateStr, osagoDate: osagoDateStr)
+            if alertMessage == "" {
+                if diagDateChanged {
+                    addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                }
+                if osagoDateChanged {
+                    addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                }
+            }
             DispatchQueue.main.async {
                 isLoading = false
                 if alertMessage == "" {
@@ -126,6 +134,43 @@ struct TranspDetailEditView: View {
                             alertMessage = "Ошибка сервера"
                             showAlert = true
                         }
+                    } else {
+                        alertMessage = ""
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
+        }
+    }
+    
+    func addNotification(tid: String, dataType: String, mode: String, date: Date, value1: String, value2: String, notification: String) {
+        var dateComponent = DateComponents()
+        dateComponent.day = 335
+        let dateExp = Calendar.current.date(byAdding: dateComponent, to: date)
+        
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateString = formatter.string(from: dateExp ?? Date())
+        
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=add_notification&tid=" + tid + "&type=" + dataType + "&mode=" + mode + "&date=" + dateString + "&notification=" + notification
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["add_notification"] as! [String : Any]
+                    print("ServiceMaterialView.addNotification(): \(info)")
+                    
+                    if info["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
                     } else {
                         alertMessage = ""
                     }

@@ -258,15 +258,17 @@ class Notification {
     var nid: Int
     var tid: Int
     var type: String
+    var mode: Int
     var date: String?
     var value1: Int?
     var value2: Int?
     var notification: String
     
-    init(nid: Int, tid: Int, type: String, date: String?, value1: Int?, value2: Int?, notification: String) {
+    init(nid: Int, tid: Int, type: String, mode: Int, date: String?, value1: Int?, value2: Int?, notification: String) {
         self.nid = nid
         self.tid = tid
         self.type = type
+        self.mode = mode
         self.date = date
         self.value1 = value1
         self.value2 = value2

@@ -115,7 +115,7 @@ struct AddTranspNotView: View {
     func addNotificationAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addNotification(tid: String(tid), dataType: type, date: date, value1: value1, value2: value2, notification: notification)
+            addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
             DispatchQueue.main.async {
                 isLoading = false
             }
@@ -155,7 +155,7 @@ struct AddTranspNotView: View {
                     } else {
                         alertMessage = ""
                         for el in info {
-                            let notification = Notification(nid: el["nid"] as! Int, tid: el["tid"] as! Int, type: el["type"] as! String, date: el["date"] as? String, value1: el["value1"] as? Int, value2: el["value2"] as? Int, notification: el["notification"] as! String)
+                            let notification = Notification(nid: el["nid"] as! Int, tid: el["tid"] as! Int, type: el["type"] as! String, mode: el["mode"] as! Int, date: el["date"] as? String, value1: el["value1"] as? Int, value2: el["value2"] as? Int, notification: el["notification"] as! String)
                             notifications.append(notification)
                         }
                     }
@@ -171,7 +171,7 @@ struct AddTranspNotView: View {
         }
     }
     
-    func addNotification(tid: String, dataType: String, date: Date, value1: String, value2: String, notification: String) {
+    func addNotification(tid: String, dataType: String, mode: String, date: Date, value1: String, value2: String, notification: String) {
         var type: String = ""
         var dateString = ""
         var value2 = value2
@@ -194,7 +194,7 @@ struct AddTranspNotView: View {
             type = ""
         }
         
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=add_notification&tid=" + tid + "&type=" + type + "&date=" + dateString + "&value1=" + value1 + "&value2=" + value2 + "&notification=" + notification
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=add_notification&tid=" + tid + "&type=" + type + "&mode=" + mode + "&date=" + dateString + "&value1=" + value1 + "&value2=" + value2 + "&notification=" + notification
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
         if let data = try? Data(contentsOf: url!) {
@@ -208,7 +208,7 @@ struct AddTranspNotView: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        notifications.append(Notification(nid: info["nid"] as! Int, tid: info["tid"] as! Int, type: info["type"] as! String, date: info["date"] as? String, value1: info["value1"] as? Int, value2: info["value2"] as? Int, notification: info["notification"] as! String))
+                        notifications.append(Notification(nid: info["nid"] as! Int, tid: info["tid"] as! Int, type: info["type"] as! String, mode: info["mode"] as! Int, date: info["date"] as? String, value1: info["value1"] as? Int, value2: info["value2"] as? Int, notification: info["notification"] as! String))
                     }
                 }
             } catch let error as NSError {
