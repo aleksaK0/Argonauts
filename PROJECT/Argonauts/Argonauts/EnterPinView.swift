@@ -71,7 +71,7 @@ struct EnterPinView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .onAppear {

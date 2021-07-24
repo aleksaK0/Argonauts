@@ -13,6 +13,7 @@ struct TransportsView: View {
     @State var alertMessage: String = ""
     @State var tid: Int = 0
     @State var nick: String = ""
+    @State var transports: [Transport] = []
     
     @State var showTranspDetail: Bool = false
     @State var showTranspAdd: Bool = false
@@ -31,18 +32,16 @@ struct TransportsView: View {
                     }
                     .padding(.trailing)
                 }
+                Text("Транспортные средства")
                 NavigationLink(destination: TranspDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showTranspDetail, label: { EmptyView() })
-                List(globalObj.transports) { transport in
-                    HStack {
-                        Text(transport.nick)
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        nick = transport.nick
+                List(transports) { transport in
+                    Button(action: {
                         tid = transport.tid
+                        nick = transport.nick
                         showTranspDetail = true
-                    }
+                    }, label: {
+                        Text(transport.nick)
+                    })
                 }
             }
             if isLoading {
@@ -50,7 +49,7 @@ struct TransportsView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .alert(isPresented: $showAlert) {
@@ -63,18 +62,20 @@ struct TransportsView: View {
         }
         .onAppear {
             getTidTnickAsync()
+            print("onAppear1 \(transports.count)")
+            print("onAppear2 \(transports.count)")
         }
     }
     
     func getTidTnickAsync() {
         isLoading = true
-        globalObj.transports = []
+        transports = []
         DispatchQueue.global(qos: .userInitiated).async {
-            let transports = getTidTnick(email: globalObj.email, alertMessage: &alertMessage, showAlert: &showAlert)
+            getTidTnick(email: globalObj.email, alertMessage: &alertMessage, showAlert: &showAlert, transports: &transports)
             DispatchQueue.main.async {
                 isLoading = false
-                globalObj.transports = transports
             }
         }
     }
 }
+

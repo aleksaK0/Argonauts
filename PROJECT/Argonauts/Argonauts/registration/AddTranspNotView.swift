@@ -9,14 +9,9 @@ import SwiftUI
 
 struct AddTranspNotView: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var tid: Int
     @State var nick: String
     @Binding var showTranspAddNot: Bool
-    
-    @State var isExpanded: Bool = false
-    @State var isLoading: Bool = false
-    @State var showAlert: Bool = false
     
     @State var alertMessage: String = ""
     @State var type: String = "Дата"
@@ -24,10 +19,12 @@ struct AddTranspNotView: View {
     @State var date: Date = Date()
     @State var value1: String = ""
     @State var value2: String = ""
-    
     @State var types: [String] = ["Дата", "Пробег", "Топливо", "Моточасы"]
-    
     @State var notifications: [Notification] = []
+    
+    @State var isExpanded: Bool = false
+    @State var isLoading: Bool = false
+    @State var showAlert: Bool = false
     
     var body: some View {
         ZStack {
@@ -76,7 +73,7 @@ struct AddTranspNotView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)

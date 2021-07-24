@@ -1080,13 +1080,35 @@ def get_user_info(mydb, query_dict, response_dict):
 
         mydb.connect()
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT e.*, u.nick FROM email AS e LEFT JOIN user AS u ON e.uid = u.uid WHERE e.uid = (SELECT uid FROM email WHERE email = '%s')" % (email))
+
+        mycursor.execute("SELECT e.*, u.nick FROM email AS e LEFT JOIN user AS u ON e.uid = u.uid WHERE e.email = '%s'" % (email))
 
         columns = [desc[0] for desc in mycursor.description]
         response_dict['get_user_info'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
         response_dict['get_user_info'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def update_user_info(mydb, query_dict, response_dict):
+    try:
+        email = query_dict['email'][0]
+        nick = query_dict['nick'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("UPDATE user SET nick = '%s' WHERE uid = (SELECT uid FROM email WHERE email = '%s')" % (nick, email))
+
+        mydb.commit()
+
+        response_dict['update_user_info'] = {'nick': nick}
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['update_user_info'] = {'server_error': 1, 'err_code': err_code}
     finally:
         mydb.close()
 
@@ -1717,6 +1739,81 @@ def discard_fuel(mydb, query_dict, response_dict):
 
     return response_dict
 
+def get_statistics_fym(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("SELECT tid, yy, mm, CONCAT_WS(' ', lpad(yy, 4, '0'), "
+                         "CASE mm WHEN 01 THEN 'янв' WHEN 02 THEN 'фев' WHEN 03 THEN 'мар' WHEN 04 THEN 'апр' "
+                         "WHEN 05 THEN 'май' WHEN 06 THEN 'июн' WHEN 07 THEN 'июл' WHEN 08 THEN 'авг' "
+                         "WHEN 09 THEN 'сен' WHEN 10 THEN 'окт' WHEN 11 THEN 'ноя' WHEN 12 THEN 'дек' END) AS mo"
+                         ", IFNULL(fuel_cnt, 0) AS fuel_cnt"
+                         ", IFNULL(TRUNCATE(fuel_min,2), 0) AS fuel_min"
+                         ", IFNULL(TRUNCATE(fuel_avg,2), 0) AS fuel_avg"
+                         ", IFNULL(TRUNCATE(fuel_max,2), 0) AS fuel_max "
+                         "FROM (SELECT t1.tid, t1.yy, t1.mm, t2.fuel_cnt, t2.fuel_min, t2.fuel_avg, t2.fuel_max "
+                         "FROM (SELECT %s AS tid, yy, mm "
+                         "FROM list_m "
+                         "WHERE yyyymm BETWEEN (SELECT DATE_FORMAT(MIN(date), '%%Y%%m') FROM fuel WHERE tid = %s) "
+                         "AND (SELECT DATE_FORMAT(MAX(date), '%%Y%%m') FROM fuel WHERE tid = %s)) AS t1 "
+                         "LEFT JOIN (SELECT tid, yy, mm, COUNT(*) AS fuel_cnt, MIN(fuel) AS fuel_min, AVG(fuel) AS fuel_avg, MAX(fuel) AS fuel_max "
+                         "FROM (SELECT tid, YEAR(date) AS yy, MONTH(date) AS mm, fuel "
+                         "FROM fuel) AS t1 "
+                         "GROUP BY tid, yy, mm) AS t2 "
+                         "ON t1.yy = t2.yy AND t1.mm = t2.mm) AS t9 "
+                         "WHERE tid = %s "
+                         "ORDER BY yy ASC, mm ASC" % (tid, tid, tid, tid))
+
+        columns = [desc[0] for desc in mycursor.description]
+        response_dict['get_statistics_fym'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['get_statistics_fym'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
+
+def get_statistics_fyy(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("SELECT tid, yy"
+                         ", 0 AS mm"
+                         ", lpad(yy, 4, '0') AS mo"
+                         ", IFNULL(fuel_cnt, 0) AS fuel_cnt"
+                         ", IFNULL(TRUNCATE(fuel_min,2), 0) AS fuel_min"
+                         ", IFNULL(TRUNCATE(fuel_avg,2), 0) AS fuel_avg"
+                         ", IFNULL(TRUNCATE(fuel_max,2), 0) AS fuel_max "
+                         "FROM ( "
+                         "SELECT t1.tid, t1.yy, t2.fuel_cnt, t2.fuel_min, t2.fuel_avg, t2.fuel_max "
+                         "FROM (SELECT %s AS tid, yy "
+                         "FROM list_y "
+                         "WHERE yyyy BETWEEN (SELECT DATE_FORMAT(MIN(date), '%%Y') FROM fuel WHERE tid = %s) "
+                         "AND (SELECT DATE_FORMAT(MAX(date), '%%Y') FROM fuel WHERE tid = %s)) AS t1 "
+                         "LEFT JOIN (SELECT tid, yy, COUNT(*) AS fuel_cnt, MIN(fuel) AS fuel_min, AVG(fuel) AS fuel_avg, MAX(fuel) AS fuel_max "
+                         "FROM (SELECT tid, YEAR(date) AS yy, fuel "
+                         "FROM fuel) AS t1 "
+                         "GROUP BY tid, yy) AS t2 "
+                         "ON t1.yy = t2.yy) AS t9 "
+                         "WHERE tid = %s "
+                         "ORDER BY yy ASC" % (tid, tid, tid, tid))
+
+        columns = [desc[0] for desc in mycursor.description]
+        response_dict['get_statistics_fyy'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['get_statistics_fyy'] = {'server_error': 1, 'err_code': err_code}
+    finally:
+        mydb.close()
+
+    return response_dict
 
 
 
@@ -1814,6 +1911,9 @@ def application(environ, start_response):
     # user
     elif request_mission == 'get_user_info':
         get_user_info(argodb, query_dict, response_dict)
+    elif request_mission == 'update_user_info':
+        update_user_info(argodb, query_dict, response_dict)
+    # email
     elif request_mission == 'get_email':
         get_email(argodb, query_dict, response_dict)
     elif request_mission == 'add_email':
@@ -1864,6 +1964,11 @@ def application(environ, start_response):
         add_notification(argodb, query_dict, response_dict)
     elif request_mission == 'delete_notification':
         delete_notification(argodb, query_dict, response_dict)
+    # statistics
+    elif request_mission == 'get_statistics_fym':
+        get_statistics_fym(argodb, query_dict, response_dict)
+    elif request_mission == 'get_statistics_fyy':
+        get_statistics_fyy(argodb, query_dict, response_dict)
 
     response_status = '200 OK'
     response_json = bytes(json.dumps(response_dict, default=dump_date, indent=2, ensure_ascii=False, sort_keys=True), encoding='utf-8')

@@ -34,8 +34,18 @@ enum Views: String {
     case createAccount = "CreateAccountView"
     case addTransp = "AddTranspView"
     case home = "HomeView"
-    
     case enterPin = "EnterPinView"
+}
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+func generatePassCode() -> String {
+    let passCode = String(Int.random(in: 1000...9999))
+    return passCode
 }
 
 func writeToDocDir(filename: String, text: String) {
@@ -78,7 +88,7 @@ func convertDateToString(date: Date) -> String {
     return str
 }
 
-func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool) -> [Transport] {
+func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool, transports: inout [Transport]) {
     let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_tid_tnick&email=" + email
     let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
     let url = URL(string: encodedUrl!)
@@ -87,8 +97,6 @@ func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Boo
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 let info = json["tid_nick"] as! [[String : Any]]
                 print("TransportsView.getTidTnick(): \(info)")
-                var transports: [Transport] = []
-                
                 if info.isEmpty {
                     // empty
                 } else if info[0]["server_error"] != nil {
@@ -100,7 +108,6 @@ func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Boo
                         let transport = Transport(tid: el["tid"] as! Int, nick: el["nick"] as! String, producted: nil, mileage: nil, engHours: nil, diagDate: nil, osagoDate: nil, totalFuel: nil, fuelDate: nil)
                         transports.append(transport)
                     }
-                    return transports
                 }
             }
         } catch let error as NSError {
@@ -112,7 +119,6 @@ func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Boo
         alertMessage = "Ошибка"
         showAlert = true
     }
-    return []
 }
 
 let buttonsNoBio: [[numPadButton]] = [
@@ -137,7 +143,6 @@ class GlobalObj: ObservableObject {
     var tids: [Int] = []
     var sentPassCode: String = ""
     var pin: String = ""
-    var transports: [Transport] = []
 }
 
 class Transport: ObservableObject, Identifiable {
@@ -274,6 +279,18 @@ class Notification {
         self.value2 = value2
         self.notification = notification
     }
+}
+
+struct StatisticsFuel {
+    var id: Int
+    var tid: Int
+    var yy: Int
+    var mm: Int
+    var mo: String
+    var fuelMin: Double
+    var fuelMax: Double
+    var fuelAvg: Double
+    var fuelCnt: Int
 }
 
 //    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification), perform: { _ in

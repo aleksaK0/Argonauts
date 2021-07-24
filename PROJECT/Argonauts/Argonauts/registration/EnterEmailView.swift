@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-extension UIApplication {
-    func endEditing() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
-
 struct EnterEmailView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @Binding var switcher: Views
@@ -22,24 +16,36 @@ struct EnterEmailView: View {
     
     @State var showAlert: Bool = false
     @State var isEditing: Bool = false
-    @State var isValid: Bool = false
     @State var isLoading: Bool = false
+    @State var isValid: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
-                Text("Подключение")
+                Spacer()
+                Text("Регистрация")
+                Spacer()
                 TextField("Email"
                           , text: $email
                           , onEditingChanged: { _ in  }
                           , onCommit: {
+                            isValid = isValidEmailAddress(email: email)
+                            isValid = true // TODO: delete
+                            if isValid {
+                                connectDeviceAsync()
+                            } else {
+                                alertMessage = "Введён некорректный email, попробуйте ещё раз"
+                                showAlert = true
+                            }
+                            connectDeviceAsync()
                           })
                     .keyboardType(.emailAddress)
-                Text("1234")
+                    .padding()
+                Spacer()
                 Button {
                     UIApplication.shared.endEditing()
                     isValid = isValidEmailAddress(email: email)
-                    isValid = true
+                    isValid = true // TODO: delete
                     if isValid {
                         connectDeviceAsync()
                     } else {
@@ -49,27 +55,28 @@ struct EnterEmailView: View {
                 } label: {
                     Text("Зарегестрироваться")
                 }
-                .alert(isPresented: $showAlert, content: {
-                    Alert(title: Text("Ошибка"), message: Text(alertMessage))
-                })
+                .disabled(email.isEmpty)
+                Spacer()
             }
             if isLoading {
                 Rectangle()
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
-        .onAppear {
-            globalObj.sentPassCode = "1234"
-        }
+        .alert(isPresented: $showAlert, content: {
+            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+        })
     }
     
     func connectDeviceAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-//            connectDevice(email: email, code: globalObj.sentPassCode)
+            //            globalObj.sentPassCode = generatePassCode()
+            globalObj.sentPassCode = "1234"
+            //            connectDevice(email: email, code: globalObj.sentPassCode)
             DispatchQueue.main.async {
                 isLoading = false
                 if alertMessage == "" {
@@ -106,10 +113,5 @@ struct EnterEmailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-    }
-    
-    func generatePassCode() -> String {
-        let passCode = String(Int.random(in: 1000...9999))
-        return passCode
     }
 }

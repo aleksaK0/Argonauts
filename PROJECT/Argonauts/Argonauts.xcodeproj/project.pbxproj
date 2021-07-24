@@ -38,6 +38,9 @@
 		559376FA269EF20F00D8A683 /* ServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559376F9269EF20F00D8A683 /* ServiceView.swift */; };
 		559376FC269EF34600D8A683 /* ServiceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559376FB269EF34600D8A683 /* ServiceDetailView.swift */; };
 		559376FE269F33DA00D8A683 /* HubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559376FD269F33DA00D8A683 /* HubView.swift */; };
+		559F7E2926AAC88E00C1CA97 /* RowTransp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559F7E2826AAC88E00C1CA97 /* RowTransp.swift */; };
+		559F7E2B26AAE1AA00C1CA97 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559F7E2A26AAE1AA00C1CA97 /* StatisticsView.swift */; };
+		55AD2F1026AC117000D6D44F /* StatisticsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55AD2F0F26AC117000D6D44F /* StatisticsDetailView.swift */; };
 		55B8136726821B47005BB9D7 /* EnterPassCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B8136626821B47005BB9D7 /* EnterPassCodeView.swift */; };
 		55BFBED6268336BF0034F4B9 /* SetPinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55BFBED5268336BF0034F4B9 /* SetPinView.swift */; };
 		55C6F52326A839980012A827 /* AddTranspNotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C6F52226A839980012A827 /* AddTranspNotView.swift */; };
@@ -81,6 +84,9 @@
 		559376F9269EF20F00D8A683 /* ServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceView.swift; sourceTree = "<group>"; };
 		559376FB269EF34600D8A683 /* ServiceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDetailView.swift; sourceTree = "<group>"; };
 		559376FD269F33DA00D8A683 /* HubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubView.swift; sourceTree = "<group>"; };
+		559F7E2826AAC88E00C1CA97 /* RowTransp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowTransp.swift; sourceTree = "<group>"; };
+		559F7E2A26AAE1AA00C1CA97 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		55AD2F0F26AC117000D6D44F /* StatisticsDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsDetailView.swift; sourceTree = "<group>"; };
 		55B8136626821B47005BB9D7 /* EnterPassCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterPassCodeView.swift; sourceTree = "<group>"; };
 		55BFBED5268336BF0034F4B9 /* SetPinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetPinView.swift; sourceTree = "<group>"; };
 		55C6F52226A839980012A827 /* AddTranspNotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTranspNotView.swift; sourceTree = "<group>"; };
@@ -180,6 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				5589E8BF26A037DC00B2DDFD /* RowMaterial.swift */,
+				559F7E2826AAC88E00C1CA97 /* RowTransp.swift */,
 			);
 			path = RowModel;
 			sourceTree = "<group>";
@@ -188,8 +195,8 @@
 			isa = PBXGroup;
 			children = (
 				55332653268B309400ED67C3 /* AccountView.swift */,
-				5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */,
 				55822BAB26A19741009FBBBE /* AccountEditView.swift */,
+				5580809E26A6E3B400CEBBD4 /* AccountEmailView.swift */,
 			);
 			path = AccountView;
 			sourceTree = "<group>";
@@ -198,12 +205,14 @@
 			isa = PBXGroup;
 			children = (
 				559376FD269F33DA00D8A683 /* HubView.swift */,
-				55822BA926A183F8009FBBBE /* NotificationView.swift */,
-				55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */,
 				5566AD1926982CC50032D7C9 /* EngHourView.swift */,
 				5566AD1B269833240032D7C9 /* EngHourDetailView.swift */,
 				5588B0AB2695A2CA00C81A8C /* MileageView.swift */,
 				5588B0AD2695E7C100C81A8C /* MileageDetailView.swift */,
+				55822BA926A183F8009FBBBE /* NotificationView.swift */,
+				55822BAD26A19C56009FBBBE /* NotificationDetailView.swift */,
+				559F7E2A26AAE1AA00C1CA97 /* StatisticsView.swift */,
+				55AD2F0F26AC117000D6D44F /* StatisticsDetailView.swift */,
 			);
 			path = HubView;
 			sourceTree = "<group>";
@@ -311,6 +320,7 @@
 				5588B0AE2695E7C100C81A8C /* MileageDetailView.swift in Sources */,
 				559376FE269F33DA00D8A683 /* HubView.swift in Sources */,
 				55BFBED6268336BF0034F4B9 /* SetPinView.swift in Sources */,
+				559F7E2926AAC88E00C1CA97 /* RowTransp.swift in Sources */,
 				552476A8269D6D2A00E64DF7 /* FuelView.swift in Sources */,
 				5538917F2690A96B0069B1B7 /* TranspAddView.swift in Sources */,
 				5527014F2685F786000AD7FD /* HomeView.swift in Sources */,
@@ -325,6 +335,8 @@
 				5503D66626A016260092DE9F /* ServiceMaterialView.swift in Sources */,
 				55E79EA526863D930043B2C3 /* CreateAccountView.swift in Sources */,
 				5523E2222665525800DAC79A /* Argonauts.xcdatamodeld in Sources */,
+				559F7E2B26AAE1AA00C1CA97 /* StatisticsView.swift in Sources */,
+				55AD2F1026AC117000D6D44F /* StatisticsDetailView.swift in Sources */,
 				55B8136726821B47005BB9D7 /* EnterPassCodeView.swift in Sources */,
 				5510064126A5CA4C0046C1FB /* TranspAddNotification.swift in Sources */,
 				55C6F52326A839980012A827 /* AddTranspNotView.swift in Sources */,

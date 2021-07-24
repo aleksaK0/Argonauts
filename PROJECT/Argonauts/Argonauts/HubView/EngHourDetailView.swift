@@ -9,7 +9,6 @@ import SwiftUI
 
 struct EngHourDetailView: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var tid: Int
     @State var nick: String
     
@@ -17,12 +16,11 @@ struct EngHourDetailView: View {
     @State var alertMessage: String = ""
     @State var engHour: String = ""
     @State var date: Date = Date()
+    @State var engHours: [EngHour] = []
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     @State var showFields: Bool = false
-    
-    @State var engHours: [EngHour] = []
     
     var body: some View {
         ZStack {
@@ -55,7 +53,7 @@ struct EngHourDetailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)

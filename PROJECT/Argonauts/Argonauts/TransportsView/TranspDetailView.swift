@@ -53,7 +53,7 @@ struct TranspDetailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(values[0], displayMode: .inline)

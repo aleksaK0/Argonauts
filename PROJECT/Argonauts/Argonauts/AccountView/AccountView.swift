@@ -18,13 +18,13 @@ struct AccountView: View {
     @State var fileRemoved: Bool = false
     
     @State var alertMessage: String = ""
-    @State var nick: String = "Александра"
+    @State var nick: String = ""
     @State var selection: String? = nil
     
     var body: some View {
         ZStack {
             VStack {
-                NavigationLink(destination: AccountEmailView(email: globalObj.email, switcher: $switcher), tag: "Почта", selection: $selection, label: { EmptyView() })
+                NavigationLink(destination: AccountEmailView(email: globalObj.email, switcher: $switcher).environmentObject(globalObj), tag: "Почта", selection: $selection, label: { EmptyView() })
                 Button(action: {
                     showAccountEdit = true
                 }, label: {
@@ -32,15 +32,11 @@ struct AccountView: View {
                 })
                 Text(nick)
                 Text(globalObj.email)
-                List {
-                    HStack {
-                        Button(action: {
-                            selection = "Почта"
-                        }, label: {
-                            Text("Почта")
-                        })
-                    }
-                }
+                Button(action: {
+                    selection = "Почта"
+                }, label: {
+                    Text("Почта")
+                })
                 Button(action: {
                     alertMessage = "Вы уверены, что хотите выйти из аккаунта?"
                     showAlert = true
@@ -53,7 +49,7 @@ struct AccountView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .alert(isPresented: $showAlert) {
@@ -63,7 +59,6 @@ struct AccountView: View {
                     message: Text(alertMessage),
                     primaryButton: .destructive(Text("Выйти")) {
                         removePinFileAsync()
-//                        exit = true
                     },
                     secondaryButton: .cancel()
                 )
@@ -71,11 +66,13 @@ struct AccountView: View {
                 return Alert(title: Text("Ошибка"), message: Text(alertMessage))
             }
         }
-        //        .fullScreenCover(isPresented: $showAccountEdit, content: {
-        //            AccountEditView(nick: nick).environmentObject(globalObj)
-        //        })
+        .fullScreenCover(isPresented: $showAccountEdit, onDismiss: getUserInfoAsync, content: {
+            NavigationView {
+                AccountEditView(nick: nick, showAccountEdit: $showAccountEdit).environmentObject(globalObj)
+            }
+        })
         .onAppear {
-            loadDataAsync()
+            getUserInfoAsync()
         }
     }
     
@@ -110,7 +107,7 @@ struct AccountView: View {
         }
     }
     
-    func loadDataAsync() {
+    func getUserInfoAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             getUserInfo(email: globalObj.email)
@@ -129,14 +126,12 @@ struct AccountView: View {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["get_user_info"] as! [[String : Any]]
                     print("AccountView.getUserInfo(): \(info)")
-                    
-                    if info.isEmpty {
-//                        exit = true
-                    } else if info[0]["server_error"] != nil {
+                    if info[0]["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
                         alertMessage = ""
+                        nick = info[0]["nick"] as! String
                     }
                 }
             } catch let error as NSError {

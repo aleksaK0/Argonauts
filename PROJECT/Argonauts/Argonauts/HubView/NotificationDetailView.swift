@@ -23,9 +23,7 @@ struct NotificationDetailView: View {
     @State var date: Date = Date()
     @State var value1: String = ""
     @State var value2: String = ""
-    
     @State var types: [String] = ["Дата", "Пробег", "Топливо", "Моточасы"]
-    
     @State var notifications: [Notification] = []
     
     var body: some View {
@@ -77,7 +75,7 @@ struct NotificationDetailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)

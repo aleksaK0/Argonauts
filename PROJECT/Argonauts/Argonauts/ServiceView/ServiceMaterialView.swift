@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ServiceMaterialView: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var sid: Int
     @State var dateServ: String
     @State var serTypeServ: String
@@ -22,17 +21,14 @@ struct ServiceMaterialView: View {
     @State var wrkType: String = "Замена"
     @State var matCost: String = ""
     @State var wrkCost: String = ""
+    @State var wrkTypes: [String] = ["Замена", "Ремонт", "Окраска", "Снятие/установка", "Регулировка"]
+    @State var materials: [Material] = []
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     @State var showFields: Bool = false
     @State var isExpanded: Bool = false
     
-    @State var wrkTypes: [String] = ["Замена", "Ремонт", "Окраска", "Снятие/установка", "Регулировка"]
-    
-    @State var materials: [Material] = []
-    
-    @State var tapped: Bool = false
     var body: some View {
         ZStack {
             VStack {
@@ -83,8 +79,6 @@ struct ServiceMaterialView: View {
                 List {
                     ForEach(materials, id: \.maid) { material in
                         RowMaterial(matInfo: material.matInfo, wrkType: material.wrkType, matCost: material.matCost, wrkCost: material.wrkCost)
-//                        Text(String(describing: material.matCost))
-//                        Text(String(describing: material.wrkCost))
                     }
                     .onDelete(perform: deleteMaterialAsync)
                 }
@@ -94,7 +88,7 @@ struct ServiceMaterialView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle("Детали", displayMode: .inline)
@@ -120,9 +114,8 @@ struct ServiceMaterialView: View {
         materials = []
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let materials = getMaterial(sid: String(sid))
+            getMaterial(sid: String(sid))
             DispatchQueue.main.async {
-                self.materials = materials
                 isLoading = false
             }
         }
@@ -153,7 +146,7 @@ struct ServiceMaterialView: View {
         }
     }
     
-    func getMaterial(sid: String) -> [Material] {
+    func getMaterial(sid: String) {
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_material&sid=" + sid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
@@ -169,13 +162,11 @@ struct ServiceMaterialView: View {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
-                        var materials: [Material] = []
                         alertMessage = ""
                         for el in info {
                             let material = Material(maid: el["maid"] as! Int, matInfo: el["mat_info"] as! String, wrkType: el["wrk_type"] as! String, matCost: el["mat_cost"] as? Double, wrkCost: el["wrk_cost"] as? Double)
                             materials.append(material)
                         }
-                        return materials
                     }
                 }
             } catch let error as NSError {
@@ -187,7 +178,6 @@ struct ServiceMaterialView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        return []
     }
     
     func addMaterial(sid: String, matInfo: String, wrkType: String, matCost: String, wrkCost: String) {

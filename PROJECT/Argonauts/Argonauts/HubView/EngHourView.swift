@@ -10,9 +10,10 @@ import SwiftUI
 struct EngHourView: View {
     @EnvironmentObject var globalObj: GlobalObj
     
+    @State var alertMessage: String = ""
     @State var tid: Int = 0
     @State var nick: String = ""
-    @State var alertMessage: String = ""
+    @State var transports: [Transport] = []
     
     @State var showEngHourDetail: Bool = false
     @State var isLoading: Bool = false
@@ -22,17 +23,14 @@ struct EngHourView: View {
         ZStack {
             VStack {
                 NavigationLink(destination: EngHourDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showEngHourDetail, label: { EmptyView() })
-                List(globalObj.transports) { transport in
-                    HStack {
-                        Text(transport.nick)
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
+                List(transports) { transport in
+                    Button(action: {
                         tid = transport.tid
                         nick = transport.nick
                         showEngHourDetail = true
-                    }
+                    }, label: {
+                        Text(transport.nick)
+                    })
                 }
             }
             if isLoading {
@@ -40,7 +38,7 @@ struct EngHourView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle("Моточасы", displayMode: .inline)
@@ -54,11 +52,10 @@ struct EngHourView: View {
     
     func getTidTnickAsync() {
         isLoading = true
-        globalObj.transports = []
+        transports = []
         DispatchQueue.global(qos: .userInitiated).async {
-            let transports = getTidTnick(email: globalObj.email, alertMessage: &alertMessage, showAlert: &showAlert)
+            getTidTnick(email: globalObj.email, alertMessage: &alertMessage, showAlert: &showAlert, transports: &transports)
             DispatchQueue.main.async {
-                globalObj.transports = transports
                 isLoading = false
             }
         }

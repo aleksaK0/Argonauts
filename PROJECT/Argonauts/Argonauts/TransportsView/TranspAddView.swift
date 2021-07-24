@@ -36,10 +36,14 @@ struct TranspAddView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 Text("Обязательное поле")
                 TextField("Ник", text: $nick)
+                    .padding([.leading, .trailing])
                 Text("Дополнительные поля")
                 TextField("Год выпуска", text: $producted)
+                    .padding([.leading, .trailing])
                 TextField("Текущий пробег", text: $mileage)
+                    .padding([.leading, .trailing])
                 TextField("Моточасы", text: $engHour)
+                    .padding([.leading, .trailing])
                 HStack {
                     Text("Дата получения действующей\nдиагностической карты")
                         .multilineTextAlignment(.center)
@@ -47,9 +51,11 @@ struct TranspAddView: View {
                     Toggle("", isOn: $isOn4)
                         .labelsHidden()
                 }
+                .padding([.leading, .trailing])
                 DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
+                    .disabled(!isOn4)
                 HStack {
                     Text("Дата оформления действующего\nполиса ОСАГО")
                         .multilineTextAlignment(.center)
@@ -57,16 +63,18 @@ struct TranspAddView: View {
                     Toggle("", isOn: $isOn5)
                         .labelsHidden()
                 }
+                .padding([.leading, .trailing])
                 DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
+                    .disabled(!isOn5)
             }
             if isLoading {
                 Rectangle()
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .alert(isPresented: $showAlert) {
@@ -81,7 +89,7 @@ struct TranspAddView: View {
                              }
                 )
             } else {
-                return Alert(title: Text("Ошибка"), message: Text(alertMessage == "" ? "empty" : alertMessage))
+                return Alert(title: Text("Ошибка"), message: Text(alertMessage))
             }
         }
         .fullScreenCover(isPresented: $showTranspAddNot, content: {
@@ -105,6 +113,7 @@ struct TranspAddView: View {
                 }, label: {
                     Text("Добавить")
                 })
+                .disabled(nick.isEmpty)
         )
     }
     

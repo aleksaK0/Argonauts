@@ -15,12 +15,11 @@ struct MileageDetailView: View {
     @State var alertMessage: String = ""
     @State var mileage: String = ""
     @State var date: Date = Date()
+    @State var mileages: [Mileage] = []
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     @State var showFields: Bool = false
-    
-    @State var mileages: [Mileage] = []
     
     var body: some View {
         ZStack {
@@ -53,7 +52,7 @@ struct MileageDetailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)

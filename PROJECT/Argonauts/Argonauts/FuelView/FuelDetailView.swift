@@ -9,24 +9,21 @@ import SwiftUI
 
 struct FuelDetailView: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var tid: Int
     @State var nick: String
     
     @State var alertMessage: String = ""
-    
     @State var date: Date = Date()
     @State var mileage: String = ""
     @State var fuel: String = ""
     @State var fillBrand: String = ""
     @State var fuelBrand: String = ""
     @State var fuelCost: String = ""
+    @State var fuels: [Fuel] = []
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     @State var showFields: Bool = false
-    
-    @State var fuels: [Fuel] = []
     
     var body: some View {
         ZStack {
@@ -69,7 +66,7 @@ struct FuelDetailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)
@@ -87,7 +84,7 @@ struct FuelDetailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            loadDataAsync()
+            getFuelAsync()
         }
     }
     
@@ -98,23 +95,22 @@ struct FuelDetailView: View {
         return String(mileage)
     }
     
-    func addFuelAsync() {
+    func getFuelAsync() {
+        fuels = []
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addFuel(tid: String(tid), date: date, mileage: mileage, fuel: fuel, fillBrand: fillBrand, fuelBrand: fuelBrand, fuelCost: fuelCost)
+            getFuel(tid: String(tid))
             DispatchQueue.main.async {
                 isLoading = false
             }
         }
     }
     
-    func loadDataAsync() {
-        fuels = []
+    func addFuelAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let fuels = getFuel(tid: String(tid))
+            addFuel(tid: String(tid), date: date, mileage: mileage, fuel: fuel, fillBrand: fillBrand, fuelBrand: fuelBrand, fuelCost: fuelCost)
             DispatchQueue.main.async {
-                self.fuels = fuels
                 isLoading = false
             }
         }
@@ -135,20 +131,29 @@ struct FuelDetailView: View {
         }
     }
     
-    func deleteFuel(fid: String, tid: String) {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=delete_fuel&fid=" + fid + "&tid=" + tid
+    func getFuel(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_fuel&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["delete_fuel"] as! [String : Any]
-                    print("FuelDetailView.deleteFuel(): \(info)")
-                    if info["server_error"] != nil {
+                    let info = json["get_fuel"] as! [[String : Any]]
+                    print("FuelDetailView.getFuel(): \(info)")
+                    if info.isEmpty {
+                        // empty
+                    } else if info[0]["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
                         alertMessage = ""
+                        for el in info {
+                            var date = el["date"] as! String
+                            date = date.replacingOccurrences(of: "T", with: " ")
+                            date.removeLast(3)
+                            let fuel = Fuel(fid: el["fid"] as! Int, date: date, fuel: el["fuel"] as! Double, mileage: el["mileage"] as? Int, fillBrand: el["fill_brand"] as? String, fuelBrand: el["fuel_brand"] as? String, fuelCost: el["fuel_cost"] as? Double)
+                            fuels.append(fuel)
+                        }
                     }
                 }
             } catch let error as NSError {
@@ -206,31 +211,20 @@ struct FuelDetailView: View {
         }
     }
     
-    func getFuel(tid: String) -> [Fuel]{
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_fuel&tid=" + tid
+    func deleteFuel(fid: String, tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=delete_fuel&fid=" + fid + "&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["get_fuel"] as! [[String : Any]]
-                    print("FuelDetailView.getFuel(): \(info)")
-                    if info.isEmpty {
-                        // empty
-                    } else if info[0]["server_error"] != nil {
+                    let info = json["delete_fuel"] as! [String : Any]
+                    print("FuelDetailView.deleteFuel(): \(info)")
+                    if info["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        var fuels: [Fuel] = []
-                        for el in info {
-                            var date = el["date"] as! String
-                            date = date.replacingOccurrences(of: "T", with: " ")
-                            date.removeLast(3)
-                            let fuel = Fuel(fid: el["fid"] as! Int, date: date, fuel: el["fuel"] as! Double, mileage: el["mileage"] as? Int, fillBrand: el["fill_brand"] as? String, fuelBrand: el["fuel_brand"] as? String, fuelCost: el["fuel_cost"] as? Double)
-                            fuels.append(fuel)
-                        }
-                        return fuels
                     }
                 }
             } catch let error as NSError {
@@ -242,6 +236,5 @@ struct FuelDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        return []
     }
 }

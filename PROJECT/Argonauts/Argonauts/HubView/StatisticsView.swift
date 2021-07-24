@@ -1,13 +1,13 @@
 //
-//  MileageAdd.swift
+//  StatisticsView.swift
 //  Argonauts
 //
-//  Created by Aleksa Khruleva on 07.07.2021.
+//  Created by Aleksa Khruleva on 23.07.2021.
 //
 
 import SwiftUI
 
-struct MileageView: View {
+struct StatisticsView: View {
     @EnvironmentObject var globalObj: GlobalObj
     
     @State var alertMessage: String = ""
@@ -15,19 +15,19 @@ struct MileageView: View {
     @State var nick: String = ""
     @State var transports: [Transport] = []
     
-    @State var showMileageDetail: Bool = false
+    @State var showStatisticsDetail: Bool = false
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
-                NavigationLink(destination: MileageDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showMileageDetail, label: { EmptyView() })
+                NavigationLink(destination: StatisticsDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showStatisticsDetail, label: { EmptyView() })
                 List(transports) { transport in
                     Button(action: {
                         tid = transport.tid
                         nick = transport.nick
-                        showMileageDetail = true
+                        showStatisticsDetail = true
                     }, label: {
                         Text(transport.nick)
                     })
@@ -41,7 +41,7 @@ struct MileageView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
-        .navigationBarTitle("Пробег", displayMode: .inline)
+        .navigationBarTitle("Статистика", displayMode: .inline)
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
@@ -61,3 +61,4 @@ struct MileageView: View {
         }
     }
 }
+

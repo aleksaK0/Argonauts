@@ -9,31 +9,27 @@ import SwiftUI
 
 struct ServiceDetailView: View {
     @EnvironmentObject var globalObj: GlobalObj
-    
     @State var tid: Int
     @State var nick: String
     
     @State var alertMessage: String = ""
-    
     @State var date: Date = Date()
     @State var serType: String = "Ремонт"
     @State var mileage: String = ""
     @State var matCost: String = ""
     @State var wrkCost: String = ""
-    
-    @State var showAlert: Bool = false
-    @State var isLoading: Bool = false
-    @State var showFields: Bool = false
-    @State var showServiceMaterial: Bool = false
-    
-    @State var services: [Service] = []
-    
     @State var sid: Int = 0
     @State var dateServ: String = ""
     @State var serTypeServ: String = ""
     @State var mileageServ: Int = 0
     @State var matCostServ: Double? = nil
     @State var wrkCostServ: Double? = nil
+    @State var services: [Service] = []
+    
+    @State var showAlert: Bool = false
+    @State var isLoading: Bool = false
+    @State var showFields: Bool = false
+    @State var showServiceMaterial: Bool = false
     
     var body: some View {
         ZStack {
@@ -63,13 +59,7 @@ struct ServiceDetailView: View {
                 }
                 List {
                     ForEach(services, id: \.sid) { service in
-                        HStack {
-                            Text(service.date)
-                            Spacer()
-                            Text(String(describing: service.mileage))
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
+                        Button(action: {
                             sid = service.sid
                             dateServ = service.date
                             serTypeServ = service.serType
@@ -77,7 +67,13 @@ struct ServiceDetailView: View {
                             matCostServ = service.matCost
                             wrkCostServ = service.wrkCost
                             showServiceMaterial = true
-                        }
+                        }, label: {
+                            HStack {
+                                Text(service.date)
+                                Spacer()
+                                Text(String(describing: service.mileage))
+                            }
+                        })
                     }
                     .onDelete(perform: deleteServiceAsync)
                 }
@@ -87,7 +83,7 @@ struct ServiceDetailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)
@@ -105,7 +101,7 @@ struct ServiceDetailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            loadDataAsync()
+            getServiceAsync()
         }
     }
     
@@ -116,13 +112,12 @@ struct ServiceDetailView: View {
         return String(describing: obj)
     }
     
-    func loadDataAsync() {
+    func getServiceAsync() {
         services = []
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let services = getService(tid: String(tid))
+            getService(tid: String(tid))
             DispatchQueue.main.async {
-                self.services = services
                 isLoading = false
             }
         }
@@ -153,7 +148,7 @@ struct ServiceDetailView: View {
         }
     }
     
-    func getService(tid: String) -> [Service] {
+    func getService(tid: String) {
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_service&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
@@ -168,7 +163,6 @@ struct ServiceDetailView: View {
                         alertMessage = "Ошибка сервера"
                         showAlert = true
                     } else {
-                        var services: [Service] = []
                         alertMessage = ""
                         for el in info {
                             var date = el["date"] as! String
@@ -178,7 +172,6 @@ struct ServiceDetailView: View {
                             let service = Service(sid: el["sid"] as! Int, date: date, serType: el["ser_type"] as! String, mileage: el["mileage"] as! Int, matCost: el["mat_cost"] as? Double, wrkCost: el["wrk_cost"] as? Double)
                             services.append(service)
                         }
-                        return services
                     }
                 }
             } catch let error as NSError {
@@ -190,7 +183,6 @@ struct ServiceDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-        return []
     }
     
     func addService(tid: String, date: Date, serType: String, mileage: String, matCost: String, wrkCost: String) {

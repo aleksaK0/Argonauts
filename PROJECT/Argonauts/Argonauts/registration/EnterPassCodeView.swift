@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct EnterPassCodeView: View {
-    @Binding var switcher: Views
     @EnvironmentObject var globalObj: GlobalObj
+    @Binding var switcher: Views
     
     @State var userPassCode: String = ""
     @State var text: String = "Ввeдите код"

@@ -37,6 +37,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.rootViewController = UIHostingController(rootView: entryView)
             self.window = window
             window.makeKeyAndVisible()
+            
+            let tapGesture = UITapGestureRecognizer(target: window, action: #selector(UIView.endEditing))
+            tapGesture.cancelsTouchesInView = false
+            tapGesture.delegate = self
+            tapGesture.name = "MyTapGesture"
+            window.addGestureRecognizer(tapGesture)
         }
     }
     
@@ -96,5 +102,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } catch let error as NSError {
             print(error)
         }
+    }
+}
+
+extension SceneDelegate: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return false
     }
 }

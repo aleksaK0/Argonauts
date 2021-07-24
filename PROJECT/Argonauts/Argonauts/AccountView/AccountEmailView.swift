@@ -24,7 +24,6 @@ struct AccountEmailView: View {
     @State var newEmail: String = ""
     @State var code: String = ""
     @State var sentCode: String = ""
-    
     @State var emails: [Email] = []
     
     var body: some View {
@@ -81,7 +80,7 @@ struct AccountEmailView: View {
                     .fill(Color.white.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .pink))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
         .navigationBarTitle("Почта", displayMode: .inline)
@@ -99,7 +98,7 @@ struct AccountEmailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            getUserEmailAsync()
+            getEmailAsync()
         }
     }
     
@@ -114,10 +113,11 @@ struct AccountEmailView: View {
             fileRemoved = true
         } catch let error as NSError {
             print(error)
+            fileRemoved = false
         }
     }
     
-    func getUserEmailAsync() {
+    func getEmailAsync() {
         emails = []
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
@@ -180,7 +180,8 @@ struct AccountEmailView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             changeEmailSend(email: selecEmail, send: String(send))
-            getUserEmailAsync()
+            emails = []
+            getEmail(email: globalObj.email)
             DispatchQueue.main.async {
                 isLoading = false
             }
