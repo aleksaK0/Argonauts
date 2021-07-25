@@ -281,17 +281,28 @@ class Notification {
     }
 }
 
-struct StatisticsFuel {
+struct Statistics {
     var id: Int
     var tid: Int
-    var yy: Int
-    var mm: Int
+    
     var mo: String
-    var fuelMin: Double
-    var fuelMax: Double
-    var fuelAvg: Double
-    var fuelCnt: Int
+    
+    var fuelCnt: String
+    var fuelSum: String
+    var fuelMin: String
+    var fuelMax: String
+    var fuelAvg: String
+    
+    var mileageCnt: String
+    var mileageSum: String
+    var mileageMin: String
+    var mileageMax: String
+    var mileageAvg: String
+    
+    var fmSum: String
 }
+
+
 
 //    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification), perform: { _ in
 //        isUnlocked = false

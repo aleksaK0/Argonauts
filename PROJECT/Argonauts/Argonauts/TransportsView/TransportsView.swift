@@ -62,8 +62,6 @@ struct TransportsView: View {
         }
         .onAppear {
             getTidTnickAsync()
-            print("onAppear1 \(transports.count)")
-            print("onAppear2 \(transports.count)")
         }
     }
     

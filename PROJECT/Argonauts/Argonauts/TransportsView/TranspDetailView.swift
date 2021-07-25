@@ -15,12 +15,11 @@ struct TranspDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State var alertMessage: String = ""
-    @State var transpInfo: [String : Any] = [:]
-    @State var keys: [String] = ["Ник", "Год выпуска", "Пробег", "Моточасы", "Дата диаг. карты", "Дата ОСАГО", "Сум. расход топлива", "Дата начала"]
+    @State var keys: [String] = ["Ник", "Год выпуска", "Пробег", "Моточасы", "Дата диаг. карты", "Дата ОСАГО", "Сум. расход\nтоплива", "Дата отсчета\nтоплива"]
     @State var values: [String] = ["", "", "", "", "", "", "", ""]
     
-    @State var isLoading: Bool = true
     @State var showTranspEditDetail: Bool = false
+    @State var isLoading: Bool = true
     @State var showAlert: Bool = false
     
     var body: some View {
@@ -28,11 +27,14 @@ struct TranspDetailView: View {
             VStack {
                 ScrollView {
                     ForEach(Array(zip(keys, values)), id: \.0) { item in
+                        Divider()
                         HStack {
                             Text("\(item.0)")
                                 .fontWeight(.semibold)
+                                .padding([.leading], 5)
                             Spacer()
                             Text(item.1)
+                                .padding([.trailing], 5)
                         }
                     }
                     Button(action: {
@@ -40,12 +42,14 @@ struct TranspDetailView: View {
                     }, label: {
                         Text("Сбросить топливо")
                     })
+                    .padding([.top])
                     Button(action: {
                         alertMessage = "Вы уверены, что хотите удалить данное транспортное средство?"
                         showAlert = true
                     }, label: {
                         Text("Удалить")
                     })
+                    .padding([.top])
                 }
             }
             if isLoading {

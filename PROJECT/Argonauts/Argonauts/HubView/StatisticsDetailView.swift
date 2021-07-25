@@ -26,7 +26,7 @@ struct StatisticsDetailView: View {
     @State var selection: Int = 0
     @State var currItem: Int = 0
     
-    @State var statisticsFuel: [StatisticsFuel] = []
+    @State var statistics: [Statistics] = []
     
     @State var isLoading: Bool = true
     @State var showAlert: Bool = false
@@ -42,8 +42,7 @@ struct StatisticsDetailView: View {
                 .padding([.leading, .trailing, .top])
                 .onChange(of: selection) { value in
                     currItem = 0
-//                    statisticsFuel = []
-                    getStatisticsFuelAsync()
+                    getStatistics()
                 }
                 HStack {
                     Button(action: {
@@ -51,9 +50,9 @@ struct StatisticsDetailView: View {
                     }, label: {
                         Image(systemName: "chevron.backward")
                     })
-                    .disabled(currItem == 0)
+                    .disabled(statistics.isEmpty || currItem == 0)
                     TabView(selection: $currItem) {
-                        ForEach(statisticsFuel, id: \.id) { statistics in
+                        ForEach(statistics, id: \.id) { statistics in
                             Text(statistics.mo).tag(statistics.id)
                         }
                     }
@@ -64,16 +63,26 @@ struct StatisticsDetailView: View {
                     }, label: {
                         Image(systemName: "chevron.forward")
                     })
-                    .disabled(currItem == statisticsFuel.count - 1)
+                    .disabled(currItem == statistics.count - 1 || statistics.isEmpty)
                 }
-                if !statisticsFuel.isEmpty {
+                if !statistics.isEmpty {
                     Group {
                         Text("Топливо")
-                        Text("Cnt \(statisticsFuel[currItem].fuelCnt)")
-                        Text("Min \(statisticsFuel[currItem].fuelMin)")
-                        Text("Max \(statisticsFuel[currItem].fuelMax)")
-                        Text("Avg \(statisticsFuel[currItem].fuelAvg)")
+                        Text(String(describing: statistics[currItem].fuelCnt))
+                        Text(String(describing: statistics[currItem].fuelAvg))
+                        Text(String(describing: statistics[currItem].fuelSum))
+                        Text(String(describing: statistics[currItem].fuelMin))
+                        Text(String(describing: statistics[currItem].fuelMax))
                     }
+                    Group {
+                        Text("Пробег")
+                        Text(String(describing: statistics[currItem].mileageCnt))
+                        Text(String(describing: statistics[currItem].mileageAvg))
+                        Text(String(describing: statistics[currItem].mileageSum))
+                        Text(String(describing: statistics[currItem].mileageMin))
+                        Text(String(describing: statistics[currItem].mileageMax))
+                    }
+                    Text(String(describing: statistics[currItem].fmSum))
                 } else {
                     Text("Статистика недоступна")
                 }
@@ -92,40 +101,43 @@ struct StatisticsDetailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            getStatisticsFuelAsync()
-            print("onAppear \(statisticsFuel.count)")
+            getStatistics()
+            print("onAppear \(statistics.count)")
         }
     }
     
-    func getStatisticsFuelAsync() {
+    func getStatistics() {
         isLoading = true
-        statisticsFuel = []
+        statistics = []
         DispatchQueue.global(qos: .userInitiated).async {
             if selection == 0 {
-                getStatisticsFym(tid: String(tid))
+                getStatisticsMonth(tid: String(tid))
             } else {
-                getStatisticsFyy(tid: String(tid))
+                getStatisticsYear(tid: String(tid))
             }
             DispatchQueue.main.async {
-//                print("getStatisticsFuelAsync \(currItem)")
                 if alertMessage == "" {
-                    currItem = statisticsFuel.count - 1
+                    currItem = statistics.count - 1
                 }
-//                print("getStatisticsFuelAsync \(currItem)")
                 isLoading = false
             }
         }
     }
     
-    func getStatisticsFym(tid: String) {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_statistics_fym&tid=" + tid
+    func get(currItem: Int) -> String {
+        print("get(): \(currItem)")
+        return "a"
+    }
+    
+    func getStatisticsMonth(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_statistics_month&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["get_statistics_fym"] as! [[String : Any]]
-                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
+                    let info = json["get_statistics_month"] as! [[String : Any]]
+//                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
                     if info.isEmpty {
                         
                     } else if info[0]["server_error"] != nil {
@@ -135,8 +147,8 @@ struct StatisticsDetailView: View {
                         alertMessage = ""
                         var id: Int = 0
                         for el in info {
-                            let statistics = StatisticsFuel(id: id, tid: el["tid"] as! Int, yy: el["yy"] as! Int, mm: el["mm"] as! Int, mo: el["mo"] as! String, fuelMin: el["fuel_min"] as! Double, fuelMax: el["fuel_max"] as! Double, fuelAvg: el["fuel_avg"] as! Double, fuelCnt: el["fuel_cnt"] as! Int)
-                            statisticsFuel.append(statistics)
+                            let statistics = Statistics(id: id, tid: el["tid"] as! Int, mo: el["mo"] as! String, fuelCnt: el["fuel_cnt"] as! String, fuelSum: el["fuel_sum"] as! String, fuelMin: el["fuel_min"] as! String, fuelMax: el["fuel_max"] as! String, fuelAvg: el["fuel_avg"] as! String, mileageCnt: el["mileage_cnt"] as! String, mileageSum: el["mileage_sum"] as! String, mileageMin: el["mileage_min"] as! String, mileageMax: el["mileage_max"] as! String, mileageAvg: el["mileage_avg"] as! String, fmSum: el["fm_sum"] as! String)
+                            self.statistics.append(statistics)
                             id += 1
                         }
                     }
@@ -152,14 +164,14 @@ struct StatisticsDetailView: View {
         }
     }
     
-    func getStatisticsFyy(tid: String) {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_statistics_fyy&tid=" + tid
+    func getStatisticsYear(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_statistics_year&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
         if let data = try? Data(contentsOf: url!) {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["get_statistics_fyy"] as! [[String : Any]]
+                    let info = json["get_statistics_year"] as! [[String : Any]]
 //                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
                     if info.isEmpty {
                         
@@ -170,9 +182,8 @@ struct StatisticsDetailView: View {
                         alertMessage = ""
                         var id: Int = 0
                         for el in info {
-                            let statisctics = StatisticsFuel(id: id, tid: el["tid"] as! Int, yy: el["yy"] as! Int, mm: el["mm"] as! Int, mo: el["mo"] as! String, fuelMin: el["fuel_min"] as! Double, fuelMax: el["fuel_max"] as! Double, fuelAvg: el["fuel_avg"] as! Double, fuelCnt: el["fuel_cnt"] as! Int)
-//                            statisticsFyy.append(statisctics)
-                            statisticsFuel.append(statisctics)
+                            let statistics = Statistics(id: id, tid: el["tid"] as! Int, mo: el["mo"] as! String, fuelCnt: el["fuel_cnt"] as! String, fuelSum: el["fuel_sum"] as! String, fuelMin: el["fuel_min"] as! String, fuelMax: el["fuel_max"] as! String, fuelAvg: el["fuel_avg"] as! String, mileageCnt: el["mileage_cnt"] as! String, mileageSum: el["mileage_sum"] as! String, mileageMin: el["mileage_min"] as! String, mileageMax: el["mileage_max"] as! String, mileageAvg: el["mileage_avg"] as! String, fmSum: el["fm_sum"] as! String)
+                            self.statistics.append(statistics)
                             id += 1
                         }
                     }

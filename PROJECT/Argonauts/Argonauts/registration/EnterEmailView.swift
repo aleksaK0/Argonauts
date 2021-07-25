@@ -30,7 +30,8 @@ struct EnterEmailView: View {
                           , onEditingChanged: { _ in  }
                           , onCommit: {
                             isValid = isValidEmailAddress(email: email)
-                            isValid = true // TODO: delete
+                            #warning("delete line below in fp")
+                            isValid = true
                             if isValid {
                                 connectDeviceAsync()
                             } else {
@@ -45,7 +46,8 @@ struct EnterEmailView: View {
                 Button {
                     UIApplication.shared.endEditing()
                     isValid = isValidEmailAddress(email: email)
-                    isValid = true // TODO: delete
+                    #warning("delete line below in fp")
+                    isValid = true
                     if isValid {
                         connectDeviceAsync()
                     } else {
@@ -75,6 +77,7 @@ struct EnterEmailView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             //            globalObj.sentPassCode = generatePassCode()
+            #warning("delete line below in fp")
             globalObj.sentPassCode = "1234"
             //            connectDevice(email: email, code: globalObj.sentPassCode)
             DispatchQueue.main.async {
