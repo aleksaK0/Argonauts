@@ -22,44 +22,70 @@ struct TranspDetailEditView: View {
     @State var osagoDateChanged: Bool
     
     @State var alertMessage: String = ""
+    @State var nickWas: String = ""
+    @State var productedWas: String = ""
+    @State var diagDateWas: Date = Date()
+    @State var osagoDateWas: Date = Date()
+    @State var diagDateChangedWas: Bool = false
+    @State var osagoDateChangedWas: Bool = false
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     
+    @State var pad: CGFloat = 10
+    
     var body: some View {
         ZStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
+                Divider()
                 HStack {
                     Text(keys[0])
+                        .fontWeight(.semibold)
+                        .padding([.leading], pad)
                     TextField(keys[0], text: $nick)
                         .multilineTextAlignment(.trailing)
+                        .padding([.trailing], pad)
                 }
+                Divider()
                 HStack {
                     Text(keys[1])
+                        .fontWeight(.semibold)
+                        .padding([.leading], pad)
                     TextField(keys[1], text: $producted)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
+                        .padding([.trailing], pad)
                 }
+                Divider()
                 HStack {
-                    Text("Дата получения действующей\nдиагностической карты")
-                        .multilineTextAlignment(.center)
+                    Text(keys[4])
+                        .fontWeight(.semibold)
+                        .padding([.leading], pad)
                     Spacer()
                     Toggle("", isOn: $diagDateChanged)
                         .labelsHidden()
+                        .padding([.trailing], pad)
+                        .disabled(diagDateChangedWas)
                 }
                 DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
+                    .disabled(!diagDateChanged)
+                Divider()
                 HStack {
-                    Text("Дата оформления действующего\nполиса ОСАГО")
-                        .multilineTextAlignment(.center)
+                    Text(keys[5])
+                        .fontWeight(.semibold)
+                        .padding([.leading], pad)
                     Spacer()
                     Toggle("", isOn: $osagoDateChanged)
                         .labelsHidden()
+                        .padding([.trailing], pad)
+                        .disabled(osagoDateChangedWas)
                 }
                 DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
+                    .disabled(!osagoDateChanged)
             }
             if isLoading {
                 Rectangle()
@@ -78,34 +104,65 @@ struct TranspDetailEditView: View {
                 Button(action: {
                     isPresented = false
                 }, label: {
-                    Text("Отменить")
+                    Text("Отм.")
                 }),
             trailing:
                 Button(action: {
                     updateTranspInfoAsync()
                 }, label: {
-                    Text("Сохранить")
+                    Text("Сохр.")
                 })
+                .disabled(nickWas == nick && productedWas == producted && (diagDateChangedWas == diagDateChanged && diagDateWas == diagDate) && (osagoDateChangedWas == osagoDateChanged && osagoDateWas == osagoDate))
         )
+        .onAppear {
+            nickWas = nick
+            productedWas = producted
+            diagDateWas = diagDate
+            osagoDateWas = osagoDate
+            diagDateChangedWas = diagDateChanged
+            osagoDateChangedWas = osagoDateChanged
+        }
+    }
+    
+    func isValidYear(year: String) -> Bool {
+        do {
+            let yearRegEx =  "^[1-9]+[0-9]+[0-9]+[0-9]$"
+            let regex = try NSRegularExpression(pattern: yearRegEx)
+            let nsString = year as NSString
+            let results = regex.matches(in: year, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
     }
     
     func updateTranspInfoAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            if diagDateChanged {
-                diagDateStr = convertDateToString(date: diagDate)
-            }
-            if osagoDateChanged {
-                osagoDateStr = convertDateToString(date: osagoDate)
-            }
-            updateTranspInfo(tid: tid, nick: nick, producted: producted, diagDate: diagDateStr, osagoDate: osagoDateStr)
-            if alertMessage == "" {
+            let isValidYear = isValidYear(year: producted)
+            if isValidYear {
                 if diagDateChanged {
-                    addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                    diagDateStr = convertDateToString(date: diagDate)
                 }
                 if osagoDateChanged {
-                    addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                    osagoDateStr = convertDateToString(date: osagoDate)
                 }
+                updateTranspInfo(tid: tid, nick: nick, producted: producted, diagDate: diagDateStr, osagoDate: osagoDateStr)
+                if alertMessage == "" {
+                    if diagDateChanged {
+                        addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                    }
+                    if osagoDateChanged {
+                        addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                    }
+                }
+            } else {
+                alertMessage = "Введен некорректный год выпуска"
+                showAlert = true
             }
             DispatchQueue.main.async {
                 isLoading = false

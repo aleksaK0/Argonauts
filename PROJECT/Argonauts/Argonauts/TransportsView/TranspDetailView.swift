@@ -22,6 +22,8 @@ struct TranspDetailView: View {
     @State var isLoading: Bool = true
     @State var showAlert: Bool = false
     
+    @State var pad: CGFloat = 10
+    
     var body: some View {
         ZStack {
             VStack {
@@ -29,12 +31,12 @@ struct TranspDetailView: View {
                     ForEach(Array(zip(keys, values)), id: \.0) { item in
                         Divider()
                         HStack {
-                            Text("\(item.0)")
+                            Text(item.0)
                                 .fontWeight(.semibold)
-                                .padding([.leading], 5)
+                                .padding([.leading], pad)
                             Spacer()
                             Text(item.1)
-                                .padding([.trailing], 5)
+                                .padding([.trailing], pad)
                         }
                     }
                     Button(action: {
@@ -48,6 +50,7 @@ struct TranspDetailView: View {
                         showAlert = true
                     }, label: {
                         Text("Удалить")
+                            .foregroundColor(.red)
                     })
                     .padding([.top])
                 }
@@ -66,7 +69,7 @@ struct TranspDetailView: View {
                 Button(action: {
                     showTranspEditDetail = true
                 }, label: {
-                    Text("Изменить")
+                    Text("Изм.")
                 })
         )
         .alert(isPresented: $showAlert) {
@@ -93,9 +96,10 @@ struct TranspDetailView: View {
     }
     
     func convertStringToDate(string: String) -> Date {
-        let formmater = DateFormatter()
-        formmater.dateFormat = "yyyy-MM-dd"
-        let date = formmater.date(from: string)
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru")
+        formatter.dateFormat = "dd.MM.yyyy"
+        let date = formatter.date(from: string)
         return date ?? Date()
     }
     
@@ -190,19 +194,23 @@ struct TranspDetailView: View {
                         }
                         if info[0]["diag_date"] is NSNull == false {
                             let diagDate = info[0]["diag_date"] as! String
-                            values[4] = diagDate
+                            values[4] = reverseDate(date: diagDate)
                         }
                         if info[0]["osago_date"] is NSNull == false {
                             let osagoDate = info[0]["osago_date"] as! String
-                            values[5] = osagoDate
+                            values[5] = reverseDate(date: osagoDate)
                         }
                         if info[0]["total_fuel"] is NSNull == false {
                             let totalFuel = info[0]["total_fuel"] as! Double
-                            values[6] = String(describing: totalFuel)
+                            if floor(totalFuel) == totalFuel {
+                                values[6] = String(describing: Int(totalFuel))
+                            } else {
+                                values[6] = String(describing: totalFuel)
+                            }
                         }
                         if info[0]["fuel_date"] is NSNull == false {
                             let fuelDate = info[0]["fuel_date"] as! String
-                            values[7] = String(describing: fuelDate)
+                            values[7] = reverseDate(date: fuelDate)
                         }
                     }
                 }
@@ -215,6 +223,12 @@ struct TranspDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
+    }
+    
+    func reverseDate(date: String) -> String {
+        let comp = date.components(separatedBy: "-")
+        let revDate = comp[2] + "." + comp[1] + "." + comp[0]
+        return revDate
     }
     
     func deleteTransp(tid: String) {

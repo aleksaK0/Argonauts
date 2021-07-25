@@ -177,7 +177,7 @@ struct TranspAddNotification: View {
         
         switch dataType {
         case "Дата":
-            type = "T"
+            type = "D"
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "ru")
             formatter.dateFormat = "yyyy-MM-dd HH:mm"

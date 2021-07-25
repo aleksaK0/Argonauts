@@ -111,11 +111,13 @@ struct AddTranspView: View {
             var osagoDateFormatted = ""
             if isOn4 {
                 let formatter = DateFormatter()
+                formatter.locale = Locale(identifier: "ru")
                 formatter.dateFormat = "YYYY-MM-dd"
                 diagDateFormatted = formatter.string(from: diagDate)
             }
             if isOn5 {
                 let formatter = DateFormatter()
+                formatter.locale = Locale(identifier: "ru")
                 formatter.dateFormat = "YYYY-MM-dd"
                 osagoDateFormatted = formatter.string(from: osagoDate)
             }

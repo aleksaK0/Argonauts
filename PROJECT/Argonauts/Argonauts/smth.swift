@@ -83,6 +83,7 @@ func isValidEmailAddress(email: String) -> Bool {
 
 func convertDateToString(date: Date) -> String {
     let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "ru")
     formatter.dateFormat = "yyyy-MM-dd"
     let str = formatter.string(from: date)
     return str
