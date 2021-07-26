@@ -19,7 +19,7 @@ struct TranspDetailView: View {
     @State var values: [String] = ["", "", "", "", "", "", "", ""]
     
     @State var showTranspEditDetail: Bool = false
-    @State var isLoading: Bool = true
+    @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
     @State var pad: CGFloat = 10
@@ -43,7 +43,7 @@ struct TranspDetailView: View {
                         discardFuelAsync()
                     }, label: {
                         Text("Сбросить топливо")
-                            .font(.system(size: 17, weight: .regular, design: .default))
+                            .font(.body)
                     })
                     .padding([.top])
                     Button(action: {
@@ -51,7 +51,7 @@ struct TranspDetailView: View {
                         showAlert = true
                     }, label: {
                         Text("Удалить")
-                            .font(.system(size: 17, weight: .regular, design: .default))
+                            .font(.body)
                             .foregroundColor(.red)
                     })
                     .padding([.top])
@@ -59,7 +59,7 @@ struct TranspDetailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -105,7 +105,14 @@ struct TranspDetailView: View {
         return date ?? Date()
     }
     
+    func reverseDate(date: String) -> String {
+        let comp = date.components(separatedBy: "-")
+        let revDate = comp[2] + "." + comp[1] + "." + comp[0]
+        return revDate
+    }
+    
     func getTranspAsync() {
+        isLoading = true
         values = ["", "", "", "", "", "", "", ""]
         DispatchQueue.global(qos: .userInitiated).async {
             getTransp(tid: String(tid))
@@ -120,10 +127,10 @@ struct TranspDetailView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             deleteTransp(tid: String(tid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     presentationMode.wrappedValue.dismiss()
                 }
+                isLoading = false
             }
         }
     }
@@ -221,12 +228,6 @@ struct TranspDetailView: View {
             alertMessage = "Ошибка"
             showAlert = true
         }
-    }
-    
-    func reverseDate(date: String) -> String {
-        let comp = date.components(separatedBy: "-")
-        let revDate = comp[2] + "." + comp[1] + "." + comp[0]
-        return revDate
     }
     
     func deleteTransp(tid: String) {

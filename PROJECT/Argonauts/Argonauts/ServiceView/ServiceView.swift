@@ -22,6 +22,12 @@ struct ServiceView: View {
     var body: some View {
         ZStack {
             VStack {
+                HStack {
+                    Text("Сервис")
+                        .font(.title.weight(.bold))
+                        .padding([.leading, .top])
+                    Spacer()
+                }
                 NavigationLink(destination: ServiceDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showServiceDetail, label: { EmptyView() })
                 List(transports) { transport in
                     Button(action: {
@@ -35,7 +41,7 @@ struct ServiceView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))

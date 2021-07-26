@@ -85,7 +85,7 @@ struct ServiceMaterialView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -111,8 +111,8 @@ struct ServiceMaterialView: View {
     }
     
     func loadDataAsync() {
-        materials = []
         isLoading = true
+        materials = []
         DispatchQueue.global(qos: .userInitiated).async {
             getMaterial(sid: String(sid))
             DispatchQueue.main.async {
@@ -138,10 +138,10 @@ struct ServiceMaterialView: View {
             let maid = materials[index].maid
             deleteMaterial(maid: String(maid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     materials.remove(at: index)
                 }
+                isLoading = false
             }
         }
     }

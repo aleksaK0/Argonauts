@@ -39,7 +39,7 @@ struct CreateAccountView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -55,11 +55,11 @@ struct CreateAccountView: View {
                 writeToDocDir(filename: "pinInfo", text: globalObj.email + "\n" + globalObj.pin)
             }
             DispatchQueue.main.async {
-                isLoading = false
                 authenticate()
                 if alertMessage == "" {
                     switcher = .addTransp
                 }
+                isLoading = false
             }
         }
     }

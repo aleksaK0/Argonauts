@@ -555,7 +555,7 @@ def add_eng_hour(mydb, query_dict, response_dict):
             ehid = mycursor.fetchone()[0]
             mycursor.execute("UPDATE transport SET eng_hour = (SELECT MAX(eng_hour) FROM eng_hour WHERE tid = %s) WHERE tid = %s" % (tid, tid))
             mydb.commit()
-            response_dict['add_eng_hour'] = {'row': affected_rows, 'ehid': ehid}
+            response_dict['add_eng_hour'] = {'row': affected_rows, 'ehid': ehid, 'eng_hour': int(eng_hour)}
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
         response_dict['add_eng_hour'] = {'server_error' : 1, 'err_code' : err_code, 'row' : 0}

@@ -7,16 +7,6 @@
 
 import SwiftUI
 
-
-//"fuel_avg": 30.1,
-//      "fuel_cnt": 8,
-//      "fuel_max": 41.58,
-//      "fuel_min": 17.02,
-//      "mm": 5,
-//      "mo": "2021 май",
-//      "tid": 121,
-//      "yy": 2021
-
 struct StatisticsDetailView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @State var tid: Int
@@ -25,10 +15,9 @@ struct StatisticsDetailView: View {
     @State var alertMessage: String = ""
     @State var selection: Int = 0
     @State var currItem: Int = 0
-    
     @State var statistics: [Statistics] = []
     
-    @State var isLoading: Bool = true
+    @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
     var body: some View {
@@ -90,7 +79,7 @@ struct StatisticsDetailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -124,11 +113,6 @@ struct StatisticsDetailView: View {
         }
     }
     
-    func get(currItem: Int) -> String {
-        print("get(): \(currItem)")
-        return "a"
-    }
-    
     func getStatisticsMonth(tid: String) {
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_statistics_month&tid=" + tid
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
@@ -137,7 +121,7 @@ struct StatisticsDetailView: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["get_statistics_month"] as! [[String : Any]]
-//                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
+                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
                     if info.isEmpty {
                         
                     } else if info[0]["server_error"] != nil {
@@ -172,7 +156,7 @@ struct StatisticsDetailView: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["get_statistics_year"] as! [[String : Any]]
-//                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
+                    print("StatisticsDetailView.getStatisticsFym(): \(info)")
                     if info.isEmpty {
                         
                     } else if info[0]["server_error"] != nil {

@@ -91,7 +91,7 @@ func convertDateToString(date: Date) -> String {
 
 func isValidYear(year: String) -> Bool {
     do {
-        let yearRegEx =  "^[1-9]+[0-9]+[0-9]+[0-9]$"
+        let yearRegEx =  "^[0-9]{4}$"
         let regex = try NSRegularExpression(pattern: yearRegEx)
         let nsString = year as NSString
         let results = regex.matches(in: year, range: NSRange(location: 0, length: nsString.length))
@@ -103,6 +103,13 @@ func isValidYear(year: String) -> Bool {
         print("invalid regex: \(error.localizedDescription)")
         return false
     }
+}
+
+func reverseDateTime(date: String) -> String {
+    let comp = date.replacingOccurrences(of: " ", with: "-").components(separatedBy: "-")
+    print(comp)
+    let revDate = comp[3] + " " + comp[2] + "." + comp[1] + "." + comp[0]
+    return revDate
 }
 
 func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool, transports: inout [Transport]) {

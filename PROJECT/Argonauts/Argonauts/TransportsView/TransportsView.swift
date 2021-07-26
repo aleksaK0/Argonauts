@@ -17,30 +17,24 @@ struct TransportsView: View {
     
     @State var showTranspDetail: Bool = false
     @State var showTranspAdd: Bool = false
-    @State var isLoading: Bool = true
+    @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
     var body: some View {
         ZStack {
             VStack {
                 HStack {
+                    Text("Транспорт")
+                        .font(.title.weight(.bold))
                     Spacer()
                     Button {
                         showTranspAdd = true
                     } label: {
                         Image(systemName: "plus")
                             .font(.title.weight(.semibold))
-//                            .foregroundColor(.yellow)
-                            .foregroundColor(ColorManager.customYellow)
                     }
-                    .padding(.trailing)
                 }
-                HStack {
-                    Text("Транспорт")
-                        .font(.title.weight(.bold))
-                        .padding([.leading])
-                    Spacer()
-                }
+                .padding([.leading, .trailing, .top])
                 NavigationLink(destination: TranspDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showTranspDetail, label: { EmptyView() })
                 List(transports) { transport in
                     Button(action: {
@@ -54,7 +48,7 @@ struct TransportsView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))

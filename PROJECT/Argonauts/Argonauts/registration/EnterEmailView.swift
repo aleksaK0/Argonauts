@@ -62,7 +62,7 @@ struct EnterEmailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -81,11 +81,11 @@ struct EnterEmailView: View {
             globalObj.sentPassCode = "1234"
             //            connectDevice(email: email, code: globalObj.sentPassCode)
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     globalObj.email = email
                     switcher = .enterPassCode
                 }
+                isLoading = false
             }
         }
     }

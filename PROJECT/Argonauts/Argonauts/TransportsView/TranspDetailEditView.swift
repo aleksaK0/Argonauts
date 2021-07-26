@@ -90,7 +90,7 @@ struct TranspDetailEditView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -150,10 +150,10 @@ struct TranspDetailEditView: View {
                 showAlert = true
             }
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     isPresented = false
                 }
+                isLoading = false
             }
         }
     }

@@ -80,7 +80,7 @@ struct TranspAddView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -129,35 +129,37 @@ struct TranspAddView: View {
     func addTranspAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            var diagDateFormatted = ""
-            var osagoDateFormatted = ""
-            if isOn4 {
-                let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: "ru")
-                formatter.dateFormat = "YYYY-MM-dd"
-                diagDateFormatted = formatter.string(from: diagDate)
-            }
-            if isOn5 {
-                let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: "ru")
-                formatter.dateFormat = "YYYY-MM-dd"
-                osagoDateFormatted = formatter.string(from: osagoDate)
-            }
-            addTransp(email: globalObj.email, nick: nick, producted: producted, mileage: mileage, engHour: engHour, diagDate: diagDateFormatted, osagoDate: osagoDateFormatted)
-            if alertMessage == "" {
+            if isValidYear(year: producted) || producted == "" {
+                var diagDateFormatted = ""
+                var osagoDateFormatted = ""
                 if isOn4 {
-                    addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                    let formatter = DateFormatter()
+                    formatter.locale = Locale(identifier: "ru")
+                    formatter.dateFormat = "YYYY-MM-dd"
+                    diagDateFormatted = formatter.string(from: diagDate)
                 }
                 if isOn5 {
-                    addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                    let formatter = DateFormatter()
+                    formatter.locale = Locale(identifier: "ru")
+                    formatter.dateFormat = "YYYY-MM-dd"
+                    osagoDateFormatted = formatter.string(from: osagoDate)
+                }
+                addTransp(email: globalObj.email, nick: nick, producted: producted, mileage: mileage, engHour: engHour, diagDate: diagDateFormatted, osagoDate: osagoDateFormatted)
+                if alertMessage == "" {
+                    if isOn4 {
+                        addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                    }
+                    if isOn5 {
+                        addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                    }
                 }
             }
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     alertMessage = "Добавить уведомления?"
                     showAlert = true
                 }
+                isLoading = false
             }
         }
     }

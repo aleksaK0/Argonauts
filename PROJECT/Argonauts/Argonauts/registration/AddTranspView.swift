@@ -12,11 +12,6 @@ struct AddTranspView: View {
     @Binding var switcher: Views
     
     @State var alertMessage: String = ""
-    @State var showOptional: Bool = false
-    @State var showAlert: Bool = false
-    @State var isLoading: Bool = false
-    @State var showTranspAddNot: Bool = false
-    
     @State var tid: Int = 0
     @State var nick: String = ""
     @State var producted: String = ""
@@ -26,6 +21,10 @@ struct AddTranspView: View {
     @State var osagoDate: Date = Date()
     @State var osagoLife: Date = Date()
     
+    @State var showOptional: Bool = false
+    @State var showAlert: Bool = false
+    @State var isLoading: Bool = false
+    @State var showTranspAddNot: Bool = false
     @State var isOn1: Bool = false
     @State var isOn2: Bool = false
     @State var isOn3: Bool = false
@@ -92,7 +91,7 @@ struct AddTranspView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -131,11 +130,11 @@ struct AddTranspView: View {
                 }
             }
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     alertMessage = "Добавить уведомления?"
                     showAlert = true
                 }
+                isLoading = false
             }
         }
     }

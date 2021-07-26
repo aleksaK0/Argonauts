@@ -22,6 +22,12 @@ struct FuelView: View {
     var body: some View {
         ZStack {
             VStack {
+                HStack {
+                    Text("Заправка")
+                        .font(.title.weight(.bold))
+                        .padding([.leading, .top])
+                    Spacer()
+                }
                 NavigationLink(destination: FuelDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showFuelDetail, label: { EmptyView() })
                 List(transports) { transport in
                     Button(action: {
@@ -35,7 +41,7 @@ struct FuelView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))

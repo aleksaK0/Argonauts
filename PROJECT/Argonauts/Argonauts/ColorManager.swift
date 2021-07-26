@@ -8,10 +8,12 @@
 import Foundation
 import SwiftUI
 
-struct ColorManager {
+struct ColMan {
     static let customYellow = Color("Yellow")
+    static let loadingColor = Color("loadingColor")
 }
 
 extension Color {
     static let customYellow = Color("Yellow")
+    static let loadingColor = Color("loadingColor")
 }

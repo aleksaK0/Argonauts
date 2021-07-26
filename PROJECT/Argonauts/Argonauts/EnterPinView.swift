@@ -15,6 +15,7 @@ struct EnterPinView: View {
     @State var pin: String = ""
     @State var text: String = "Введите пин"
     @State var pinInfo: [String] = []
+    
     @State var isLoading: Bool = false
     
     var body: some View {
@@ -68,7 +69,7 @@ struct EnterPinView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))

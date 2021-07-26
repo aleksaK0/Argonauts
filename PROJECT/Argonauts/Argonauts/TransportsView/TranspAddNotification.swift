@@ -14,20 +14,18 @@ struct TranspAddNotification: View {
     @Binding var isPresented: Bool
     @Binding var showTranspAddNot: Bool
     
-    @State var isExpanded: Bool = false
-    @State var isLoading: Bool = false
-    @State var showAlert: Bool = false
-    
     @State var alertMessage: String = ""
     @State var type: String = "Дата"
     @State var notification: String = ""
     @State var date: Date = Date()
     @State var value1: String = ""
     @State var value2: String = ""
-    
     @State var types: [String] = ["Дата", "Пробег", "Топливо", "Моточасы"]
-    
     @State var notifications: [Notification] = []
+    
+    @State var isExpanded: Bool = false
+    @State var isLoading: Bool = false
+    @State var showAlert: Bool = false
     
     var body: some View {
         ZStack {
@@ -71,7 +69,7 @@ struct TranspAddNotification: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -97,13 +95,13 @@ struct TranspAddNotification: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            loadDataAsync()
+            getNotificationAsync()
         }
     }
     
-    func loadDataAsync() {
-        notifications = []
+    func getNotificationAsync() {
         isLoading = true
+        notifications = []
         DispatchQueue.global(qos: .userInitiated).async {
             getNotification(tid: String(tid))
             DispatchQueue.main.async {
@@ -117,6 +115,11 @@ struct TranspAddNotification: View {
         DispatchQueue.global(qos: .userInitiated).async {
             addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
             DispatchQueue.main.async {
+                if alertMessage == "" {
+                    notification = ""
+                    value1 = ""
+                    value2 = ""
+                }
                 isLoading = false
             }
         }
@@ -129,10 +132,10 @@ struct TranspAddNotification: View {
             let nid = notifications[index].nid
             deleteNotification(nid: String(nid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     notifications.remove(at: index)
                 }
+                isLoading = false
             }
         }
     }

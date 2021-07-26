@@ -63,7 +63,7 @@ struct FuelDetailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -96,8 +96,8 @@ struct FuelDetailView: View {
     }
     
     func getFuelAsync() {
-        fuels = []
         isLoading = true
+        fuels = []
         DispatchQueue.global(qos: .userInitiated).async {
             getFuel(tid: String(tid))
             DispatchQueue.main.async {
@@ -123,10 +123,10 @@ struct FuelDetailView: View {
             let fid = fuels[index].fid
             deleteFuel(fid: String(fid), tid: String(tid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     fuels.remove(at: index)
                 }
+                isLoading = false
             }
         }
     }
@@ -168,7 +168,6 @@ struct FuelDetailView: View {
     }
     
     func addFuel(tid: String, date: Date, mileage: String, fuel: String, fillBrand: String, fuelBrand: String, fuelCost: String) {
-        print(mileage)
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru")
         formatter.dateFormat = "yyyy-MM-dd HH:mm"

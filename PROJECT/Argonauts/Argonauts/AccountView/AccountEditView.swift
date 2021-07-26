@@ -24,7 +24,7 @@ struct AccountEditView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -54,10 +54,10 @@ struct AccountEditView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             updateUserInfo(email: globalObj.email, nick: nick)
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     showAccountEdit = false
                 }
+                isLoading = false
             }
         }
     }

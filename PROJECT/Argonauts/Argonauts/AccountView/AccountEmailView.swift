@@ -77,7 +77,7 @@ struct AccountEmailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -118,8 +118,8 @@ struct AccountEmailView: View {
     }
     
     func getEmailAsync() {
-        emails = []
         isLoading = true
+        emails = []
         DispatchQueue.global(qos: .userInitiated).async {
             getEmail(email: email)
             DispatchQueue.main.async {
@@ -133,8 +133,8 @@ struct AccountEmailView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             addEmail(email: email, newEmail: newEmail)
             DispatchQueue.main.async {
-                isLoading = false
                 codeSent = false
+                isLoading = false
             }
         }
     }
@@ -149,7 +149,6 @@ struct AccountEmailView: View {
                 removePinFile()
             }
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     if fileRemoved {
                         emails.remove(at: index)
@@ -158,6 +157,7 @@ struct AccountEmailView: View {
                         emails.remove(at: index)
                     }
                 }
+                isLoading = false
             }
         }
     }
@@ -168,10 +168,10 @@ struct AccountEmailView: View {
             sentCode = generatePassCode()
             connectDevice(email: newEmail, code: sentCode)
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     codeSent = true
                 }
+                isLoading = false
             }
         }
     }

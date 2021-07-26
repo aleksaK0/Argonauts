@@ -80,7 +80,7 @@ struct ServiceDetailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -113,8 +113,8 @@ struct ServiceDetailView: View {
     }
     
     func getServiceAsync() {
-        services = []
         isLoading = true
+        services = []
         DispatchQueue.global(qos: .userInitiated).async {
             getService(tid: String(tid))
             DispatchQueue.main.async {
@@ -140,10 +140,10 @@ struct ServiceDetailView: View {
             let sid = services[index].sid
             deleteService(sid: String(sid), tid: String(tid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     services.remove(at: index)
                 }
+                isLoading = false
             }
         }
     }

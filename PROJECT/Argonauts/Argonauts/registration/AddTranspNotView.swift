@@ -70,7 +70,7 @@ struct AddTranspNotView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -99,8 +99,8 @@ struct AddTranspNotView: View {
     }
     
     func getNotificationAsync() {
-        notifications = []
         isLoading = true
+        notifications = []
         DispatchQueue.global(qos: .userInitiated).async {
             getNotification(tid: String(tid))
             DispatchQueue.main.async {
@@ -126,10 +126,10 @@ struct AddTranspNotView: View {
             let nid = notifications[index].nid
             deleteNotification(nid: String(nid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     notifications.remove(at: index)
                 }
+                isLoading = false
             }
         }
     }

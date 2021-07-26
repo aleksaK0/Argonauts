@@ -31,11 +31,15 @@ struct EngHourDetailView: View {
                         .labelsHidden()
                     TextField("Моточасы", text: $engHour)
                         .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
                     Button {
+                        UIApplication.shared.endEditing()
                         addEngHourAsync()
                     } label: {
                         Text("Добавить")
                     }
+                    .disabled(engHour.isEmpty)
+                    .padding([.top])
                 }
                 List {
                     ForEach(engHours, id: \.ehid) { engHour in
@@ -50,7 +54,7 @@ struct EngHourDetailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -63,8 +67,10 @@ struct EngHourDetailView: View {
                                 }, label: {
                                     if showFields {
                                         Image(systemName: "minus")
+                                            .font(.title2.weight(.semibold))
                                     } else {
                                         Image(systemName: "plus")
+                                            .font(.title2.weight(.semibold))
                                     }
                                 }))
         .alert(isPresented: $showAlert) {
@@ -76,8 +82,8 @@ struct EngHourDetailView: View {
     }
     
     func getEngHourAsync() {
-        engHours = []
         isLoading = true
+        engHours = []
         DispatchQueue.global(qos: .userInitiated).async {
             getEngHour(tid: String(tid))
             DispatchQueue.main.async {
@@ -89,8 +95,16 @@ struct EngHourDetailView: View {
     func addEngHourAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addEngHour(tid: String(tid), date: date, engHour: engHour)
+            if isValidEngHour(engHour: engHour) {
+                addEngHour(tid: String(tid), date: date, engHour: engHour)
+            } else {
+                alertMessage = "Введено некорректное значение"
+                showAlert = true
+            }
             DispatchQueue.main.async {
+                if alertMessage == "" {
+                    engHour = ""
+                }
                 isLoading = false
             }
         }
@@ -103,11 +117,27 @@ struct EngHourDetailView: View {
             ehid = engHours[index].ehid
             deleteEngHour(ehid: String(ehid), tid: String(tid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     engHours.remove(at: index)
                 }
+                isLoading = false
             }
+        }
+    }
+    
+    func isValidEngHour(engHour: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = engHour as NSString
+            let results = regex.matches(in: engHour, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
         }
     }
     
@@ -132,6 +162,7 @@ struct EngHourDetailView: View {
                             var date = el["date"] as! String
                             date = date.replacingOccurrences(of: "T", with: " ")
                             date.removeLast(3)
+                            date = reverseDateTime(date: date)
                             
                             let engHour = EngHour(ehid: el["ehid"] as! Int, date: date, engHour: el["eng_hour"] as! Int)
                             engHours.append(engHour)
@@ -176,7 +207,8 @@ struct EngHourDetailView: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        engHours.append(EngHour(ehid: info["ehid"] as! Int, date: dateString, engHour: Int(engHour)!))
+                        let date = reverseDateTime(date: dateString)
+                        engHours.append(EngHour(ehid: info["ehid"] as! Int, date: date, engHour: info["eng_hour"] as! Int))
                         engHours.sort { $0.date > $1.date }
                     }
                 }

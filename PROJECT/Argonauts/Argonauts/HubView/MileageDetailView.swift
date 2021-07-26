@@ -49,7 +49,7 @@ struct MileageDetailView: View {
             }
             if isLoading {
                 Rectangle()
-                    .fill(Color.white.opacity(0.5))
+                    .fill(Color.loadingColor.opacity(0.5))
                     .allowsHitTesting(true)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
@@ -75,8 +75,8 @@ struct MileageDetailView: View {
     }
     
     func getMileageAsync() {
-        mileages = []
         isLoading = true
+        mileages = []
         DispatchQueue.global(qos: .userInitiated).async {
             getMileage(tid: String(tid))
             DispatchQueue.main.async {
@@ -102,10 +102,10 @@ struct MileageDetailView: View {
             let mid = mileages[index].mid
             deleteMileage(mid: String(mid), tid: String(tid))
             DispatchQueue.main.async {
-                isLoading = false
                 if alertMessage == "" {
                     mileages.remove(at: index)
                 }
+                isLoading = false
             }
         }
     }
