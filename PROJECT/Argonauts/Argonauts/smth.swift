@@ -107,7 +107,6 @@ func isValidYear(year: String) -> Bool {
 
 func reverseDateTime(date: String) -> String {
     let comp = date.replacingOccurrences(of: " ", with: "-").components(separatedBy: "-")
-    print(comp)
     let revDate = comp[3] + " " + comp[2] + "." + comp[1] + "." + comp[0]
     return revDate
 }

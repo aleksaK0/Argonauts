@@ -17,6 +17,7 @@ struct StatisticsDetailView: View {
     @State var currItem: Int = 0
     @State var statistics: [Statistics] = []
     
+    
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
@@ -38,40 +39,106 @@ struct StatisticsDetailView: View {
                         currItem -= 1
                     }, label: {
                         Image(systemName: "chevron.backward")
+                            .font(.title.weight(.semibold))
+                            .frame(width: UIScreen.main.bounds.width / 8, height: UIScreen.main.bounds.height / 8, alignment: .center)
                     })
                     .disabled(statistics.isEmpty || currItem == 0)
                     TabView(selection: $currItem) {
                         ForEach(statistics, id: \.id) { statistics in
-                            Text(statistics.mo).tag(statistics.id)
+                            Text(statistics.mo)
+                                .font(.title2)
+                                .tag(statistics.id)
                         }
                     }
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                    .frame(width: UIScreen.main.bounds.width - 120, height: UIScreen.main.bounds.height / 6, alignment: .center)
+                    .frame(width: UIScreen.main.bounds.width - 120, height: UIScreen.main.bounds.height / 8, alignment: .center)
                     Button(action: {
                         currItem += 1
                     }, label: {
                         Image(systemName: "chevron.forward")
+                            .font(.title.weight(.semibold))
+                            .frame(width: UIScreen.main.bounds.width / 8, height: UIScreen.main.bounds.height / 8, alignment: .center)
                     })
                     .disabled(currItem == statistics.count - 1 || statistics.isEmpty)
                 }
                 if !statistics.isEmpty {
-                    Group {
-                        Text("Топливо")
-                        Text(String(describing: statistics[currItem].fuelCnt))
-                        Text(String(describing: statistics[currItem].fuelAvg))
-                        Text(String(describing: statistics[currItem].fuelSum))
-                        Text(String(describing: statistics[currItem].fuelMin))
-                        Text(String(describing: statistics[currItem].fuelMax))
+                    ScrollView(showsIndicators: false) {
+                        HStack {
+                            Text("Топливо")
+                                .font(.title2.weight(.bold))
+                            Spacer()
+                        }
+                        .padding([.bottom], 10)
+                        Group {
+                            HStack {
+                                Text("Кол-во заправок")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].fuelCnt))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Средняя заправка")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].fuelAvg))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Сум. заправка")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].fuelSum))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Мин. заправка")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].fuelMin))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Макс. заправка")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].fuelMax))
+                            }
+                        }
+                        HStack {
+                            Text("Пробег")
+                                .font(.title2.weight(.bold))
+                            Spacer()
+                        }
+                        .padding([.top, .bottom], 10)
+                        Group {
+                            HStack {
+                                Text("Кол-во записей")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].mileageCnt))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Средний пробег")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].mileageAvg))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Сум. пробег")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].mileageSum))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Мин. пробег")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].mileageMin))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Макс. пробег")
+                                Spacer()
+                                Text(String(describing: statistics[currItem].mileageMax))
+                            }
+                        }
                     }
-                    Group {
-                        Text("Пробег")
-                        Text(String(describing: statistics[currItem].mileageCnt))
-                        Text(String(describing: statistics[currItem].mileageAvg))
-                        Text(String(describing: statistics[currItem].mileageSum))
-                        Text(String(describing: statistics[currItem].mileageMin))
-                        Text(String(describing: statistics[currItem].mileageMax))
-                    }
-                    Text(String(describing: statistics[currItem].fmSum))
+                    .padding([.leading, .trailing])
                 } else {
                     Text("Статистика недоступна")
                 }
