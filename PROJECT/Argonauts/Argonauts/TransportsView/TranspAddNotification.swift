@@ -183,7 +183,7 @@ struct TranspAddNotification: View {
             type = "D"
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "ru")
-            formatter.dateFormat = "yyyy-MM-dd HH:mm"
+            formatter.dateFormat = "yyyy-MM-dd"
             dateString = formatter.string(from: date)
         case "Пробег":
             type = "M"

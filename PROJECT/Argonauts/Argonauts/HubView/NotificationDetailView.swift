@@ -12,11 +12,6 @@ struct NotificationDetailView: View {
     @State var tid: Int
     @State var nick: String
     
-    @State var isExpanded: Bool = false
-    @State var showFields: Bool = false
-    @State var isLoading: Bool = false
-    @State var showAlert: Bool = false
-    
     @State var alertMessage: String = ""
     @State var type: String = "Дата"
     @State var notification: String = ""
@@ -26,6 +21,11 @@ struct NotificationDetailView: View {
     @State var types: [String] = ["Дата", "Пробег", "Топливо", "Моточасы"]
     @State var notifications: [Notification] = []
     
+    @State var isExpanded: Bool = false
+    @State var showAlert: Bool = false
+    @State var isLoading: Bool = false
+    @State var showFields: Bool = false
+    
     var body: some View {
         ZStack {
             VStack {
@@ -33,7 +33,9 @@ struct NotificationDetailView: View {
                     DisclosureGroup("Критерий: \(type)", isExpanded: $isExpanded) {
                         ForEach(types, id: \.self) { el in
                             HStack {
+                                Spacer()
                                 Text(el)
+                                Spacer()
                             }
                             .contentShape(Rectangle())
                             .onTapGesture {
@@ -43,7 +45,14 @@ struct NotificationDetailView: View {
                             Divider()
                         }
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        isExpanded.toggle()
+                    }
+                    .padding([.leading, .trailing])
                     TextField("Уведомление", text: $notification)
+                        .disableAutocorrection(true)
+                        .padding([.leading, .trailing])
                     switch type {
                     case "Дата":
                         DatePicker("", selection: $date, in: Date()..., displayedComponents: [.date])
@@ -51,21 +60,27 @@ struct NotificationDetailView: View {
                             .labelsHidden()
                     case "Топливо":
                         TextField(type, text: $value1)
+                            .keyboardType(.numberPad)
+                            .padding([.leading, .trailing])
                     default:
-                        TextField(type, text: $value1)
-                        Text("Ниже можно ввести показание \"\(type)\", при достижении которого будет отправлено уведомление, о приближении")
-                            .foregroundColor(.gray)
-                        TextField(type, text: $value2)
+                        TextField(type + " (наступление)", text: $value1)
+                            .keyboardType(.numberPad)
+                            .padding([.leading, .trailing])
+                        TextField(type + " (приближение (доп))", text: $value2)
+                            .keyboardType(.numberPad)
+                            .padding([.leading, .trailing])
                     }
                     Button(action: {
+                        UIApplication.shared.endEditing()
                         addNotificationAsync()
                     }, label: {
                         Text("Добавить")
                     })
+                    .disabled(notification.isEmpty || (type != "Дата" && value1.isEmpty))
                 }
                 List {
                     ForEach(notifications, id: \.nid) { notification in
-                        Text(String(describing: notification.nid))
+                        RowNotification(notification: notification.notification, type: notification.type, date: notification.date, value1: notification.value1, value2: notification.value2)
                     }
                     .onDelete(perform: deleteMaterialAsync)
                 }
@@ -85,8 +100,10 @@ struct NotificationDetailView: View {
                                 }, label: {
                                     if showFields {
                                         Image(systemName: "minus")
+                                            .font(.title2.weight(.semibold))
                                     } else {
                                         Image(systemName: "plus")
+                                            .font(.title2.weight(.semibold))
                                     }
                             }))
         .alert(isPresented: $showAlert) {
@@ -113,6 +130,11 @@ struct NotificationDetailView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
             DispatchQueue.main.async {
+                if alertMessage == "" {
+                    notification = ""
+                    value1 = ""
+                    value2 = ""
+                }
                 isLoading = false
             }
         }
@@ -177,7 +199,7 @@ struct NotificationDetailView: View {
             type = "D"
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "ru")
-            formatter.dateFormat = "yyyy-MM-dd HH:mm"
+            formatter.dateFormat = "yyyy-MM-dd"
             dateString = formatter.string(from: date)
         case "Пробег":
             type = "M"
@@ -198,7 +220,6 @@ struct NotificationDetailView: View {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["add_notification"] as! [String : Any]
                     print("ServiceMaterialView.addNotification(): \(info)")
-                    
                     if info["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true

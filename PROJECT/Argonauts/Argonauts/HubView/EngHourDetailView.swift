@@ -12,7 +12,6 @@ struct EngHourDetailView: View {
     @State var tid: Int
     @State var nick: String
     
-    @State var ehid: Int = 0
     @State var alertMessage: String = ""
     @State var engHour: String = ""
     @State var date: Date = Date()
@@ -114,7 +113,7 @@ struct EngHourDetailView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             let index = offsets[offsets.startIndex]
-            ehid = engHours[index].ehid
+            let ehid = engHours[index].ehid
             deleteEngHour(ehid: String(ehid), tid: String(tid))
             DispatchQueue.main.async {
                 if alertMessage == "" {
@@ -150,7 +149,6 @@ struct EngHourDetailView: View {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["get_eng_hour"] as! [[String : Any]]
                     print("EngHourDetailView.getEngHour(): \(info)")
-                    
                     if info.isEmpty {
                         // empty
                     } else if info[0]["server_error"] != nil {
@@ -193,7 +191,6 @@ struct EngHourDetailView: View {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["add_eng_hour"] as! [String : Any]
                     print("EngHourDetailView.addEngHour(): \(info)")
-                    
                     if info["server_error"] != nil {
                         if info["err_code"] as! Int == 1062 {
                             alertMessage = "Запись с таким временем/пробегом уже есть"
@@ -232,7 +229,6 @@ struct EngHourDetailView: View {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["delete_eng_hour"] as! [String : Any]
                     print("EngHourDetailView.deleteEngHour(): \(info)")
-                    
                     if info["server_error"] != nil {
                         alertMessage = "Ошибка сервера"
                         showAlert = true

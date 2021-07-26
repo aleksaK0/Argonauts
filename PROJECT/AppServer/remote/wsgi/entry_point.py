@@ -487,7 +487,7 @@ def add_mileage(mydb, query_dict, response_dict):
             mid = mycursor.fetchone()[0]
             mycursor.execute("UPDATE transport SET mileage = (SELECT MAX(mileage) FROM mileage WHERE tid = %s) WHERE tid = %s" % (tid, tid))
             mydb.commit()
-            response_dict['add_mileage'] = {'row': affected_rows, 'mid': mid}
+            response_dict['add_mileage'] = {'row': affected_rows, 'mid': mid, 'mileage': int(mileage)}
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
         response_dict['add_mileage'] = {'server_error' : 1, 'err_code' : err_code, 'row' : 0}
