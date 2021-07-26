@@ -89,6 +89,22 @@ func convertDateToString(date: Date) -> String {
     return str
 }
 
+func isValidYear(year: String) -> Bool {
+    do {
+        let yearRegEx =  "^[1-9]+[0-9]+[0-9]+[0-9]$"
+        let regex = try NSRegularExpression(pattern: yearRegEx)
+        let nsString = year as NSString
+        let results = regex.matches(in: year, range: NSRange(location: 0, length: nsString.length))
+        if results.count != 1 {
+             return false
+        }
+        return true
+    } catch let error as NSError {
+        print("invalid regex: \(error.localizedDescription)")
+        return false
+    }
+}
+
 func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool, transports: inout [Transport]) {
     let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_tid_tnick&email=" + email
     let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)

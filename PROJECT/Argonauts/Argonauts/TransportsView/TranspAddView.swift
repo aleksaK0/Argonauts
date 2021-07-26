@@ -31,22 +31,31 @@ struct TranspAddView: View {
     @State var alertMessage: String = ""
     @State var isLoading: Bool = false
     
+    @State var pad: CGFloat = 5
+    
     var body: some View {
         ZStack {
             ScrollView(.vertical, showsIndicators: false) {
                 Text("Обязательное поле")
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                    .padding([.top])
                 TextField("Ник", text: $nick)
                     .padding([.leading, .trailing])
+                    .disableAutocorrection(true)
                 Text("Дополнительные поля")
+                    .font(.system(size: 17, weight: .semibold, design: .default))
                 TextField("Год выпуска", text: $producted)
+                    .keyboardType(.numberPad)
                     .padding([.leading, .trailing])
                 TextField("Текущий пробег", text: $mileage)
+                    .keyboardType(.numberPad)
                     .padding([.leading, .trailing])
                 TextField("Моточасы", text: $engHour)
+                    .keyboardType(.numberPad)
                     .padding([.leading, .trailing])
                 HStack {
-                    Text("Дата получения действующей\nдиагностической карты")
-                        .multilineTextAlignment(.center)
+                    Text("Дата диаг. карты")
+                        .font(.system(size: 17, weight: .semibold, design: .default))
                     Spacer()
                     Toggle("", isOn: $isOn4)
                         .labelsHidden()
@@ -57,8 +66,8 @@ struct TranspAddView: View {
                     .labelsHidden()
                     .disabled(!isOn4)
                 HStack {
-                    Text("Дата оформления действующего\nполиса ОСАГО")
-                        .multilineTextAlignment(.center)
+                    Text("Дата ОСАГО")
+                        .font(.system(size: 17, weight: .semibold, design: .default))
                     Spacer()
                     Toggle("", isOn: $isOn5)
                         .labelsHidden()
@@ -105,13 +114,13 @@ struct TranspAddView: View {
                 Button(action: {
                     isPresented = false
                 }, label: {
-                    Text("Отменить")
+                    Text("Отм.")
                 }),
             trailing:
                 Button(action: {
                     addTranspAsync()
                 }, label: {
-                    Text("Добавить")
+                    Text("Доб.")
                 })
                 .disabled(nick.isEmpty)
         )

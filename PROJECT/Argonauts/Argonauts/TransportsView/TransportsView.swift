@@ -29,10 +29,18 @@ struct TransportsView: View {
                         showTranspAdd = true
                     } label: {
                         Image(systemName: "plus")
+                            .font(.title.weight(.semibold))
+//                            .foregroundColor(.yellow)
+                            .foregroundColor(ColorManager.customYellow)
                     }
                     .padding(.trailing)
                 }
-                Text("Транспортные средства")
+                HStack {
+                    Text("Транспорт")
+                        .font(.title.weight(.bold))
+                        .padding([.leading])
+                    Spacer()
+                }
                 NavigationLink(destination: TranspDetailView(tid: tid, nick: nick).environmentObject(globalObj), isActive: $showTranspDetail, label: { EmptyView() })
                 List(transports) { transport in
                     Button(action: {

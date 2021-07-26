@@ -43,6 +43,7 @@ struct TranspDetailView: View {
                         discardFuelAsync()
                     }, label: {
                         Text("Сбросить топливо")
+                            .font(.system(size: 17, weight: .regular, design: .default))
                     })
                     .padding([.top])
                     Button(action: {
@@ -50,6 +51,7 @@ struct TranspDetailView: View {
                         showAlert = true
                     }, label: {
                         Text("Удалить")
+                            .font(.system(size: 17, weight: .regular, design: .default))
                             .foregroundColor(.red)
                     })
                     .padding([.top])
@@ -202,11 +204,7 @@ struct TranspDetailView: View {
                         }
                         if info[0]["total_fuel"] is NSNull == false {
                             let totalFuel = info[0]["total_fuel"] as! Double
-                            if floor(totalFuel) == totalFuel {
-                                values[6] = String(describing: Int(totalFuel))
-                            } else {
-                                values[6] = String(describing: totalFuel)
-                            }
+                            values[6] = String(format: "%.2f", totalFuel)
                         }
                         if info[0]["fuel_date"] is NSNull == false {
                             let fuelDate = info[0]["fuel_date"] as! String

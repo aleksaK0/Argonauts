@@ -44,6 +44,7 @@ struct TranspDetailEditView: View {
                         .padding([.leading], pad)
                     TextField(keys[0], text: $nick)
                         .multilineTextAlignment(.trailing)
+                        .disableAutocorrection(true)
                         .padding([.trailing], pad)
                 }
                 Divider()
@@ -124,27 +125,11 @@ struct TranspDetailEditView: View {
         }
     }
     
-    func isValidYear(year: String) -> Bool {
-        do {
-            let yearRegEx =  "^[1-9]+[0-9]+[0-9]+[0-9]$"
-            let regex = try NSRegularExpression(pattern: yearRegEx)
-            let nsString = year as NSString
-            let results = regex.matches(in: year, range: NSRange(location: 0, length: nsString.length))
-            if results.count != 1 {
-                 return false
-            }
-            return true
-        } catch let error as NSError {
-            print("invalid regex: \(error.localizedDescription)")
-            return false
-        }
-    }
-    
     func updateTranspInfoAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             let isValidYear = isValidYear(year: producted)
-            if isValidYear {
+            if isValidYear || producted == "" {
                 if diagDateChanged {
                     diagDateStr = convertDateToString(date: diagDate)
                 }

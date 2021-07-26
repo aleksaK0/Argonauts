@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5503D66626A016260092DE9F /* ServiceMaterialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5503D66526A016260092DE9F /* ServiceMaterialView.swift */; };
 		5510064126A5CA4C0046C1FB /* TranspAddNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */; };
+		55225CCA26AED40F00E091A8 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55225CC926AED40F00E091A8 /* ColorManager.swift */; };
 		5523E21B2665525800DAC79A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21A2665525800DAC79A /* AppDelegate.swift */; };
 		5523E21D2665525800DAC79A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21C2665525800DAC79A /* SceneDelegate.swift */; };
 		5523E2222665525800DAC79A /* Argonauts.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5523E2202665525800DAC79A /* Argonauts.xcdatamodeld */; };
@@ -53,6 +54,7 @@
 /* Begin PBXFileReference section */
 		5503D66526A016260092DE9F /* ServiceMaterialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMaterialView.swift; sourceTree = "<group>"; };
 		5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranspAddNotification.swift; sourceTree = "<group>"; };
+		55225CC926AED40F00E091A8 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		5523E2172665525800DAC79A /* Argonauts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Argonauts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5523E21A2665525800DAC79A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5523E21C2665525800DAC79A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				55E56D7126836EC000DDD801 /* smth.swift */,
 				55C6F52626A85AD40012A827 /* RowModel */,
 				5523E2252665525900DAC79A /* Preview Content */,
+				55225CC926AED40F00E091A8 /* ColorManager.swift */,
 			);
 			path = Argonauts;
 			sourceTree = "<group>";
@@ -339,6 +342,7 @@
 				55AD2F1026AC117000D6D44F /* StatisticsDetailView.swift in Sources */,
 				55B8136726821B47005BB9D7 /* EnterPassCodeView.swift in Sources */,
 				5510064126A5CA4C0046C1FB /* TranspAddNotification.swift in Sources */,
+				55225CCA26AED40F00E091A8 /* ColorManager.swift in Sources */,
 				55C6F52326A839980012A827 /* AddTranspNotView.swift in Sources */,
 				552476AA269D6EEC00E64DF7 /* FuelDetailView.swift in Sources */,
 				55E56D7226836EC000DDD801 /* smth.swift in Sources */,

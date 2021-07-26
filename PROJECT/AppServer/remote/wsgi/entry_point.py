@@ -203,6 +203,8 @@ def update_transp_info(mydb, query_dict, response_dict):
         if 'producted' in query_dict:
             mycursor.execute("UPDATE transport SET producted = %s WHERE tid = %d" % (query_dict['producted'][0], tid))
             resp['producted'] = query_dict['producted'][0]
+        else:
+            mycursor.execute("UPDATE transport SET producted = NULL")
         if 'diag_date' in query_dict:
             mycursor.execute("UPDATE transport SET diag_date = '%s' WHERE tid = %d" % (query_dict['diag_date'][0], tid))
             mycursor.execute("DELETE FROM notification WHERE mode = 1 AND tid = %s" % (tid))
