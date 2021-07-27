@@ -141,6 +141,7 @@ struct StatisticsDetailView: View {
                     .padding([.leading, .trailing])
                 } else {
                     Text("Статистика недоступна")
+                        .foregroundColor(Color(UIColor.systemGray))
                 }
                 Spacer()
             }

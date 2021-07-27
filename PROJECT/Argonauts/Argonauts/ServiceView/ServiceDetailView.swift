@@ -45,37 +45,50 @@ struct ServiceDetailView: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .labelsHidden()
+                    .padding([.leading, .trailing])
                     TextField("Пробег", text: $mileage)
                         .keyboardType(.numberPad)
-                    TextField("Стоимость материалов", text: $matCost)
+                        .padding([.leading, .trailing])
+                    TextField("Стоимость материалов (доп)", text: $matCost)
                         .keyboardType(.decimalPad)
-                    TextField("Стоимость работ", text: $wrkCost)
+                        .padding([.leading, .trailing])
+                    TextField("Стоимость работ (доп)", text: $wrkCost)
                         .keyboardType(.decimalPad)
+                        .padding([.leading, .trailing])
                     Button {
                         addServiceAsync()
                     } label: {
                         Text("Добавить")
                     }
+                    .padding([.top])
+                    .disabled(mileage.isEmpty)
                 }
-                List {
-                    ForEach(services, id: \.sid) { service in
-                        Button(action: {
-                            sid = service.sid
-                            dateServ = service.date
-                            serTypeServ = service.serType
-                            mileageServ = service.mileage
-                            matCostServ = service.matCost
-                            wrkCostServ = service.wrkCost
-                            showServiceMaterial = true
-                        }, label: {
-                            HStack {
-                                Text(service.date)
-                                Spacer()
-                                Text(String(describing: service.mileage))
-                            }
-                        })
+                if services.isEmpty {
+                    Text("Здесь будет список записей о сервисных работах")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(services, id: \.sid) { service in
+                            Button(action: {
+                                sid = service.sid
+                                dateServ = service.date
+                                serTypeServ = service.serType
+                                mileageServ = service.mileage
+                                matCostServ = service.matCost
+                                wrkCostServ = service.wrkCost
+                                showServiceMaterial = true
+                            }, label: {
+                                HStack {
+                                    Text(service.date)
+                                    Spacer()
+                                    Text(String(describing: service.mileage))
+                                }
+                            })
+                        }
+                        .onDelete(perform: deleteServiceAsync)
                     }
-                    .onDelete(perform: deleteServiceAsync)
                 }
             }
             if isLoading {
@@ -93,8 +106,10 @@ struct ServiceDetailView: View {
                                 }, label: {
                                     if showFields {
                                         Image(systemName: "minus")
+                                            .font(.title2.weight(.semibold))
                                     } else {
                                         Image(systemName: "plus")
+                                            .font(.title2.weight(.semibold))
                                     }
                                 }))
         .alert(isPresented: $showAlert) {
@@ -103,13 +118,6 @@ struct ServiceDetailView: View {
         .onAppear {
             getServiceAsync()
         }
-    }
-    
-    func convert(obj: Any?) -> String {
-        guard let obj = obj else {
-            return ""
-        }
-        return String(describing: obj)
     }
     
     func getServiceAsync() {

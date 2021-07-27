@@ -40,15 +40,22 @@ struct MileageDetailView: View {
                     .disabled(mileage.isEmpty)
                     .padding([.top])
                 }
-                List {
-                    ForEach(mileages, id: \.mid) { mileage in
-                        HStack {
-                            Text(mileage.date)
-                            Spacer()
-                            Text("\(mileage.mileage)")
+                if mileages.isEmpty {
+                    Text("Здесь будет список записей о пробеге")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(mileages, id: \.mid) { mileage in
+                            HStack {
+                                Text(mileage.date)
+                                Spacer()
+                                Text("\(mileage.mileage)")
+                            }
                         }
+                        .onDelete(perform: deleteMileageAsync)
                     }
-                    .onDelete(perform: deleteMileageAsync)
                 }
             }
             if isLoading {

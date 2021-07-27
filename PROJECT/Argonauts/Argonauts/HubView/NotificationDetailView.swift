@@ -78,11 +78,18 @@ struct NotificationDetailView: View {
                     })
                     .disabled(notification.isEmpty || (type != "Дата" && value1.isEmpty))
                 }
-                List {
-                    ForEach(notifications, id: \.nid) { notification in
-                        RowNotification(notification: notification.notification, type: notification.type, date: notification.date, value1: notification.value1, value2: notification.value2)
+                if notifications.isEmpty {
+                    Text("Здесь будет список уведомлений, созданных для данного транспорта")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(notifications, id: \.nid) { notification in
+                            RowNotification(notification: notification.notification, type: notification.type, date: notification.date, value1: notification.value1, value2: notification.value2)
+                        }
+                        .onDelete(perform: deleteMaterialAsync)
                     }
-                    .onDelete(perform: deleteMaterialAsync)
                 }
             }
             if isLoading {
@@ -114,6 +121,43 @@ struct NotificationDetailView: View {
         }
     }
     
+    func isValidValue(value: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = value as NSString
+            let results = regex.matches(in: value, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func canAdd(type: String) -> Bool {
+        if type == "Дата" {
+            return true
+        } else if type == "Моточасы" || type == "Пробег" {
+            if isValidValue(value: value1) {
+                if value2.isEmpty == false {
+                    if isValidValue(value: value2) && Int(value1)! > Int(value2)! {
+                        return true
+                    }
+                } else {
+                    return true
+                }
+            }
+        } else if type == "Топливо" {
+            if isValidValue(value: value1) {
+                return true
+            }
+        }
+        return false
+    }
+    
     func getNotificationAsync() {
         isLoading = true
         notifications = []
@@ -128,7 +172,12 @@ struct NotificationDetailView: View {
     func addNotificationAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
+            if canAdd(type: type) {
+                addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
+            }
             DispatchQueue.main.async {
                 if alertMessage == "" {
                     notification = ""

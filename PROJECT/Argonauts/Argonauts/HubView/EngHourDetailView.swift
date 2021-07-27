@@ -40,15 +40,22 @@ struct EngHourDetailView: View {
                     .disabled(engHour.isEmpty)
                     .padding([.top])
                 }
-                List {
-                    ForEach(engHours, id: \.ehid) { engHour in
-                        HStack {
-                            Text(engHour.date)
-                            Spacer()
-                            Text("\(engHour.engHour)")
+                if engHours.isEmpty {
+                    Text("Здесь будет список записей о моточасах")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(engHours, id: \.ehid) { engHour in
+                            HStack {
+                                Text(engHour.date)
+                                Spacer()
+                                Text("\(engHour.engHour)")
+                            }
                         }
+                        .onDelete(perform: deleteEngHourAsync)
                     }
-                    .onDelete(perform: deleteEngHourAsync)
                 }
             }
             if isLoading {
