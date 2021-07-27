@@ -22,6 +22,9 @@ struct ServiceMaterialView: View {
     @State var matCost: String = ""
     @State var wrkCost: String = ""
     @State var wrkTypes: [String] = ["Замена", "Ремонт", "Окраска", "Снятие/установка", "Регулировка"]
+    @State var serviceKeys: [String] = ["Дата", "Тип работ", "Пробег", "Цена деталей", "Цена работ"]
+    @State var serviceInfo: [String] = ["", "", "", "", ""]
+    @State var service: Service = Service(sid: 0, date: "", serType: "", mileage: 0, matCost: nil, wrkCost: nil)
     @State var materials: [Material] = []
     
     @State var showAlert: Bool = false
@@ -29,24 +32,46 @@ struct ServiceMaterialView: View {
     @State var showFields: Bool = false
     @State var isExpanded: Bool = false
     
+    @State var pad: CGFloat = 5
+    
     var body: some View {
         ZStack {
             VStack {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Дата")
-                        Text("Тип работ")
-                        Text("Пробег")
-                        Text("Стоимость деталей")
-                        Text("Стоимость работ")
+                Group {
+                    HStack {
+                        Text(serviceKeys[0])
+                            .fontWeight(.semibold)
+                            .padding([.top], 10)
+                        Spacer()
+                        Text(String(describing: service.date))
                     }
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text(String(describing: dateServ))
-                        Text(String(describing: serTypeServ))
-                        Text(String(describing: mileageServ))
-                        Text(String(describing: matCostServ))
-                        Text(String(describing: wrkCostServ))
+                    Divider()
+                    HStack {
+                        Text(serviceKeys[1])
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text(String(describing: service.serType))
+                    }
+                    Divider()
+                    HStack {
+                        Text(serviceKeys[2])
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text(String(describing: service.mileage))
+                    }
+                    Divider()
+                    HStack {
+                        Text(serviceKeys[3])
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text(String(describing: service.matCost))
+                    }
+                    Divider()
+                    HStack {
+                        Text(serviceKeys[4])
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text(String(describing: service.wrkCost))
                     }
                 }
                 if showFields {
@@ -71,6 +96,7 @@ struct ServiceMaterialView: View {
                     TextField("Стоимость работы", text: $wrkCost)
                         .keyboardType(.decimalPad)
                     Button {
+                        UIApplication.shared.endEditing()
                         addMaterialAsync()
                     } label: {
                         Text("Добавить")
@@ -106,7 +132,19 @@ struct ServiceMaterialView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
+            getServiceInfoAsync()
             loadDataAsync()
+        }
+    }
+    
+    func getServiceInfoAsync() {
+        isLoading = true
+//        serviceInfo = ["", "", "", "", ""]
+        DispatchQueue.global(qos: .userInitiated).async {
+            getServiceInfo(sid: String(sid))
+            DispatchQueue.main.async {
+                isLoading = false
+            }
         }
     }
     
@@ -143,6 +181,44 @@ struct ServiceMaterialView: View {
                 }
                 isLoading = false
             }
+        }
+    }
+    
+    func getServiceInfo(sid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_service_info&sid=" + sid
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["get_service_info"] as! [[String : Any]]
+                    print("ServiceDetailView.getService(): \(info)")
+                    if info.isEmpty {
+                        // empty
+                    } else if info[0]["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
+                    } else {
+                        alertMessage = ""
+                        for el in info {
+                            var date = el["date"] as! String
+                            date = date.replacingOccurrences(of: "T", with: " ")
+                            date.removeLast(3)
+                            
+                            date = reverseDateTime(date: date)
+                            
+                            service = Service(sid: el["sid"] as! Int, date: date, serType: el["ser_type"] as! String, mileage: el["mileage"] as! Int, matCost: el["mat_cost"] as? Double, wrkCost: el["wrk_cost"] as? Double)
+                        }
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
         }
     }
     

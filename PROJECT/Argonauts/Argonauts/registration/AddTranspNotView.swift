@@ -57,6 +57,7 @@ struct AddTranspNotView: View {
                     TextField(type, text: $value2)
                 }
                 Button(action: {
+                    UIApplication.shared.endEditing()
                     addNotificationAsync()
                 }, label: {
                     Text("Добавить")

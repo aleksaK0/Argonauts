@@ -780,6 +780,30 @@ def delete_service(mydb, query_dict, response_dict):
 
     return response_dict
 
+def get_service_info(mydb, query_dict, response_dict):
+    try:
+        sid = query_dict['sid'][0]
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute("SELECT s.*, m.mileage "
+                         "FROM service AS s "
+                         "LEFT JOIN mileage AS m "
+                         "ON s.date = m.date AND s.tid = m.tid "
+                         "WHERE sid = %s" % (sid))
+
+        columns = [desc[0] for desc in mycursor.description]
+
+        response_dict['get_service_info'] = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['get_service_info'] = [{'server_error': 1, 'err_code': err_code}]
+    finally:
+        mydb.close()
+
+    return response_dict
+
 def get_material(mydb, query_dict, response_dict):
     try:
         sid = query_dict['sid'][0]
@@ -1152,6 +1176,8 @@ def application(environ, start_response):
         add_service(argodb, query_dict, response_dict)
     elif request_mission == 'delete_service':
         delete_service(argodb, query_dict, response_dict)
+    elif request_mission == 'get_service_info':
+        get_service_info(argodb, query_dict, response_dict)
     # material
     elif request_mission == 'get_material':
         get_material(argodb, query_dict, response_dict)

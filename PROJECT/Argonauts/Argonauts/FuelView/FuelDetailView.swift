@@ -42,6 +42,7 @@ struct FuelDetailView: View {
                     TextField("Стоимость 1 литра", text: $fuelCost)
                         .keyboardType(.decimalPad)
                     Button {
+                        UIApplication.shared.endEditing()
                         addFuelAsync()
                     } label: {
                         Text("Добавить")

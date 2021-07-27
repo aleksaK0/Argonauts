@@ -56,6 +56,7 @@ struct ServiceDetailView: View {
                         .keyboardType(.decimalPad)
                         .padding([.leading, .trailing])
                     Button {
+                        UIApplication.shared.endEditing()
                         addServiceAsync()
                     } label: {
                         Text("Добавить")
@@ -120,6 +121,60 @@ struct ServiceDetailView: View {
         }
     }
     
+    func isValidMileage(mileage: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = mileage as NSString
+            let results = regex.matches(in: mileage, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func isValid(value: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}+[',']{0,1}+[0-9]{0,2}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = value as NSString
+            let results = regex.matches(in: value, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+        
+    }
+    
+    func canAdd() -> Bool {
+        if isValidMileage(mileage: mileage) {
+            if matCost.isEmpty == true && wrkCost.isEmpty == true {
+                return true
+            } else if matCost.isEmpty == false && wrkCost.isEmpty == true {
+                if isValid(value: matCost) {
+                    return true
+                }
+            } else if matCost.isEmpty == true && wrkCost.isEmpty == false {
+                if isValid(value: wrkCost) {
+                    return true
+                }
+            } else if matCost.isEmpty == false && wrkCost.isEmpty == false {
+                if isValid(value: matCost) && isValid(value: wrkCost) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
     func getServiceAsync() {
         isLoading = true
         services = []
@@ -134,8 +189,18 @@ struct ServiceDetailView: View {
     func addServiceAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addService(tid: String(tid), date: date, serType: serType, mileage: mileage, matCost: matCost, wrkCost: wrkCost)
+            if canAdd() {
+                addService(tid: String(tid), date: date, serType: serType, mileage: mileage, matCost: matCost.replacingOccurrences(of: ",", with: "."), wrkCost: wrkCost.replacingOccurrences(of: ",", with: "."))
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
+            }
             DispatchQueue.main.async {
+                if alertMessage == "" {
+                    mileage = ""
+                    matCost = ""
+                    wrkCost = ""
+                }
                 isLoading = false
             }
         }
