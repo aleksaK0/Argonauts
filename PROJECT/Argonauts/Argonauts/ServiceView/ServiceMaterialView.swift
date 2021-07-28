@@ -10,11 +10,6 @@ import SwiftUI
 struct ServiceMaterialView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @State var sid: Int
-    @State var dateServ: String
-    @State var serTypeServ: String
-    @State var mileageServ: Int
-    @State var matCostServ: Double?
-    @State var wrkCostServ: Double?
     
     @State var alertMessage: String = ""
     @State var matInfo: String = ""
@@ -37,43 +32,6 @@ struct ServiceMaterialView: View {
     var body: some View {
         ZStack {
             VStack {
-                Group {
-                    HStack {
-                        Text(serviceKeys[0])
-                            .fontWeight(.semibold)
-                            .padding([.top], 10)
-                        Spacer()
-                        Text(String(describing: service.date))
-                    }
-                    Divider()
-                    HStack {
-                        Text(serviceKeys[1])
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Text(String(describing: service.serType))
-                    }
-                    Divider()
-                    HStack {
-                        Text(serviceKeys[2])
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Text(String(describing: service.mileage))
-                    }
-                    Divider()
-                    HStack {
-                        Text(serviceKeys[3])
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Text(String(describing: service.matCost))
-                    }
-                    Divider()
-                    HStack {
-                        Text(serviceKeys[4])
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Text(String(describing: service.wrkCost))
-                    }
-                }
                 if showFields {
                     DisclosureGroup("Тип работы: \(wrkType)", isExpanded: $isExpanded) {
                         ForEach(wrkTypes, id: \.self) { el in
@@ -104,7 +62,7 @@ struct ServiceMaterialView: View {
                 }
                 List {
                     ForEach(materials, id: \.maid) { material in
-                        RowMaterial(matInfo: material.matInfo, wrkType: material.wrkType, matCost: material.matCost, wrkCost: material.wrkCost)
+                        RowMaterial(material: material)
                     }
                     .onDelete(perform: deleteMaterialAsync)
                 }

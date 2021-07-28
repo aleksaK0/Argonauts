@@ -86,7 +86,7 @@ struct NotificationDetailView: View {
                 } else {
                     List {
                         ForEach(notifications, id: \.nid) { notification in
-                            RowNotification(notification: notification.notification, type: notification.type, date: notification.date, value1: notification.value1, value2: notification.value2)
+                            RowNotification(notification: notification)
                         }
                         .onDelete(perform: deleteMaterialAsync)
                     }

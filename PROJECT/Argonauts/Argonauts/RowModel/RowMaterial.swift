@@ -8,37 +8,31 @@
 import SwiftUI
 
 struct RowMaterial: View {
-    @State var matInfo: String
-    @State var wrkType: String
-    @State var matCost: Double?
-    @State var wrkCost: Double?
-    //    @State var matInfo: String = "Wrench"
-    //    @State var wrkType: String = "Change"
-    //    @State var matCost: Double? = 123.123
-    //    @State var wrkCost: Double? = 123123.123
+    @State var material: Material
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(matInfo)
-            Text(wrkType)
-            if convert(obj: matCost) != "" {
-                Text("Стоимость детали: \(convert(obj: matCost))")
+            Text(material.matInfo)
+                .padding([.bottom], 5)
+            HStack {
+                Text("Тип работы:")
+                    .fontWeight(.semibold)
+                Text(material.wrkType)
             }
-            if convert(obj: wrkCost) != "" {                
-                Text("Стоимость работы: \(convert(obj: wrkCost))")
+            if let matCost = material.matCost {
+                HStack {
+                    Text("Стоимость детали:")
+                        .fontWeight(.semibold)
+                    Text(String(format: "%.2f", matCost))
+                }
+            }
+            if let wrkCost = material.wrkCost {
+                HStack {
+                    Text("Стоимость детали:")
+                        .fontWeight(.semibold)
+                    Text(String(format: "%.2f", wrkCost))
+                }
             }
         }
-    }
-    
-    func convert(obj: Double?) -> String{
-        guard let obj = obj else {
-            return ""
-        }
-        
-        if floor(obj) == obj {
-            return String(Int(obj))
-        }
-        
-        return String(describing: obj)
     }
 }

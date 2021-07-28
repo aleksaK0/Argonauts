@@ -33,7 +33,7 @@ struct ServiceDetailView: View {
     
     var body: some View {
         ZStack {
-            NavigationLink(destination: ServiceMaterialView(sid: sid, dateServ: dateServ, serTypeServ: serType, mileageServ: mileageServ, matCostServ: matCostServ, wrkCostServ: wrkCostServ).environmentObject(globalObj), isActive: $showServiceMaterial, label: { EmptyView() })
+            NavigationLink(destination: ServiceMaterialView(sid: sid).environmentObject(globalObj), isActive: $showServiceMaterial, label: { EmptyView() })
             VStack {
                 if showFields {
                     DatePicker("", selection: $date, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
@@ -81,11 +81,7 @@ struct ServiceDetailView: View {
                                 wrkCostServ = service.wrkCost
                                 showServiceMaterial = true
                             }, label: {
-                                HStack {
-                                    Text(service.date)
-                                    Spacer()
-                                    Text(String(describing: service.mileage))
-                                }
+                                RowService(service: service)
                             })
                         }
                         .onDelete(perform: deleteServiceAsync)

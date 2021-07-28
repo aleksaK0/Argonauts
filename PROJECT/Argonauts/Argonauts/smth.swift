@@ -111,6 +111,12 @@ func reverseDateTime(date: String) -> String {
     return revDate
 }
 
+func reverseDate(date: String) -> String {
+    let comp = date.components(separatedBy: "-")
+    let revDate = comp[2] + "." + comp[1] + "." + comp[0]
+    return revDate
+}
+
 func getTidTnick(email: String, alertMessage: inout String, showAlert: inout Bool, transports: inout [Transport]) {
     let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_tid_tnick&email=" + email
     let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)

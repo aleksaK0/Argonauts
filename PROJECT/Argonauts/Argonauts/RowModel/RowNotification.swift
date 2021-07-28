@@ -8,35 +8,25 @@
 import SwiftUI
 
 struct RowNotification: View {
-    @State var notification: String
-    @State var type: String
-    @State var date: String?
-    @State var value1: Int?
-    @State var value2: Int?
-    
-//    @State var notification: String = "Замена масла"
-//    @State var type: String = "Дата"
-//    @State var date: Date = Date()
-//    @State var value1: String = ""
-//    @State var value2: String = ""
+    @State var notification: Notification
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(notification)
-                .fontWeight(.semibold)
+            Text(notification.notification)
+                .padding([.bottom], 5)
             HStack {
                 Text("Критерий:")
                     .fontWeight(.semibold)
-                Text(getType(type: type))
+                Text(getType(type: notification.type))
             }
-            if type == "D" {
+            if notification.type == "D" {
                 HStack {
                     Text("Дата:")
                         .fontWeight(.semibold)
-                    Text(reverseDate(date: String(describing: date!)))
+                    Text(reverseDate(date: notification.date!))
                 }
             } else {
-                if let value2 = value2 {
+                if let value2 = notification.value2 {
                     HStack {
                         Text("Приближение:")
                             .fontWeight(.semibold)
@@ -45,23 +35,17 @@ struct RowNotification: View {
                     HStack {
                         Text("Наступление:")
                             .fontWeight(.semibold)
-                        Text(String(describing: value1!))
+                        Text(String(describing: notification.value1!))
                     }
                 } else {
                     HStack {
                         Text("Наступление:")
                             .fontWeight(.semibold)
-                        Text(String(describing: value1!))
+                        Text(String(describing: notification.value1!))
                     }
                 }
             }
         }
-    }
-    
-    func reverseDate(date: String) -> String {
-        let comp = date.components(separatedBy: "-")
-        let revDate = comp[2] + "." + comp[1] + "." + comp[0]
-        return revDate
     }
     
     func getType(type: String) -> String {
@@ -79,9 +63,3 @@ struct RowNotification: View {
         }
     }
 }
-
-//struct RowNotification_Previews: PreviewProvider {
-//    static var previews: some View {
-//        RowNotification()
-//    }
-//}
