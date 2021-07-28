@@ -33,7 +33,7 @@ struct AddTranspView: View {
     
     var body: some View {
         ZStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 Text("Транспортное средство")
                 Text("Обязательное поле")
                 TextField("Ник транспортного средства", text: $nick)

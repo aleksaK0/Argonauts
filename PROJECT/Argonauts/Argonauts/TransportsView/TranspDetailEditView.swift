@@ -32,8 +32,6 @@ struct TranspDetailEditView: View {
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     
-    @State var pad: CGFloat = 10
-    
     var body: some View {
         ZStack {
             ScrollView(showsIndicators: false) {
@@ -41,31 +39,31 @@ struct TranspDetailEditView: View {
                 HStack {
                     Text(keys[0])
                         .fontWeight(.semibold)
-                        .padding([.leading], pad)
+                        .padding([.leading])
                     TextField(keys[0], text: $nick)
                         .multilineTextAlignment(.trailing)
                         .disableAutocorrection(true)
-                        .padding([.trailing], pad)
+                        .padding([.trailing])
                 }
                 Divider()
                 HStack {
                     Text(keys[1])
                         .fontWeight(.semibold)
-                        .padding([.leading], pad)
+                        .padding([.leading])
                     TextField(keys[1], text: $producted)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
-                        .padding([.trailing], pad)
+                        .padding([.trailing])
                 }
                 Divider()
                 HStack {
                     Text(keys[4])
                         .fontWeight(.semibold)
-                        .padding([.leading], pad)
+                        .padding([.leading])
                     Spacer()
                     Toggle("", isOn: $diagDateChanged)
                         .labelsHidden()
-                        .padding([.trailing], pad)
+                        .padding([.trailing])
                         .disabled(diagDateChangedWas)
                 }
                 DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
@@ -76,11 +74,11 @@ struct TranspDetailEditView: View {
                 HStack {
                     Text(keys[5])
                         .fontWeight(.semibold)
-                        .padding([.leading], pad)
+                        .padding([.leading])
                     Spacer()
                     Toggle("", isOn: $osagoDateChanged)
                         .labelsHidden()
-                        .padding([.trailing], pad)
+                        .padding([.trailing])
                         .disabled(osagoDateChangedWas)
                 }
                 DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)

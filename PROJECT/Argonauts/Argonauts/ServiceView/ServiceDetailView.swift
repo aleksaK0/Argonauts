@@ -25,18 +25,21 @@ struct ServiceDetailView: View {
     @State var matCostServ: Double? = nil
     @State var wrkCostServ: Double? = nil
     @State var services: [Service] = []
+    @State var now: Date = Date()
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     @State var showFields: Bool = false
     @State var showServiceMaterial: Bool = false
     
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
     var body: some View {
         ZStack {
             NavigationLink(destination: ServiceMaterialView(sid: sid).environmentObject(globalObj), isActive: $showServiceMaterial, label: { EmptyView() })
             VStack {
                 if showFields {
-                    DatePicker("", selection: $date, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("", selection: $date, in: ...now, displayedComponents: [.date, .hourAndMinute])
                         .datePickerStyle(WheelDatePickerStyle())
                         .labelsHidden()
                     Picker("", selection: $serType) {
@@ -99,6 +102,9 @@ struct ServiceDetailView: View {
         .navigationBarTitle(nick, displayMode: .inline)
         .navigationBarItems(trailing:
                                 Button(action: {
+                                    mileage = ""
+                                    matCost = ""
+                                    wrkCost = ""
                                     showFields.toggle()
                                 }, label: {
                                     if showFields {
@@ -124,7 +130,7 @@ struct ServiceDetailView: View {
             let nsString = mileage as NSString
             let results = regex.matches(in: mileage, range: NSRange(location: 0, length: nsString.length))
             if results.count != 1 {
-                 return false
+                return false
             }
             return true
         } catch let error as NSError {
@@ -140,7 +146,7 @@ struct ServiceDetailView: View {
             let nsString = value as NSString
             let results = regex.matches(in: value, range: NSRange(location: 0, length: nsString.length))
             if results.count != 1 {
-                 return false
+                return false
             }
             return true
         } catch let error as NSError {

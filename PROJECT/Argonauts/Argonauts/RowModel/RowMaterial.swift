@@ -23,14 +23,14 @@ struct RowMaterial: View {
                 HStack {
                     Text("Стоимость детали:")
                         .fontWeight(.semibold)
-                    Text(String(format: "%.2f", matCost))
+                    Text(String(format: "%.2f", matCost).replacingOccurrences(of: ".", with: ","))
                 }
             }
             if let wrkCost = material.wrkCost {
                 HStack {
                     Text("Стоимость детали:")
                         .fontWeight(.semibold)
-                    Text(String(format: "%.2f", wrkCost))
+                    Text(String(format: "%.2f", wrkCost).replacingOccurrences(of: ".", with: ","))
                 }
             }
         }

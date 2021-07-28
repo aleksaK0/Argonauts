@@ -27,8 +27,6 @@ struct ServiceMaterialView: View {
     @State var showFields: Bool = false
     @State var isExpanded: Bool = false
     
-    @State var pad: CGFloat = 5
-    
     var body: some View {
         ZStack {
             VStack {
@@ -48,23 +46,40 @@ struct ServiceMaterialView: View {
                             Divider()
                         }
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        isExpanded.toggle()
+                    }
+                    .padding([.leading, .trailing])
                     TextField("Код/наименование детали", text: $matInfo)
-                    TextField("Стоимость детали", text: $matCost)
+                        .disableAutocorrection(true)
+                        .padding([.leading, .trailing])
+                    TextField("Стоимость детали (доп)", text: $matCost)
                         .keyboardType(.decimalPad)
-                    TextField("Стоимость работы", text: $wrkCost)
+                        .padding([.leading, .trailing])
+                    TextField("Стоимость работы (доп)", text: $wrkCost)
                         .keyboardType(.decimalPad)
+                        .padding([.leading, .trailing])
                     Button {
                         UIApplication.shared.endEditing()
                         addMaterialAsync()
                     } label: {
                         Text("Добавить")
                     }
+                    .disabled(matInfo.isEmpty)
                 }
-                List {
-                    ForEach(materials, id: \.maid) { material in
-                        RowMaterial(material: material)
+                if materials.isEmpty {
+                    Text("Здесь будет список записей о материалах")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(materials, id: \.maid) { material in
+                            RowMaterial(material: material)
+                        }
+                        .onDelete(perform: deleteMaterialAsync)
                     }
-                    .onDelete(perform: deleteMaterialAsync)
                 }
             }
             if isLoading {
@@ -78,35 +93,61 @@ struct ServiceMaterialView: View {
         .navigationBarTitle("Детали", displayMode: .inline)
         .navigationBarItems(trailing:
                                 Button(action: {
+                                    matInfo = ""
+                                    matCost = ""
+                                    wrkCost = ""
                                     showFields.toggle()
                                 }, label: {
                                     if showFields {
                                         Image(systemName: "minus")
+                                            .font(.title2.weight(.semibold))
                                     } else {
                                         Image(systemName: "plus")
+                                            .font(.title2.weight(.semibold))
                                     }
                                 }))
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            getServiceInfoAsync()
-            loadDataAsync()
+            getMaterialAsync()
         }
     }
     
-    func getServiceInfoAsync() {
-        isLoading = true
-//        serviceInfo = ["", "", "", "", ""]
-        DispatchQueue.global(qos: .userInitiated).async {
-            getServiceInfo(sid: String(sid))
-            DispatchQueue.main.async {
-                isLoading = false
+    func isValid(value: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}+[',']{0,1}+[0-9]{0,2}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = value as NSString
+            let results = regex.matches(in: value, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func canAdd() -> Bool {
+        if matCost.isEmpty == false && wrkCost.isEmpty == true {
+            if isValid(value: matCost) {
+                return true
+            }
+        } else if matCost.isEmpty == true && wrkCost.isEmpty == false {
+            if isValid(value: wrkCost) {
+                return true
+            }
+        } else if matCost.isEmpty == false && wrkCost.isEmpty == false {
+            if isValid(value: matCost) && isValid(value: wrkCost) {
+                return true
             }
         }
+        return false
     }
     
-    func loadDataAsync() {
+    func getMaterialAsync() {
         isLoading = true
         materials = []
         DispatchQueue.global(qos: .userInitiated).async {
@@ -120,8 +161,15 @@ struct ServiceMaterialView: View {
     func addMaterialAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addMaterial(sid: String(sid), matInfo: matInfo, wrkType: wrkType, matCost: matCost, wrkCost: wrkCost)
+            if canAdd() {
+                addMaterial(sid: String(sid), matInfo: matInfo, wrkType: wrkType, matCost: matCost.replacingOccurrences(of: ",", with: "."), wrkCost: wrkCost.replacingOccurrences(of: ",", with: "."))
+            }
             DispatchQueue.main.async {
+                if alertMessage == "" {
+                    matInfo = ""
+                    matCost = ""
+                    wrkCost = ""
+                }
                 isLoading = false
             }
         }
@@ -139,44 +187,6 @@ struct ServiceMaterialView: View {
                 }
                 isLoading = false
             }
-        }
-    }
-    
-    func getServiceInfo(sid: String) {
-        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=get_service_info&sid=" + sid
-        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-        let url = URL(string: encodedUrl!)
-        if let data = try? Data(contentsOf: url!) {
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    let info = json["get_service_info"] as! [[String : Any]]
-                    print("ServiceDetailView.getService(): \(info)")
-                    if info.isEmpty {
-                        // empty
-                    } else if info[0]["server_error"] != nil {
-                        alertMessage = "Ошибка сервера"
-                        showAlert = true
-                    } else {
-                        alertMessage = ""
-                        for el in info {
-                            var date = el["date"] as! String
-                            date = date.replacingOccurrences(of: "T", with: " ")
-                            date.removeLast(3)
-                            
-                            date = reverseDateTime(date: date)
-                            
-                            service = Service(sid: el["sid"] as! Int, date: date, serType: el["ser_type"] as! String, mileage: el["mileage"] as! Int, matCost: el["mat_cost"] as? Double, wrkCost: el["wrk_cost"] as? Double)
-                        }
-                    }
-                }
-            } catch let error as NSError {
-                print("Failed to load: \(error.localizedDescription)")
-                alertMessage = "Ошибка"
-                showAlert = true
-            }
-        } else {
-            alertMessage = "Ошибка"
-            showAlert = true
         }
     }
     

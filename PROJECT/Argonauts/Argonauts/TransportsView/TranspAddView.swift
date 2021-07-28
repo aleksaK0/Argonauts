@@ -31,11 +31,9 @@ struct TranspAddView: View {
     @State var alertMessage: String = ""
     @State var isLoading: Bool = false
     
-    @State var pad: CGFloat = 5
-    
     var body: some View {
         ZStack {
-            ScrollView(.vertical, showsIndicators: false) {
+            ScrollView(showsIndicators: false) {
                 Text("Обязательное поле")
                     .font(.system(size: 17, weight: .semibold, design: .default))
                     .padding([.top])

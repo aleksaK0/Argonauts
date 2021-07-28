@@ -22,21 +22,19 @@ struct TranspDetailView: View {
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     
-    @State var pad: CGFloat = 10
-    
     var body: some View {
         ZStack {
             VStack {
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     ForEach(Array(zip(keys, values)), id: \.0) { item in
                         Divider()
                         HStack {
                             Text(item.0)
                                 .fontWeight(.semibold)
-                                .padding([.leading], pad)
+                                .padding([.leading])
                             Spacer()
                             Text(item.1)
-                                .padding([.trailing], pad)
+                                .padding([.trailing])
                         }
                     }
                     Button(action: {

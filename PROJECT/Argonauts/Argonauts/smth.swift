@@ -383,3 +383,38 @@ func getBioType() {
 //        globalObj.biometryType = "none"
     }
 }
+
+
+struct TestTextfield: UIViewRepresentable {
+    @Binding var text: String
+    var keyType: UIKeyboardType
+    func makeUIView(context: Context) -> UITextField {
+        let textField = UITextField()
+        textField.placeholder = "text"
+        textField.keyboardType = keyType
+        
+        let customView = UIView(frame: CGRect(x: 0, y: 0, width: textField.frame.size.width, height: 44))
+        customView.backgroundColor = .systemGray6
+        
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
+        button.setTitle("Done", for: .normal)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.addTarget(self, action: #selector(textField.doneButtonTapped(button:)), for: .touchUpInside)
+        customView.addSubview(button)
+        
+        textField.inputAccessoryView = customView
+        
+        return textField
+    }
+
+    func updateUIView(_ uiView: UITextField, context: Context) {
+        uiView.text = text
+    }
+}
+
+extension UITextField{
+    @objc func doneButtonTapped(button:UIBarButtonItem) -> Void {
+        self.resignFirstResponder()
+    }
+}

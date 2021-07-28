@@ -79,7 +79,7 @@ struct NotificationDetailView: View {
                     .disabled(notification.isEmpty || (type != "Дата" && value1.isEmpty))
                 }
                 if notifications.isEmpty {
-                    Text("Здесь будет список уведомлений, созданных для данного транспорта")
+                    Text("Здесь будет список уведомлений")
                         .foregroundColor(Color(UIColor.systemGray))
                         .padding()
                     Spacer()
