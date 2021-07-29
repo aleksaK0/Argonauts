@@ -61,9 +61,9 @@ func writeToDocDir(filename: String, text: String) {
 }
 
 extension String {
-   var isNumeric: Bool {
-     return !(self.isEmpty) && self.allSatisfy { $0.isNumber }
-   }
+    var isNumeric: Bool {
+        return !(self.isEmpty) && self.allSatisfy { $0.isNumber }
+    }
 }
 
 func isValidEmailAddress(email: String) -> Bool {
@@ -96,7 +96,7 @@ func isValidYear(year: String) -> Bool {
         let nsString = year as NSString
         let results = regex.matches(in: year, range: NSRange(location: 0, length: nsString.length))
         if results.count != 1 {
-             return false
+            return false
         }
         return true
     } catch let error as NSError {
@@ -222,70 +222,37 @@ class Mileage {
     }
 }
 
-class EngHour {
+struct EngHour {
     var ehid: Int
     var date: String
     var engHour: Int
-    
-    init(ehid: Int, date: String, engHour: Int) {
-        self.ehid = ehid
-        self.date = date
-        self.engHour = engHour
-    }
 }
 
-class Fuel {
+struct Fuel {
     var fid: Int
     var date: String
     var fuel: Double
-    var mileage: Int?
+    var mileage: Int
     var fillBrand: String?
     var fuelBrand: String?
     var fuelCost: Double?
-    
-    init(fid: Int, date: String, fuel: Double, mileage: Int?, fillBrand: String?, fuelBrand: String?, fuelCost: Double?) {
-        self.fid = fid
-        self.date = date
-        self.fuel = fuel
-        self.mileage = mileage
-        self.fillBrand = fillBrand
-        self.fuelBrand = fuelBrand
-        self.fuelCost = fuelCost
-    }
 }
 
-class Service {
+struct Service {
     var sid: Int
     var date: String
     var serType: String
     var mileage: Int
     var matCost: Double?
     var wrkCost: Double?
-    
-    init(sid: Int, date: String, serType: String, mileage: Int, matCost: Double?, wrkCost: Double?) {
-        self.sid = sid
-        self.date = date
-        self.serType = serType
-        self.mileage = mileage
-        self.matCost = matCost
-        self.wrkCost = wrkCost
-    }
 }
 
-class Material {
+struct Material {
     var maid: Int
     var matInfo: String
     var wrkType: String
     var matCost: Double?
     var wrkCost: Double?
-    
-    init(maid: Int, matInfo: String, wrkType: String, matCost: Double?, wrkCost: Double?) {
-        self.maid = maid
-        self.matInfo = matInfo
-        self.wrkType = wrkType
-        self.matCost = matCost
-        self.wrkCost = wrkCost
-    }
 }
 
 class Notification {
@@ -349,8 +316,8 @@ func buttonHeightNumPad(item: numPadButton) -> CGFloat {
 }
 
 func feedbackSelect() {
-//    let impactLight = UIImpactFeedbackGenerator(style: .light)
-//    impactLight.impactOccurred()
+    //    let impactLight = UIImpactFeedbackGenerator(style: .light)
+    //    impactLight.impactOccurred()
     let selectionFeedback = UISelectionFeedbackGenerator()
     selectionFeedback.selectionChanged()
 }
@@ -365,56 +332,65 @@ func feedbackError() {
 func getBioType() {
     let context = LAContext()
     var error: NSError?
-
+    
     // check whether biometric authentication is possible
     if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
         switch context.biometryType {
         case .faceID:
             print("authenticate: faceID")
-//            globalObj.biometryType = "faceID"
+        //            globalObj.biometryType = "faceID"
         case .touchID:
             print("authenticate: touchID")
-//            globalObj.biometryType = "touchID"
+        //            globalObj.biometryType = "touchID"
         default:
             print("authenticate: none")
-//            globalObj.biometryType = "none"
+        //            globalObj.biometryType = "none"
         }
     } else {
-//        globalObj.biometryType = "none"
+        //        globalObj.biometryType = "none"
     }
 }
 
-
-struct TestTextfield: UIViewRepresentable {
+struct CustomTextField: UIViewRepresentable {
+    var titleKey: String
     @Binding var text: String
-    var keyType: UIKeyboardType
+    var keyboardType: UIKeyboardType
+//    var autocorrection: UITextAutocorrectionType
+    
+    init(_ titleKey: String, text: Binding<String>, _ keyboardType: UIKeyboardType) {
+        self.titleKey = titleKey
+        self._text = text
+        self.keyboardType = keyboardType
+//        self.autocorrection = autocorrection
+    }
+    
     func makeUIView(context: Context) -> UITextField {
-        let textField = UITextField()
-        textField.placeholder = "text"
-        textField.keyboardType = keyType
+        let textField = UITextField(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        textField.placeholder = titleKey
+        textField.keyboardType = keyboardType
+        textField.autocorrectionType = .no
         
         let customView = UIView(frame: CGRect(x: 0, y: 0, width: textField.frame.size.width, height: 44))
         customView.backgroundColor = .systemGray6
         
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 100, height: 44))
-        button.setTitle("Done", for: .normal)
+        button.setTitle("Готово", for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
         button.setTitleColor(.systemBlue, for: .normal)
         button.addTarget(self, action: #selector(textField.doneButtonTapped(button:)), for: .touchUpInside)
         customView.addSubview(button)
         
         textField.inputAccessoryView = customView
-        
         return textField
     }
-
+    
     func updateUIView(_ uiView: UITextField, context: Context) {
         uiView.text = text
     }
 }
 
-extension UITextField{
-    @objc func doneButtonTapped(button:UIBarButtonItem) -> Void {
+extension UITextField {
+    @objc func doneButtonTapped(button: UIBarButtonItem) -> Void {
         self.resignFirstResponder()
     }
 }

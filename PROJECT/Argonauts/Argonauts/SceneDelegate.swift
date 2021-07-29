@@ -26,6 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         
 //        writeToDocDir(filename: "pinInfo", text: "Oo@ll.aa\n2222")
+        
 //        removePinFile()
         
         

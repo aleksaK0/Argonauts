@@ -137,6 +137,17 @@ struct StatisticsDetailView: View {
                                 Text(String(describing: statistics[currItem].mileageMax))
                             }
                         }
+                        HStack {
+                            Text("Топливо/Пробег")
+                                .font(.title2.weight(.bold))
+                            Spacer()
+                        }
+                        .padding([.top, .bottom], 10)
+                        HStack {
+                            Text("Сум.?? Может Средний?")
+                            Spacer()
+                            Text(String(describing: statistics[currItem].fmSum))
+                        }
                     }
                     .padding([.leading, .trailing])
                 } else {

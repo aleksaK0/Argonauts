@@ -38,7 +38,6 @@ struct EngHourDetailView: View {
                         Text("Добавить")
                     }
                     .disabled(engHour.isEmpty)
-                    .padding([.top])
                 }
                 if engHours.isEmpty {
                     Text("Здесь будет список записей о моточасах")

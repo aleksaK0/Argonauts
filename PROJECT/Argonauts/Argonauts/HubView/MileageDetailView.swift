@@ -38,7 +38,6 @@ struct MileageDetailView: View {
                         Text("Добавить")
                     }
                     .disabled(mileage.isEmpty)
-                    .padding([.top])
                 }
                 if mileages.isEmpty {
                     Text("Здесь будет список записей о пробеге")

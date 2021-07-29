@@ -130,7 +130,7 @@ struct ServiceMaterialView: View {
         }
     }
     
-    func canAdd() -> Bool {
+    func canAddMaterial() -> Bool {
         if matCost.isEmpty == false && wrkCost.isEmpty == true {
             if isValid(value: matCost) {
                 return true
@@ -161,8 +161,11 @@ struct ServiceMaterialView: View {
     func addMaterialAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            if canAdd() {
+            if canAddMaterial() {
                 addMaterial(sid: String(sid), matInfo: matInfo, wrkType: wrkType, matCost: matCost.replacingOccurrences(of: ",", with: "."), wrkCost: wrkCost.replacingOccurrences(of: ",", with: "."))
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
             }
             DispatchQueue.main.async {
                 if alertMessage == "" {

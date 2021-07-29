@@ -23,13 +23,18 @@ struct AccountView: View {
     
     var body: some View {
         ZStack {
+//            ScrollView(showsIndicators: false) {
             VStack {
                 NavigationLink(destination: AccountEmailView(email: globalObj.email, switcher: $switcher).environmentObject(globalObj), tag: "Почта", selection: $selection, label: { EmptyView() })
-                Button(action: {
-                    showAccountEdit = true
-                }, label: {
-                    Text("Изменить")
-                })
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showAccountEdit = true
+                    }, label: {
+                        Text("Изм.")
+                    })
+                }
+                .padding([.leading, .trailing])
                 Text(nick)
                 Text(globalObj.email)
                 Button(action: {

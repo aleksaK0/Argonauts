@@ -39,33 +39,35 @@ struct ServiceDetailView: View {
             NavigationLink(destination: ServiceMaterialView(sid: sid).environmentObject(globalObj), isActive: $showServiceMaterial, label: { EmptyView() })
             VStack {
                 if showFields {
-                    DatePicker("", selection: $date, in: ...now, displayedComponents: [.date, .hourAndMinute])
-                        .datePickerStyle(WheelDatePickerStyle())
+                    ScrollView(showsIndicators: false) {
+                        DatePicker("", selection: $date, in: ...now, displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(WheelDatePickerStyle())
+                            .labelsHidden()
+                        Picker("", selection: $serType) {
+                            Text("Ремонт").tag("Ремонт")
+                            Text("Тех. обслуживание").tag("Тех. обслуживание")
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
                         .labelsHidden()
-                    Picker("", selection: $serType) {
-                        Text("Ремонт").tag("Ремонт")
-                        Text("Тех. обслуживание").tag("Тех. обслуживание")
+                        .padding([.leading, .trailing])
+                        TextField("Пробег", text: $mileage)
+                            .keyboardType(.numberPad)
+                            .padding([.leading, .trailing])
+                        TextField("Стоимость материалов (доп)", text: $matCost)
+                            .keyboardType(.decimalPad)
+                            .padding([.leading, .trailing])
+                        TextField("Стоимость работ (доп)", text: $wrkCost)
+                            .keyboardType(.decimalPad)
+                            .padding([.leading, .trailing])
+                        Button {
+                            UIApplication.shared.endEditing()
+                            addServiceAsync()
+                        } label: {
+                            Text("Добавить")
+                        }
+                        .disabled(mileage.isEmpty)
                     }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .labelsHidden()
-                    .padding([.leading, .trailing])
-                    TextField("Пробег", text: $mileage)
-                        .keyboardType(.numberPad)
-                        .padding([.leading, .trailing])
-                    TextField("Стоимость материалов (доп)", text: $matCost)
-                        .keyboardType(.decimalPad)
-                        .padding([.leading, .trailing])
-                    TextField("Стоимость работ (доп)", text: $wrkCost)
-                        .keyboardType(.decimalPad)
-                        .padding([.leading, .trailing])
-                    Button {
-                        UIApplication.shared.endEditing()
-                        addServiceAsync()
-                    } label: {
-                        Text("Добавить")
-                    }
-                    .padding([.top])
-                    .disabled(mileage.isEmpty)
+//                    .frame(height: UIScreen.main.bounds.height / 2.3)
                 }
                 if services.isEmpty {
                     Text("Здесь будет список записей о сервисных работах")
@@ -156,7 +158,7 @@ struct ServiceDetailView: View {
         
     }
     
-    func canAdd() -> Bool {
+    func canAddService() -> Bool {
         if isValidMileage(mileage: mileage) {
             if matCost.isEmpty == true && wrkCost.isEmpty == true {
                 return true
@@ -191,7 +193,7 @@ struct ServiceDetailView: View {
     func addServiceAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            if canAdd() {
+            if canAddService() {
                 addService(tid: String(tid), date: date, serType: serType, mileage: mileage, matCost: matCost.replacingOccurrences(of: ",", with: "."), wrkCost: wrkCost.replacingOccurrences(of: ",", with: "."))
             } else {
                 alertMessage = "Введены некорректные данные"
@@ -261,6 +263,7 @@ struct ServiceDetailView: View {
     }
     
     func addService(tid: String, date: Date, serType: String, mileage: String, matCost: String, wrkCost: String) {
+        print(mileage, matCost, wrkCost)
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru")
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
@@ -287,7 +290,8 @@ struct ServiceDetailView: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        services.append(Service(sid: info["sid"] as! Int, date: info["date"] as! String, serType: info["ser_type"] as! String, mileage: info["mileage"] as! Int, matCost: info["mat_cost"] as? Double, wrkCost: info["wrk_cost"] as? Double))
+                        let service = Service(sid: info["sid"] as! Int, date: info["date"] as! String, serType: info["ser_type"] as! String, mileage: info["mileage"] as! Int, matCost: info["mat_cost"] as? Double, wrkCost: info["wrk_cost"] as? Double)
+                        services.append(service)
                         services.sort { $0.date > $1.date }
                     }
                 }

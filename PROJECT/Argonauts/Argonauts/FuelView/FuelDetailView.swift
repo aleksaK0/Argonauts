@@ -29,34 +29,38 @@ struct FuelDetailView: View {
         ZStack {
             VStack {
                 if showFields {
-                    DatePicker("", selection: $date, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
-                        .datePickerStyle(WheelDatePickerStyle())
-                        .labelsHidden()
-                    TextField("Пробег", text: $mileage)
-                        .keyboardType(.numberPad)
-                    TextField("Топливо", text: $fuel)
-                        .keyboardType(.numberPad)
-                    Text("Дополнительные поля")
-                    TextField("Бренд заправки", text: $fillBrand)
-                    TextField("Марка топлива", text: $fuelBrand)
-                    TextField("Стоимость 1 литра", text: $fuelCost)
-                        .keyboardType(.decimalPad)
-                    Button {
-                        UIApplication.shared.endEditing()
-                        addFuelAsync()
-                    } label: {
-                        Text("Добавить")
+                    ScrollView(showsIndicators: true) {
+                        DatePicker("", selection: $date, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(WheelDatePickerStyle())
+                            .labelsHidden()
+                        TextField("Топливо", text: $fuel)
+                            .keyboardType(.decimalPad)
+                            .padding([.leading, .trailing])
+                        TextField("Пробег", text: $mileage)
+                            .keyboardType(.numberPad)
+                            .padding([.leading, .trailing])
+                        TextField("Бренд заправки (доп)", text: $fillBrand)
+                            .disableAutocorrection(true)
+                            .padding([.leading, .trailing])
+                        TextField("Марка топлива (доп)", text: $fuelBrand)
+                            .disableAutocorrection(true)
+                            .padding([.leading, .trailing])
+                        TextField("Стоимость 1 литра (доп)", text: $fuelCost)
+                            .keyboardType(.decimalPad)
+                            .padding([.leading, .trailing])
+                        Button {
+                            UIApplication.shared.endEditing()
+                            addFuelAsync()
+                        } label: {
+                            Text("Добавить")
+                        }
+                        .disabled(fuel.isEmpty || mileage.isEmpty)
                     }
+                    .frame(height: UIScreen.main.bounds.height / 2)
                 }
                 List {
                     ForEach(fuels, id: \.fid) { fuel in
-                        HStack {
-                            Text(fuel.date)
-                            Spacer()
-                            Text(convert(mileage: fuel.mileage))
-                            Spacer()
-                            Text(String(describing: fuel.fuel))
-                        }
+                        RowFuel(fuel: fuel)
                     }
                     .onDelete(perform: deleteFuelAsync)
                 }
@@ -73,12 +77,19 @@ struct FuelDetailView: View {
         .navigationBarTitle(nick, displayMode: .inline)
         .navigationBarItems(trailing:
                                 Button(action: {
+                                    fuel = ""
+                                    mileage = ""
+                                    fillBrand = ""
+                                    fuelBrand = ""
+                                    fuelCost = ""
                                     showFields.toggle()
                                 }, label: {
                                     if showFields {
                                         Image(systemName: "minus")
+                                            .font(.title2.weight(.semibold))
                                     } else {
                                         Image(systemName: "plus")
+                                            .font(.title2.weight(.semibold))
                                     }
                                 }))
         .alert(isPresented: $showAlert) {
@@ -89,11 +100,50 @@ struct FuelDetailView: View {
         }
     }
     
-    func convert(mileage: Int?) -> String {
-        guard let mileage = mileage else {
-            return ""
+    func isValidMileage(mileage: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = mileage as NSString
+            let results = regex.matches(in: mileage, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
         }
-        return String(mileage)
+    }
+    
+    func isValid(value: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}+[',']{0,1}+[0-9]{0,2}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = value as NSString
+            let results = regex.matches(in: value, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+        
+    }
+    
+    func canAddFuel() -> Bool {
+        if isValidMileage(mileage: mileage) && isValid(value: fuel) {
+            if fuelCost.isEmpty == false {
+                if isValid(value: fuelCost) {
+                    return true
+                }
+            } else {
+                return true
+            }
+        }
+        return false
     }
     
     func getFuelAsync() {
@@ -110,8 +160,20 @@ struct FuelDetailView: View {
     func addFuelAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addFuel(tid: String(tid), date: date, mileage: mileage, fuel: fuel, fillBrand: fillBrand, fuelBrand: fuelBrand, fuelCost: fuelCost)
+            if canAddFuel() {
+                addFuel(tid: String(tid), date: date, fuel: fuel.replacingOccurrences(of: ",", with: "."), mileage: mileage, fillBrand: fillBrand, fuelBrand: fuelBrand, fuelCost: fuelCost.replacingOccurrences(of: ",", with: "."))
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
+            }
             DispatchQueue.main.async {
+                if alertMessage == "" {
+                    fuel = ""
+                    mileage = ""
+                    fillBrand = ""
+                    fuelBrand = ""
+                    fuelCost = ""
+                }
                 isLoading = false
             }
         }
@@ -152,7 +214,7 @@ struct FuelDetailView: View {
                             var date = el["date"] as! String
                             date = date.replacingOccurrences(of: "T", with: " ")
                             date.removeLast(3)
-                            let fuel = Fuel(fid: el["fid"] as! Int, date: date, fuel: el["fuel"] as! Double, mileage: el["mileage"] as? Int, fillBrand: el["fill_brand"] as? String, fuelBrand: el["fuel_brand"] as? String, fuelCost: el["fuel_cost"] as? Double)
+                            let fuel = Fuel(fid: el["fid"] as! Int, date: date, fuel: el["fuel"] as! Double, mileage: el["mileage"] as! Int, fillBrand: el["fill_brand"] as? String, fuelBrand: el["fuel_brand"] as? String, fuelCost: el["fuel_cost"] as? Double)
                             fuels.append(fuel)
                         }
                     }
@@ -168,12 +230,11 @@ struct FuelDetailView: View {
         }
     }
     
-    func addFuel(tid: String, date: Date, mileage: String, fuel: String, fillBrand: String, fuelBrand: String, fuelCost: String) {
+    func addFuel(tid: String, date: Date, fuel: String, mileage: String, fillBrand: String, fuelBrand: String, fuelCost: String) {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru")
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         let dateString = formatter.string(from: date)
-        
         let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=add_fuel&tid=" + tid + "&date=" + dateString + "&mileage=" + mileage + "&fuel=" + fuel + "&fill_brand=" + fillBrand + "&fuel_brand=" + fuelBrand + "&fuel_cost=" + fuelCost
         let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         let url = URL(string: encodedUrl!)
@@ -182,7 +243,7 @@ struct FuelDetailView: View {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     let info = json["add_fuel"] as! [String : Any]
                     print("FuelDetailView.addFuel(): \(info)")
-
+                    
                     if info["server_error"] != nil {
                         if info["err_code"] as! Int == 1062 {
                             alertMessage = "Запись с таким временем/пробегом уже есть"
@@ -196,7 +257,8 @@ struct FuelDetailView: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        fuels.append(Fuel(fid: info["fid"] as! Int, date: info["date"] as! String, fuel: info["fuel"] as! Double, mileage: info["mileage"] as? Int, fillBrand: info["fill_brand"] as? String, fuelBrand: info["fuel_brand"] as? String, fuelCost: info["fuel_cost"] as? Double))
+                        let fuel = Fuel(fid: info["fid"] as! Int, date: info["date"] as! String, fuel: info["fuel"] as! Double, mileage: info["mileage"] as! Int, fillBrand: info["fill_brand"] as? String, fuelBrand: info["fuel_brand"] as? String, fuelCost: info["fuel_cost"] as? Double)
+                        fuels.append(fuel)
                         fuels.sort { $0.date > $1.date }
                     }
                 }

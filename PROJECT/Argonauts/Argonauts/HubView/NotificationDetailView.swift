@@ -137,7 +137,7 @@ struct NotificationDetailView: View {
         }
     }
     
-    func canAdd(type: String) -> Bool {
+    func canAddNotification(type: String) -> Bool {
         if type == "Дата" {
             return true
         } else if type == "Моточасы" || type == "Пробег" {
@@ -172,7 +172,7 @@ struct NotificationDetailView: View {
     func addNotificationAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            if canAdd(type: type) {
+            if canAddNotification(type: type) {
                 addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
             } else {
                 alertMessage = "Введены некорректные данные"

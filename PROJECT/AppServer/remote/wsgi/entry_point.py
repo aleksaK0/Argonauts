@@ -609,7 +609,7 @@ def add_fuel(mydb, query_dict, response_dict):
     mycursor = mydb.cursor()
     resp = dict()
     global fid
-    
+
     try:
         tid = query_dict['tid'][0]
         date = query_dict['date'][0]
@@ -619,9 +619,11 @@ def add_fuel(mydb, query_dict, response_dict):
         mycursor.execute("INSERT INTO mileage (tid, date, mileage) SELECT %s, '%s', %s FROM DUAL WHERE NOT EXISTS (SELECT * FROM mileage WHERE tid = %s AND ('%s' > date AND %s < mileage OR '%s' < date AND %s > mileage OR '%s' = date AND %s = mileage))" % (tid, date, mileage, tid, date, mileage, date, mileage, date, mileage))
         affected_rows = mycursor.rowcount
 
+
         if affected_rows == 0:
             response_dict['add_fuel'] = {'row': affected_rows, 'mileage_inserted' : 0}
         else:
+            print(tid, date, fuel)
             mycursor.execute("INSERT INTO fuel (tid, date, fuel) VALUES (%s, '%s', %s)" % (tid, date, fuel))
             affected_rows = mycursor.rowcount
 
@@ -630,6 +632,7 @@ def add_fuel(mydb, query_dict, response_dict):
             else:
                 mycursor.execute("SELECT LAST_INSERT_ID()")
                 fid = mycursor.fetchone()[0]
+
                 mycursor.execute("UPDATE transport SET mileage = (SELECT MAX(mileage) FROM mileage WHERE tid = %s) WHERE tid = %s" % (tid, tid))
                 mycursor.execute("UPDATE transport AS t SET total_fuel = (SELECT SUM(fuel) FROM fuel WHERE tid = %s AND date >= t.fuel_date ) WHERE tid = %s" % (tid, tid))
 
@@ -744,10 +747,10 @@ def add_service(mydb, query_dict, response_dict):
     try:
         if 'mat_cost' in query_dict:
             mycursor.execute("UPDATE service SET mat_cost = %s WHERE sid = %s" % (query_dict['mat_cost'][0], sid))
-            resp['mat_cost'] = query_dict['mat_cost'][0]
+            resp['mat_cost'] = float(query_dict['mat_cost'][0])
         if 'wrk_cost' in query_dict:
             mycursor.execute("UPDATE service SET wrk_cost = %s WHERE sid = %s" % (query_dict['wrk_cost'][0], sid))
-            resp['wrk_cost'] = query_dict['wrk_cost'][0]
+            resp['wrk_cost'] = float(query_dict['wrk_cost'][0])
         mydb.commit()
         response_dict['add_service'] = resp
     except mysql.connector.Error as error:
