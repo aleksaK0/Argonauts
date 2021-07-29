@@ -232,7 +232,7 @@ struct Fuel {
     var fid: Int
     var date: String
     var fuel: Double
-    var mileage: Int
+    var mileage: Int?
     var fillBrand: String?
     var fuelBrand: String?
     var fuelCost: Double?
@@ -242,7 +242,7 @@ struct Service {
     var sid: Int
     var date: String
     var serType: String
-    var mileage: Int
+    var mileage: Int?
     var matCost: Double?
     var wrkCost: Double?
 }

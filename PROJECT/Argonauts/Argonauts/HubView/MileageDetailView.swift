@@ -68,6 +68,7 @@ struct MileageDetailView: View {
         .navigationBarTitle(nick, displayMode: .inline)
         .navigationBarItems(trailing:
                                 Button(action: {
+                                    mileage = ""
                                     showFields.toggle()
                                 }, label: {
                                     if showFields {

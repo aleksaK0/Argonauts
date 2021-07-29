@@ -32,7 +32,7 @@ struct StatisticsDetailView: View {
                 .padding([.leading, .trailing, .top])
                 .onChange(of: selection) { value in
                     currItem = 0
-                    getStatistics()
+                    getStatisticsAsync()
                 }
                 HStack {
                     Button(action: {
@@ -138,16 +138,17 @@ struct StatisticsDetailView: View {
                             }
                         }
                         HStack {
-                            Text("Топливо/Пробег")
+                            Text("Расход")
                                 .font(.title2.weight(.bold))
                             Spacer()
                         }
                         .padding([.top, .bottom], 10)
                         HStack {
-                            Text("Сум.?? Может Средний?")
+                            Text("На 100км")
                             Spacer()
                             Text(String(describing: statistics[currItem].fmSum))
                         }
+                        .padding([.bottom])
                     }
                     .padding([.leading, .trailing])
                 } else {
@@ -169,15 +170,17 @@ struct StatisticsDetailView: View {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
-            getStatistics()
+            getStatisticsAsync()
             print("onAppear \(statistics.count)")
         }
     }
     
-    func getStatistics() {
+    func getStatisticsAsync() {
         isLoading = true
         statistics = []
         DispatchQueue.global(qos: .userInitiated).async {
+            print(selection)
+            print(tid)
             if selection == 0 {
                 getStatisticsMonth(tid: String(tid))
             } else {

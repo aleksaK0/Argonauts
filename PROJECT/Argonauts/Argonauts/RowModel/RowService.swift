@@ -19,10 +19,12 @@ struct RowService: View {
                     .fontWeight(.semibold)
                 Text(reverseDateTime(date: service.date))
             }
-            HStack {
-                Text("Пробег:")
-                    .fontWeight(.semibold)
-                Text(String(describing: service.mileage))
+            if let mileage = service.mileage {
+                HStack {
+                    Text("Пробег:")
+                        .fontWeight(.semibold)
+                    Text(String(describing: mileage))
+                }
             }
             if let matCost = service.matCost {
                 HStack {

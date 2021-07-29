@@ -68,6 +68,7 @@ struct EngHourDetailView: View {
         .navigationBarTitle(nick, displayMode: .inline)
         .navigationBarItems(trailing:
                                 Button(action: {
+                                    engHour = ""
                                     showFields.toggle()
                                 }, label: {
                                     if showFields {

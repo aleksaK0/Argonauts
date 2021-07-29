@@ -19,13 +19,7 @@ struct ServiceDetailView: View {
     @State var matCost: String = ""
     @State var wrkCost: String = ""
     @State var sid: Int = 0
-    @State var dateServ: String = ""
-    @State var serTypeServ: String = ""
-    @State var mileageServ: Int = 0
-    @State var matCostServ: Double? = nil
-    @State var wrkCostServ: Double? = nil
     @State var services: [Service] = []
-    @State var now: Date = Date()
     
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
@@ -40,7 +34,7 @@ struct ServiceDetailView: View {
             VStack {
                 if showFields {
                     ScrollView(showsIndicators: false) {
-                        DatePicker("", selection: $date, in: ...now, displayedComponents: [.date, .hourAndMinute])
+                        DatePicker("", selection: $date, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
                             .datePickerStyle(WheelDatePickerStyle())
                             .labelsHidden()
                         Picker("", selection: $serType) {
@@ -66,8 +60,10 @@ struct ServiceDetailView: View {
                             Text("Добавить")
                         }
                         .disabled(mileage.isEmpty)
+                        .padding([.bottom], 70)
                     }
-//                    .frame(height: UIScreen.main.bounds.height / 2.3)
+                    .frame(height: UIScreen.main.bounds.height / 1.5)
+                    Spacer()
                 }
                 if services.isEmpty {
                     Text("Здесь будет список записей о сервисных работах")
@@ -79,11 +75,6 @@ struct ServiceDetailView: View {
                         ForEach(services, id: \.sid) { service in
                             Button(action: {
                                 sid = service.sid
-                                dateServ = service.date
-                                serTypeServ = service.serType
-                                mileageServ = service.mileage
-                                matCostServ = service.matCost
-                                wrkCostServ = service.wrkCost
                                 showServiceMaterial = true
                             }, label: {
                                 RowService(service: service)
@@ -246,7 +237,7 @@ struct ServiceDetailView: View {
                             date = date.replacingOccurrences(of: "T", with: " ")
                             date.removeLast(3)
                             
-                            let service = Service(sid: el["sid"] as! Int, date: date, serType: el["ser_type"] as! String, mileage: el["mileage"] as! Int, matCost: el["mat_cost"] as? Double, wrkCost: el["wrk_cost"] as? Double)
+                            let service = Service(sid: el["sid"] as! Int, date: date, serType: el["ser_type"] as! String, mileage: el["mileage"] as? Int, matCost: el["mat_cost"] as? Double, wrkCost: el["wrk_cost"] as? Double)
                             services.append(service)
                         }
                     }
@@ -290,7 +281,7 @@ struct ServiceDetailView: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        let service = Service(sid: info["sid"] as! Int, date: info["date"] as! String, serType: info["ser_type"] as! String, mileage: info["mileage"] as! Int, matCost: info["mat_cost"] as? Double, wrkCost: info["wrk_cost"] as? Double)
+                        let service = Service(sid: info["sid"] as! Int, date: info["date"] as! String, serType: info["ser_type"] as! String, mileage: info["mileage"] as? Int, matCost: info["mat_cost"] as? Double, wrkCost: info["wrk_cost"] as? Double)
                         services.append(service)
                         services.sort { $0.date > $1.date }
                     }

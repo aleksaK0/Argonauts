@@ -22,10 +22,12 @@ struct RowFuel: View {
                     .fontWeight(.semibold)
                 Text(String(describing: fuel.fuel).replacingOccurrences(of: ".", with: ","))
             }
-            HStack {
-                Text("Пробег:")
-                    .fontWeight(.semibold)
-                Text(String(describing: fuel.mileage))
+            if let mileage = fuel.mileage {
+                HStack {
+                    Text("Пробег:")
+                        .fontWeight(.semibold)
+                    Text(String(describing: mileage))
+                }
             }
             if let fillBrand = fuel.fillBrand {
                 HStack {

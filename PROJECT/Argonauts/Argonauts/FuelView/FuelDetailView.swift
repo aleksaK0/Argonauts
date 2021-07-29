@@ -55,16 +55,24 @@ struct FuelDetailView: View {
                             Text("Добавить")
                         }
                         .disabled(fuel.isEmpty || mileage.isEmpty)
+                        .padding([.bottom], 70)
                     }
-                    .frame(height: UIScreen.main.bounds.height / 2)
+                    .frame(height: UIScreen.main.bounds.height / 1.5)
+                    Spacer()
                 }
-                List {
-                    ForEach(fuels, id: \.fid) { fuel in
-                        RowFuel(fuel: fuel)
+                if fuels.isEmpty {
+                    Text("Здесь будет список записей о заправках")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(fuels, id: \.fid) { fuel in
+                            RowFuel(fuel: fuel)
+                        }
+                        .onDelete(perform: deleteFuelAsync)
                     }
-                    .onDelete(perform: deleteFuelAsync)
                 }
-                .navigationBarTitle(nick, displayMode: .inline)
             }
             if isLoading {
                 Rectangle()
@@ -214,7 +222,7 @@ struct FuelDetailView: View {
                             var date = el["date"] as! String
                             date = date.replacingOccurrences(of: "T", with: " ")
                             date.removeLast(3)
-                            let fuel = Fuel(fid: el["fid"] as! Int, date: date, fuel: el["fuel"] as! Double, mileage: el["mileage"] as! Int, fillBrand: el["fill_brand"] as? String, fuelBrand: el["fuel_brand"] as? String, fuelCost: el["fuel_cost"] as? Double)
+                            let fuel = Fuel(fid: el["fid"] as! Int, date: date, fuel: el["fuel"] as! Double, mileage: el["mileage"] as? Int, fillBrand: el["fill_brand"] as? String, fuelBrand: el["fuel_brand"] as? String, fuelCost: el["fuel_cost"] as? Double)
                             fuels.append(fuel)
                         }
                     }
@@ -257,7 +265,7 @@ struct FuelDetailView: View {
                         showAlert = true
                     } else {
                         alertMessage = ""
-                        let fuel = Fuel(fid: info["fid"] as! Int, date: info["date"] as! String, fuel: info["fuel"] as! Double, mileage: info["mileage"] as! Int, fillBrand: info["fill_brand"] as? String, fuelBrand: info["fuel_brand"] as? String, fuelCost: info["fuel_cost"] as? Double)
+                        let fuel = Fuel(fid: info["fid"] as! Int, date: info["date"] as! String, fuel: info["fuel"] as! Double, mileage: info["mileage"] as? Int, fillBrand: info["fill_brand"] as? String, fuelBrand: info["fuel_brand"] as? String, fuelCost: info["fuel_cost"] as? Double)
                         fuels.append(fuel)
                         fuels.sort { $0.date > $1.date }
                     }
