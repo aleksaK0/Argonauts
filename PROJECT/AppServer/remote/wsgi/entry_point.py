@@ -1049,6 +1049,7 @@ def send_statistics_year(mydb, query_dict, response_dict):
 
         columns = [desc[0] for desc in mycursor.description]
         values = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+        values.reverse()
 
         mycursor.execute("SELECT email from email WHERE uid = (SELECT uid FROM transport WHERE tid = %s) AND send = 1" % (tid))
         emails = [row[0] for row in mycursor.fetchall()]
@@ -1146,6 +1147,7 @@ def send_statistics_month(mydb, query_dict, response_dict):
 
         columns = [desc[0] for desc in mycursor.description]
         values = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+        values.reverse()
 
         mycursor.execute("SELECT email from email WHERE uid = (SELECT uid FROM transport WHERE tid = %s) AND send = 1" % (tid))
         emails = [row[0] for row in mycursor.fetchall()]
