@@ -144,7 +144,7 @@ struct StatisticsDetailView: View {
                         }
                         .padding([.top, .bottom], 10)
                         HStack {
-                            Text("На 100км")
+                            Text("На 100 км")
                             Spacer()
                             Text(String(describing: statistics[currItem].fmSum))
                         }
@@ -166,8 +166,27 @@ struct StatisticsDetailView: View {
             }
         }
         .navigationBarTitle(nick, displayMode: .inline)
+        .navigationBarItems(trailing:
+                                Button(action: {
+                                    alertMessage = "Вы уверены, что хотите отправить статистику на все активные почты?"
+                                    showAlert = true
+                                }, label: {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.title2)
+                                })
+                                .disabled(statistics.isEmpty)
+        )
         .alert(isPresented: $showAlert) {
-            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            if alertMessage == "Вы уверены, что хотите отправить статистику на все активные почты?" {
+                return Alert(title: Text("Подтверждение"),
+                             message: Text(alertMessage),
+                             primaryButton: .cancel(),
+                             secondaryButton: .default(Text("Отправить")) {
+                                sendStatisticsAsync()
+                             })
+            } else {
+             return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            }
         }
         .onAppear {
             getStatisticsAsync()
@@ -179,8 +198,6 @@ struct StatisticsDetailView: View {
         isLoading = true
         statistics = []
         DispatchQueue.global(qos: .userInitiated).async {
-            print(selection)
-            print(tid)
             if selection == 0 {
                 getStatisticsMonth(tid: String(tid))
             } else {
@@ -190,6 +207,20 @@ struct StatisticsDetailView: View {
                 if alertMessage == "" {
                     currItem = statistics.count - 1
                 }
+                isLoading = false
+            }
+        }
+    }
+    
+    func sendStatisticsAsync() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            if selection == 0 {
+                
+            } else {
+                sendStatisticsYear(tid: String(tid))
+            }
+            DispatchQueue.main.async {
                 isLoading = false
             }
         }
@@ -252,6 +283,36 @@ struct StatisticsDetailView: View {
                             self.statistics.append(statistics)
                             id += 1
                         }
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
+        }
+    }
+    
+    func sendStatisticsYear(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=send_statistics_year&tid=" + tid
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["send_statistics_year"] as! [[String : Any]]
+                    print("StatisticsDetailView.sendStatisticsYear(): \(info)")
+                    if info[0]["empty_emails"] != nil {
+                        alertMessage = "Нет активных почт"
+                        showAlert = true
+                    } else if info[0]["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
+                    } else {
+                        alertMessage = ""
                     }
                 }
             } catch let error as NSError {

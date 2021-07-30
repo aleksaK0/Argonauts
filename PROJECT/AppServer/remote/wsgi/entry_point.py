@@ -1,33 +1,25 @@
 #!/usr/bin/env python3
 
-from wsgiref.simple_server import make_server
-from cgi import parse_qs, escape
+from cgi import parse_qs
 import os
 import sys
 import mysql.connector
-from mysql.connector.errors import Error
 import json
-from datetime import datetime
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import socket
-import random
 from datetime import datetime
-
-import time
-import logging
-
-import asyncio
-from aioapns import APNs, NotificationRequest, PushType
 
 path = os.path.dirname(__file__)
 if path not in sys.path:
    sys.path.insert(0, path)
 
-from send import *
-
 argo_home = ""
+
+from send import *
+# from send_statistics import statistics_year
+
+# import send_statistics
+# from importlib import reload
+# reload(send_statistics)
 
 # argo_user = os.getenv('ARGO_USER')
 # argo_pass = os.getenv('ARGO_PASS')
@@ -837,7 +829,7 @@ def add_material(mydb, query_dict, response_dict):
 
         resp['mat_info'] = mat_info
         resp['wrk_type'] = wrk_type
-        
+
         mycursor.execute("INSERT INTO material (sid, mat_info, wrk_type) VALUES (%s, '%s', '%s')" % (sid, mat_info, wrk_type))
     except mysql.connector.Error as error:
         err_code = int(str(error).split()[0])
@@ -1043,6 +1035,103 @@ def get_statistics_year(mydb, query_dict, response_dict):
 
     return response_dict
 
+def send_statistics_year(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+
+        f = open(query_dict['argo_home'] + '/wsgi/select_stat_by_year.sql')
+        line = f.read().replace('121', tid)
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute(line)
+
+        columns = [desc[0] for desc in mycursor.description]
+        values = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+
+        mycursor.execute("SELECT email from email WHERE uid = (SELECT uid FROM transport WHERE tid = %s) AND send = 1" % (tid))
+        emails = [row[0] for row in mycursor.fetchall()]
+        
+        if emails != []:
+            txt = """
+                  <html lang="ru">
+                  <head>
+                  </head>
+                  <body>
+                  <h1>Статистика по годам</h1>
+                  <div>
+                  """
+            for el in values:
+                txt += """
+                       <h2>Год: """ + el['mo'] +  """</h2>
+                       <h3>Топливо</h3>
+                       Кол-во заправок: """ + str(el['fuel_cnt']) + """
+                       <br>
+                       Средняя заправка: """ + str(el['fuel_avg']) + """
+                       <br>
+                       Сум. заправка: """ + str(el['fuel_sum']) + """
+                       <br>
+                       Мин. заправка: """ + str(el['fuel_min']) + """
+                       <br>
+                       Макс. заправка: """ + str(el['fuel_max']) + """
+                       <br>
+                       <br>
+                       <h3>Пробег</h3>
+                       Кол-во записей: """ + str(el['mileage_cnt']) + """
+                       <br>
+                       Средний пробег: """ + str(el['mileage_avg']) + """
+                       <br>
+                       Сум. пробег: """ + str(el['mileage_sum']) + """
+                       <br>
+                       Мин. пробег: """ + str(el['mileage_min']) + """
+                       <br>
+                       Макс. пробег: """ + str(el['mileage_max']) + """
+                       <br>
+                       <h3>Расход</h3>
+                       На 100 км: """ + str(el['fm_sum']) + """
+                       <br>
+                       <br>
+                       """
+            txt += """
+                   </div>
+                   <br>
+                   <font color="#696969">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                   </body>
+                   </html>
+                   """
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = txt
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            # s.send_message(msg)
+
+            del msg
+
+            response_dict['send_statistics_year'] = values
+        else:
+            response_dict['send_statistics_year'] = [{'empty_emails' : 1}]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['send_statistics_year'] = [{'server_error': 1, 'err_code': err_code}]
+    except Exception as error:
+        response_dict['send_statistics_year'] = [{'server_error': 1, 'err_message': str(error)}]
+    finally:
+        mydb.close()
+
+    return response_dict
+
 
 
 
@@ -1085,6 +1174,8 @@ def application(environ, start_response):
     #   database='argodb'
     # )
     query_dict = parse_qs(environ['QUERY_STRING'])
+    query_dict['argo_home'] = argo_home
+
     response_dict = {'proto_ver': '1.0.0'
         , 'sys.version': sys.version
         , 'query_dict': str(query_dict)
@@ -1096,6 +1187,8 @@ def application(environ, start_response):
     list_db_tables(argodb, response_dict)
 
     request_mission = query_dict.get('mission', [''])[0]
+
+
 
     # notification
     if request_mission == 'date_notification':
@@ -1200,10 +1293,16 @@ def application(environ, start_response):
         get_statistics_month(argodb, query_dict, response_dict)
     elif request_mission == 'get_statistics_year':
         get_statistics_year(argodb, query_dict, response_dict)
+    elif request_mission == 'send_statistics_year':
+        send_statistics_year(argodb, query_dict, response_dict)
+
 
     response_status = '200 OK'
     response_json = bytes(json.dumps(response_dict, default=dump_date, indent=2, ensure_ascii=False, sort_keys=True), encoding='utf-8')
-    response_headers = [('Content-type', 'text/plain; charset=utf-8'), ('Content-Length', str(len(response_json)))]
+    response_headers = [('Content-type', 'text/plain; charset=utf-8'), ('Content-Length', str(len(response_json))),
+                        ('Cache-Control', 'no-cache, no-store, must-revalidate'), ('Pragma', 'no-cache'), ('Expires', '0'),
+                        ('Date', datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f'))
+                        ]
     start_response(response_status, response_headers)
 
     # time.sleep(2)

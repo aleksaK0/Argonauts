@@ -25,7 +25,7 @@ SELECT tt1.tid AS tid
                   FROM (SELECT tid, YEAR(date) AS yy, fuel
                           FROM argodb.fuel) AS t1
                  GROUP BY tid, yy) AS t2
-            ON t1.yy = t2.yy) AS t9
+            ON t1.tid = t2.tid AND t1.yy = t2.yy) AS t9
          WHERE tid = 121
        ) AS tt1
   JOIN (
@@ -49,7 +49,7 @@ SELECT tt1.tid AS tid
                          WHERE t2.rid IS NOT NULL 
                          ORDER BY t1.rid, t2.rid) AS t
                  GROUP BY tid, yy) AS t4
-            ON t3.yy = t4.yy) AS t
+            ON t3.tid = t4.tid AND t3.yy = t4.yy) AS t
          WHERE tid = 121
        ) AS tt2
     ON tt1.tid = tt2.tid AND tt1.yy = tt2.yy
