@@ -1052,7 +1052,7 @@ def send_statistics_year(mydb, query_dict, response_dict):
 
         mycursor.execute("SELECT email from email WHERE uid = (SELECT uid FROM transport WHERE tid = %s) AND send = 1" % (tid))
         emails = [row[0] for row in mycursor.fetchall()]
-        
+
         if emails != []:
             txt = """
                   <html lang="ru">
@@ -1075,7 +1075,6 @@ def send_statistics_year(mydb, query_dict, response_dict):
                        Мин. заправка: """ + str(el['fuel_min']) + """
                        <br>
                        Макс. заправка: """ + str(el['fuel_max']) + """
-                       <br>
                        <br>
                        <h3>Пробег</h3>
                        Кол-во записей: """ + str(el['mileage_cnt']) + """
@@ -1115,7 +1114,7 @@ def send_statistics_year(mydb, query_dict, response_dict):
             msg['Subject'] = 'Уведомление от Argonauts'
 
             msg.attach(MIMEText(message, 'html'))
-            # s.send_message(msg)
+            s.send_message(msg)
 
             del msg
 
@@ -1132,6 +1131,102 @@ def send_statistics_year(mydb, query_dict, response_dict):
 
     return response_dict
 
+
+def send_statistics_month(mydb, query_dict, response_dict):
+    try:
+        tid = query_dict['tid'][0]
+
+        f = open(query_dict['argo_home'] + '/wsgi/select_stat_by_month.sql')
+        line = f.read().replace('121', tid)
+
+        mydb.connect()
+        mycursor = mydb.cursor()
+
+        mycursor.execute(line)
+
+        columns = [desc[0] for desc in mycursor.description]
+        values = [dict(zip(columns, row)) for row in mycursor.fetchall()]
+
+        mycursor.execute("SELECT email from email WHERE uid = (SELECT uid FROM transport WHERE tid = %s) AND send = 1" % (tid))
+        emails = [row[0] for row in mycursor.fetchall()]
+
+        if emails != []:
+            txt = """
+                  <html lang="ru">
+                  <head>
+                  </head>
+                  <body>
+                  <h1>Статистика по месяцам</h1>
+                  <div>
+                  """
+            for el in values:
+                txt += """
+                       <h2>Месяц: """ + el['mo'] + """</h2>
+                       <h3>Топливо</h3>
+                       Кол-во заправок: """ + str(el['fuel_cnt']) + """
+                       <br>
+                       Средняя заправка: """ + str(el['fuel_avg']) + """
+                       <br>
+                       Сум. заправка: """ + str(el['fuel_sum']) + """
+                       <br>
+                       Мин. заправка: """ + str(el['fuel_min']) + """
+                       <br>
+                       Макс. заправка: """ + str(el['fuel_max']) + """
+                       <br>
+                       <h3>Пробег</h3>
+                       Кол-во записей: """ + str(el['mileage_cnt']) + """
+                       <br>
+                       Средний пробег: """ + str(el['mileage_avg']) + """
+                       <br>
+                       Сум. пробег: """ + str(el['mileage_sum']) + """
+                       <br>
+                       Мин. пробег: """ + str(el['mileage_min']) + """
+                       <br>
+                       Макс. пробег: """ + str(el['mileage_max']) + """
+                       <br>
+                       <h3>Расход</h3>
+                       На 100 км: """ + str(el['fm_sum']) + """
+                       <br>
+                       <br>
+                       """
+            txt += """
+                   </div>
+                   <br>
+                   <font color="#696969">Данное уведомление сформировано и отправлено автоматически и не требует ответа.<font>
+                   </body>
+                   </html>
+                   """
+
+            s = smtplib.SMTP('smtp.mail.ru', 587)
+            s.starttls()
+            s.login('noreply@argonauts.online', 'YexVc31P#up~0~DuAhC2xIwysK*kcaXO')
+            msg = MIMEMultipart()
+
+            message_template = txt
+            message = message_template  # .substitute(PERSON_NAME=name.title())
+
+            msg['From'] = 'Argonauts.Online <noreply@argonauts.online>'
+            msg['To'] = ', '.join(emails)
+            msg['BCC'] = 'sent@argonauts.online'
+            msg['Subject'] = 'Уведомление от Argonauts'
+
+            msg.attach(MIMEText(message, 'html'))
+            s.send_message(msg)
+
+            del msg
+
+            response_dict['send_statistics_month'] = values
+        else:
+            response_dict['send_statistics_month'] = [{'empty_emails': 1}]
+    except mysql.connector.Error as error:
+        err_code = int(str(error).split()[0])
+        response_dict['send_statistics_month'] = [{'server_error': 1, 'err_code': err_code}]
+    except Exception as error:
+        response_dict['send_statistics_month'] = [{'server_error': 1, 'err_message': str(error)}]
+    finally:
+        mydb.close()
+
+    return response_dict
 
 
 
@@ -1295,6 +1390,8 @@ def application(environ, start_response):
         get_statistics_year(argodb, query_dict, response_dict)
     elif request_mission == 'send_statistics_year':
         send_statistics_year(argodb, query_dict, response_dict)
+    elif request_mission == 'send_statistics_month':
+        send_statistics_month(argodb, query_dict, response_dict)
 
 
     response_status = '200 OK'

@@ -216,7 +216,7 @@ struct StatisticsDetailView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             if selection == 0 {
-                
+                sendStatisticsMonth(tid: String(tid))
             } else {
                 sendStatisticsYear(tid: String(tid))
             }
@@ -283,6 +283,36 @@ struct StatisticsDetailView: View {
                             self.statistics.append(statistics)
                             id += 1
                         }
+                    }
+                }
+            } catch let error as NSError {
+                print("Failed to load: \(error.localizedDescription)")
+                alertMessage = "Ошибка"
+                showAlert = true
+            }
+        } else {
+            alertMessage = "Ошибка"
+            showAlert = true
+        }
+    }
+    
+    func sendStatisticsMonth(tid: String) {
+        let urlString = "https://www.argonauts.online/ARGO63/wsgi?mission=send_statistics_month&tid=" + tid
+        let encodedUrl = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let url = URL(string: encodedUrl!)
+        if let data = try? Data(contentsOf: url!) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    let info = json["send_statistics_month"] as! [[String : Any]]
+                    print("StatisticsDetailView.sendStatisticsMonth(): \(info)")
+                    if info[0]["empty_emails"] != nil {
+                        alertMessage = "Нет активных почт"
+                        showAlert = true
+                    } else if info[0]["server_error"] != nil {
+                        alertMessage = "Ошибка сервера"
+                        showAlert = true
+                    } else {
+                        alertMessage = ""
                     }
                 }
             } catch let error as NSError {
