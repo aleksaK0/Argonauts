@@ -11,7 +11,7 @@ struct EnterEmailView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @Binding var switcher: Views
     
-    @State var email: String = ""
+    @State var email: String = "OO@oo.00"
     @State var alertMessage: String = ""
     
     @State var showAlert: Bool = false
@@ -41,6 +41,7 @@ struct EnterEmailView: View {
                             connectDeviceAsync()
                           })
                     .keyboardType(.emailAddress)
+                    .disableAutocorrection(true)
                     .padding()
                 Spacer()
                 Button {

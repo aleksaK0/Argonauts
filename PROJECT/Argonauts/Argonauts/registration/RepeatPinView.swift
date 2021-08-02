@@ -22,13 +22,16 @@ struct RepeatPinView: View {
     var body: some View {
         ZStack {
             VStack {
-                Button {
-                    switcher = .setPin
-                } label: {
-                    Text("Назад")
+                HStack {
+                    Button {
+                        switcher = .setPin
+                    } label: {
+                        Image(systemName: "chevron.backward")
+                            .font(.title3.weight(.semibold))
+                    }
+                    Spacer()
                 }
                 Text(text)
-                Spacer()
                 Text(pinRepeat)
                     .onChange(of: pinRepeat) { pinRepeat in
                         if pinRepeat.count == 4 {
@@ -39,7 +42,6 @@ struct RepeatPinView: View {
                             }
                         }
                     }
-                Spacer()
                 ForEach(buttonsNoBio, id: \.self) { row in
                     HStack {
                         ForEach(row, id: \.self) { item in
@@ -66,7 +68,6 @@ struct RepeatPinView: View {
                         }
                     }
                 }
-                Spacer()
             }
             .alert(isPresented: $showAlert, content: {
                 Alert(title: Text("Ошибка"), message: Text(alertMessage))
