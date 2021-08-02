@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		5503D66626A016260092DE9F /* ServiceMaterialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5503D66526A016260092DE9F /* ServiceMaterialView.swift */; };
 		5510064126A5CA4C0046C1FB /* TranspAddNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */; };
+		5511253726B8390D004915E8 /* PinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5511253626B8390D004915E8 /* PinView.swift */; };
+		5511253926B8398A004915E8 /* PinButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5511253826B8398A004915E8 /* PinButton.swift */; };
 		55225CCA26AED40F00E091A8 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55225CC926AED40F00E091A8 /* ColorManager.swift */; };
 		5523E21B2665525800DAC79A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21A2665525800DAC79A /* AppDelegate.swift */; };
 		5523E21D2665525800DAC79A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523E21C2665525800DAC79A /* SceneDelegate.swift */; };
@@ -56,6 +58,8 @@
 /* Begin PBXFileReference section */
 		5503D66526A016260092DE9F /* ServiceMaterialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMaterialView.swift; sourceTree = "<group>"; };
 		5510064026A5CA4C0046C1FB /* TranspAddNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranspAddNotification.swift; sourceTree = "<group>"; };
+		5511253626B8390D004915E8 /* PinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinView.swift; sourceTree = "<group>"; };
+		5511253826B8398A004915E8 /* PinButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinButton.swift; sourceTree = "<group>"; };
 		55225CC926AED40F00E091A8 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		5523E2172665525800DAC79A /* Argonauts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Argonauts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5523E21A2665525800DAC79A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -165,6 +169,8 @@
 				55C6F52626A85AD40012A827 /* RowModel */,
 				5523E2252665525900DAC79A /* Preview Content */,
 				55225CC926AED40F00E091A8 /* ColorManager.swift */,
+				5511253626B8390D004915E8 /* PinView.swift */,
+				5511253826B8398A004915E8 /* PinButton.swift */,
 			);
 			path = Argonauts;
 			sourceTree = "<group>";
@@ -317,6 +323,7 @@
 			files = (
 				559376FA269EF20F00D8A683 /* ServiceView.swift in Sources */,
 				5588B0AC2695A2CA00C81A8C /* MileageView.swift in Sources */,
+				5511253726B8390D004915E8 /* PinView.swift in Sources */,
 				5566AD1A26982CC50032D7C9 /* EngHourView.swift in Sources */,
 				55822BAE26A19C56009FBBBE /* NotificationDetailView.swift in Sources */,
 				55D8FACF2689B42D005657DC /* AddTranspView.swift in Sources */,
@@ -325,6 +332,7 @@
 				5523E21B2665525800DAC79A /* AppDelegate.swift in Sources */,
 				55822BAA26A183F8009FBBBE /* NotificationView.swift in Sources */,
 				559376FC269EF34600D8A683 /* ServiceDetailView.swift in Sources */,
+				5511253926B8398A004915E8 /* PinButton.swift in Sources */,
 				5523E21D2665525800DAC79A /* SceneDelegate.swift in Sources */,
 				5588B0AE2695E7C100C81A8C /* MileageDetailView.swift in Sources */,
 				559376FE269F33DA00D8A683 /* HubView.swift in Sources */,
