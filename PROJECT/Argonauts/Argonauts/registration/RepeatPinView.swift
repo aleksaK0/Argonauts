@@ -34,7 +34,7 @@ struct RepeatPinView: View {
                 Text(text)
                 Text(pinRepeat)
                     .onChange(of: pinRepeat) { pinRepeat in
-                        if pinRepeat.count == 4 {
+                        if pinRepeat.count == 5 {
                             if self.pinRepeat == globalObj.pin {
                                 isEmailExistsAsync()
                             } else {

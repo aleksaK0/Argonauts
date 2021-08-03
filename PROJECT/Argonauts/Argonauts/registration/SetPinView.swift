@@ -15,11 +15,22 @@ struct SetPinView: View {
 
     var body: some View {
         VStack {
+            Spacer()
+            HStack {
+                Button {
+                    switcher = .setPin
+                } label: {
+                    Image(systemName: "chevron.backward")
+                        .font(.title3.weight(.semibold))
+                }
+                Spacer()
+            }
+            Spacer()
             Text("Введите пин")
             Spacer()
             Text(pin)
                 .onChange(of: pin) { pin in
-                    if pin.count == 4 {
+                    if pin.count == 5 {
                         globalObj.pin = pin
                         switcher = .repeatPin
                     }
