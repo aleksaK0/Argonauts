@@ -69,9 +69,6 @@ struct RepeatPinView: View {
                     }
                 }
             }
-            .alert(isPresented: $showAlert, content: {
-                Alert(title: Text("Ошибка"), message: Text(alertMessage))
-            })
             if isLoading {
                 Rectangle()
                     .fill(Color.loadingColor.opacity(0.5))
@@ -80,6 +77,9 @@ struct RepeatPinView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
+        .alert(isPresented: $showAlert, content: {
+            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+        })
     }
     
     func isEmailExistsAsync() {

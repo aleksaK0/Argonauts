@@ -8,33 +8,48 @@
 import SwiftUI
 
 struct SetPinView: View {
-    @EnvironmentObject var globalObj: GlobalObj
     @Binding var switcher: Views
-    
+    @EnvironmentObject var globalObj: GlobalObj
+
     @State var pin: String = ""
-    
+
     var body: some View {
         VStack {
-            Spacer()
             Text("Введите пин")
             Spacer()
-            HStack(spacing: 15) {
-                ForEach(0..<5, id: \.self) { index in
-                    PinView(index: index, pin: $pin)
+            Text(pin)
+                .onChange(of: pin) { pin in
+                    if pin.count == 4 {
+                        globalObj.pin = pin
+                        switcher = .repeatPin
+                    }
                 }
-            }
             Spacer()
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 15) {
-                ForEach(1...9, id: \.self) { value in
-                    PinButton(value: "\(value)", pin: $pin, switcher: $switcher)
-                        .environmentObject(globalObj)
+            ForEach(buttonsNoBio, id: \.self) { row in
+                HStack {
+                    ForEach(row, id: \.self) { item in
+                        Button(action: {
+                            switch item.rawValue {
+                            case "dop":
+                                print("dop")
+                            case "del":
+                                if pin != "" {
+                                    pin.removeLast()
+                                }
+                            default:
+                                pin.append(item.rawValue)
+                            }
+                        }, label: {
+                            if item.rawValue == "del" {
+                                Image(systemName: "delete.left")
+                            } else if item.rawValue == "dop" {
+                                Text("")
+                            } else {
+                                Text(item.rawValue)
+                            }
+                        })
+                    }
                 }
-                PinButton(value: "", pin: $pin, switcher: $switcher)
-                    .environmentObject(globalObj)
-                PinButton(value: "0", pin: $pin, switcher: $switcher)
-                    .environmentObject(globalObj)
-                PinButton(value: "delete.left", pin: $pin, switcher: $switcher)
-                    .environmentObject(globalObj)
             }
             Spacer()
         }
