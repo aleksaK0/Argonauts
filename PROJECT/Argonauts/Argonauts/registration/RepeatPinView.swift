@@ -42,7 +42,8 @@ struct RepeatPinView: View {
                     .onChange(of: pinRepeat) { value in
                         if value.count == 5 {
                             if value == globalObj.pin {
-                                isEmailExistsAsync()
+                                authenticate()
+//                                isEmailExistsAsync()
                             } else {
                                 text = "Пин не совпадает"
                             }
@@ -180,6 +181,10 @@ struct RepeatPinView: View {
         } else {
             globalObj.biometryType = "none"
             print("none")
+        }
+        
+        DispatchQueue.main.async {
+            isEmailExistsAsync()
         }
     }
 }
