@@ -11,7 +11,7 @@ struct EnterEmailView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @Binding var switcher: Views
     
-    @State var email: String = "OO@oo.00"
+    @State var email: String = "OO@oo.0000"
     @State var alertMessage: String = ""
     
     @State var showAlert: Bool = false
@@ -24,13 +24,13 @@ struct EnterEmailView: View {
             VStack {
                 Spacer()
                 Text("Регистрация")
+                    .font(.title.weight(.semibold))
                 Spacer()
                 TextField("Email"
                           , text: $email
                           , onEditingChanged: { _ in  }
                           , onCommit: {
                             isValid = isValidEmailAddress(email: email)
-                            #warning("delete line below in fp")
                             isValid = true
                             if isValid {
                                 connectDeviceAsync()
@@ -42,12 +42,12 @@ struct EnterEmailView: View {
                           })
                     .keyboardType(.emailAddress)
                     .disableAutocorrection(true)
+                    .font(.title3)
                     .padding()
                 Spacer()
                 Button {
                     UIApplication.shared.endEditing()
                     isValid = isValidEmailAddress(email: email)
-                    #warning("delete line below in fp")
                     isValid = true
                     if isValid {
                         connectDeviceAsync()
@@ -57,6 +57,7 @@ struct EnterEmailView: View {
                     }
                 } label: {
                     Text("Зарегестрироваться")
+                        .font(.title3)
                 }
                 .disabled(email.isEmpty)
                 Spacer()
@@ -78,7 +79,6 @@ struct EnterEmailView: View {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             //            globalObj.sentPassCode = generatePassCode()
-            #warning("delete line below in fp")
             globalObj.sentPassCode = "1234"
             //            connectDevice(email: email, code: globalObj.sentPassCode)
             DispatchQueue.main.async {

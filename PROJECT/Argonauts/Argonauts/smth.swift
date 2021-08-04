@@ -23,8 +23,8 @@ enum numPadButton: String {
     case zero = "0"
     
     case bio = "bio"
-    case del = "del"
-    case dop = "dop"
+    case del = "delete.left"
+    case dop = ""
 }
 
 enum Views: String {
@@ -157,6 +157,8 @@ let buttonsNoBio: [[numPadButton]] = [
     [.seven, .eight, .nine],
     [.dop, .zero, .del],
 ]
+
+let butNotBio: [numPadButton] = [.one, .two, .three, .four, .five, .six, .seven, .eight, .nine, .dop, .zero, .del]
 
 let buttonsWithBio: [[numPadButton]] = [
     [.one, .two, .three],

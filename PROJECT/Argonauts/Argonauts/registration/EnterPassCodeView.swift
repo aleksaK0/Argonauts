@@ -28,15 +28,20 @@ struct EnterPassCodeView: View {
             .padding([.leading, .trailing, .top])
             Spacer()
             Text(text)
+                .font(.title.weight(.semibold))
+                .multilineTextAlignment(.center)
+                .padding()
             Spacer()
             TextField("Код", text: $userPassCode)
-                .keyboardType(.numberPad)
                 .onChange(of: userPassCode, perform: { value in
                     if userPassCode.count > 4 {
-                        userPassCode.removeLast()
+                        let index = String.Index(utf16Offset: 3, in: userPassCode)
+                        userPassCode = String(userPassCode[...index])
                     }
                 })
-                .padding()
+                .keyboardType(.numberPad)
+                .font(.title3)
+                .padding(.all, 35)
             Spacer()
             Button {
                 if userPassCode == globalObj.sentPassCode {
@@ -46,8 +51,11 @@ struct EnterPassCodeView: View {
                 }
             } label: {
                 Text("Продолжить")
+                    .font(.title3)
             }
-            .disabled(userPassCode.isEmpty)
+            .disabled(userPassCode.isEmpty || userPassCode.count < 4)
+            .padding()
+            Spacer()
             Spacer()
         }
     }

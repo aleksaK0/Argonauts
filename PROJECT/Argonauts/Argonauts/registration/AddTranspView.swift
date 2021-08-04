@@ -21,10 +21,10 @@ struct AddTranspView: View {
     @State var osagoDate: Date = Date()
     @State var osagoLife: Date = Date()
     
-    @State var showOptional: Bool = false
     @State var showAlert: Bool = false
     @State var isLoading: Bool = false
     @State var showTranspAddNot: Bool = false
+    
     @State var isOn1: Bool = false
     @State var isOn2: Bool = false
     @State var isOn3: Bool = false
@@ -34,61 +34,69 @@ struct AddTranspView: View {
     var body: some View {
         ZStack {
             ScrollView(showsIndicators: false) {
-                Text("Транспортное средство")
+                Text("Транспорт")
+                    .font(.title.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .padding()
                 Text("Обязательное поле")
-                TextField("Ник транспортного средства", text: $nick)
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                TextField("Ник", text: $nick)
+                    .disableAutocorrection(true)
+                    .padding([.leading, .trailing])
                 Group {
                     Text("Дополнительные поля")
+                        .font(.system(size: 17, weight: .semibold, design: .default))
                     TextField("Год выпуска", text: $producted)
+                        .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
                     TextField("Текущий пробег", text: $mileage)
+                        .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
                     TextField("Моточасы", text: $engHour)
+                        .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
                     HStack {
-                        Text("Дата получения действующей\nдиагностической карты")
-                            .multilineTextAlignment(.center)
+                        Text("Дата диаг. карты")
+                            .font(.system(size: 17, weight: .semibold, design: .default))
                         Spacer()
                         Toggle("", isOn: $isOn4)
                             .labelsHidden()
                     }
+                    .padding([.leading, .trailing])
                     DatePicker("", selection: $diagDate, in: ...Date(), displayedComponents: .date)
                         .datePickerStyle(WheelDatePickerStyle())
                         .labelsHidden()
+                        .disabled(!isOn4)
                     HStack {
-                        Text("Дата оформления действующего\nполиса ОСАГО")
-                            .multilineTextAlignment(.center)
+                        Text("Дата ОСАГО")
+                            .font(.system(size: 17, weight: .semibold, design: .default))
                         Spacer()
                         Toggle("", isOn: $isOn5)
                             .labelsHidden()
                     }
+                    .padding([.leading, .trailing])
                     DatePicker("", selection: $osagoDate, in: ...Date(), displayedComponents: .date)
                         .datePickerStyle(WheelDatePickerStyle())
                         .labelsHidden()
+                        .disabled(!isOn5)
                 }
                 Button {
                     addTranspAsync()
                 } label: {
                     Text("Продолжить")
+                        .font(.title3)
                 }
-                .alert(isPresented: $showAlert, content: {
-                    if alertMessage == "Добавить уведомления?" {
-                        return Alert(title: Text("Уведомления"),
-                                     message: Text(alertMessage),
-                                     primaryButton: .default(Text("Позже")) {
-                                        switcher = .home
-                                     },
-                                     secondaryButton: .default(Text("Добавить")) {
-                                        showTranspAddNot = true
-                                     }
-                        )
-                    } else {
-                        return Alert(title: Text("Ошибка"), message: Text(alertMessage))
-                    }
-                })
-                .fullScreenCover(isPresented: $showTranspAddNot, onDismiss: changeSwitcher, content: {
-                    NavigationView {
-                        AddTranspNotView(tid: tid, nick: nick, showTranspAddNot: $showTranspAddNot)
-                    }
-                })
+                .disabled(nick.isEmpty)
+                .padding()
+                Button {
+                    switcher = .home
+                } label: {
+                    Text("Потом")
+                        .font(.title3)
+                }
+                .padding([.bottom], 40)
             }
+            .padding([.top], 10)
             if isLoading {
                 Rectangle()
                     .fill(Color.loadingColor.opacity(0.5))
@@ -97,37 +105,118 @@ struct AddTranspView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
+        .alert(isPresented: $showAlert, content: {
+            if alertMessage == "Добавить уведомления?" {
+                return Alert(title: Text("Уведомления"),
+                             message: Text(alertMessage),
+                             primaryButton: .default(Text("Позже")) {
+                                switcher = .home
+                             },
+                             secondaryButton: .default(Text("Добавить")) {
+                                showTranspAddNot = true
+                             }
+                )
+            } else {
+                return Alert(title: Text("Ошибка"), message: Text(alertMessage))
+            }
+        })
+        .fullScreenCover(isPresented: $showTranspAddNot, onDismiss: changeSwitcher, content: {
+            NavigationView {
+                AddTranspNotView(tid: tid, nick: nick, showTranspAddNot: $showTranspAddNot)
+            }
+        })
     }
     
     func changeSwitcher() {
         switcher = .home
     }
     
+    func isValidNick(nick: String) -> Bool {
+        do {
+            let regEx = "^[A-Za-z0-9._]{1,16}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = nick as NSString
+            let results = regex.matches(in: nick, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func isValidMileage(mileage: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = mileage as NSString
+            let results = regex.matches(in: mileage, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func isValidEngHour(engHour: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = engHour as NSString
+            let results = regex.matches(in: engHour, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func canAddTransp() -> Bool {
+        if (producted.isEmpty || isValidYear(year: producted)) && (mileage.isEmpty || isValidMileage(mileage: mileage)) && (engHour.isEmpty || isValidEngHour(engHour: engHour)) && isValidNick(nick: nick) {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     func addTranspAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            var diagDateFormatted = ""
-            var osagoDateFormatted = ""
-            if isOn4 {
-                let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: "ru")
-                formatter.dateFormat = "YYYY-MM-dd"
-                diagDateFormatted = formatter.string(from: diagDate)
-            }
-            if isOn5 {
-                let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: "ru")
-                formatter.dateFormat = "YYYY-MM-dd"
-                osagoDateFormatted = formatter.string(from: osagoDate)
-            }
-            addTransp(email: globalObj.email, nick: nick, producted: producted, mileage: mileage, engHour: engHour, diagDate: diagDateFormatted, osagoDate: osagoDateFormatted)
-            if alertMessage == "" {
+            if canAddTransp() {
+                var diagDateFormatted = ""
+                var osagoDateFormatted = ""
                 if isOn4 {
-                    addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                    let formatter = DateFormatter()
+                    formatter.locale = Locale(identifier: "ru")
+                    formatter.dateFormat = "YYYY-MM-dd"
+                    diagDateFormatted = formatter.string(from: diagDate)
                 }
                 if isOn5 {
-                    addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                    let formatter = DateFormatter()
+                    formatter.locale = Locale(identifier: "ru")
+                    formatter.dateFormat = "YYYY-MM-dd"
+                    osagoDateFormatted = formatter.string(from: osagoDate)
                 }
+                addTransp(email: globalObj.email, nick: nick, producted: producted, mileage: mileage, engHour: engHour, diagDate: diagDateFormatted, osagoDate: osagoDateFormatted)
+                if alertMessage == "" {
+                    if isOn4 {
+                        addNotification(tid: String(tid), dataType: "D", mode: "1", date: diagDate, value1: "", value2: "", notification: "Истекает срок действия диагностической карты")
+                    }
+                    if isOn5 {
+                        addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
+                    }
+                }
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
             }
             DispatchQueue.main.async {
                 if alertMessage == "" {

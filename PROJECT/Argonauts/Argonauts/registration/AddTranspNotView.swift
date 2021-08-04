@@ -32,7 +32,9 @@ struct AddTranspNotView: View {
                 DisclosureGroup("Критерий: \(type)", isExpanded: $isExpanded) {
                     ForEach(types, id: \.self) { el in
                         HStack {
+                            Spacer()
                             Text(el)
+                            Spacer()
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -42,7 +44,14 @@ struct AddTranspNotView: View {
                         Divider()
                     }
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    isExpanded.toggle()
+                }
+                .padding([.leading, .trailing])
                 TextField("Уведомление", text: $notification)
+                    .disableAutocorrection(true)
+                    .padding([.leading, .trailing])
                 switch type {
                 case "Дата":
                     DatePicker("", selection: $date, in: Date()..., displayedComponents: [.date])
@@ -50,11 +59,15 @@ struct AddTranspNotView: View {
                         .labelsHidden()
                 case "Топливо":
                     TextField(type, text: $value1)
+                        .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
                 default:
-                    TextField(type, text: $value1)
-                    Text("Ниже можно ввести показание \"\(type)\", при достижении которого будет отправлено уведомление, о приближении")
-                        .foregroundColor(.gray)
-                    TextField(type, text: $value2)
+                    TextField(type + " (наступление)", text: $value1)
+                        .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
+                    TextField(type + " (приближение (доп))", text: $value2)
+                        .keyboardType(.numberPad)
+                        .padding([.leading, .trailing])
                 }
                 Button(action: {
                     UIApplication.shared.endEditing()
@@ -62,11 +75,19 @@ struct AddTranspNotView: View {
                 }, label: {
                     Text("Добавить")
                 })
-                List {
-                    ForEach(notifications, id: \.nid) { notification in
-                        Text(String(describing: notification.nid))
+                .disabled(notification.isEmpty || (type != "Дата" && value1.isEmpty))
+                if notifications.isEmpty {
+                    Text("Здесь будет список уведомлений")
+                        .foregroundColor(Color(UIColor.systemGray))
+                        .padding()
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(notifications, id: \.nid) { notification in
+                            RowNotification(notification: notification)
+                        }
+                        .onDelete(perform: deleteNotificationAsync)
                     }
-                    .onDelete(perform: deleteNotificationAsync)
                 }
             }
             if isLoading {
@@ -82,7 +103,7 @@ struct AddTranspNotView: View {
                                 Button(action: {
                                     showTranspAddNot = false
                                 }, label: {
-                                    Text("Отменить")
+                                    Text("Отм.")
                                 }),
                             trailing:
                                 Button(action: {
@@ -90,13 +111,50 @@ struct AddTranspNotView: View {
                                 }, label: {
                                     Text("Готово")
                                 })
-                            )
+        )
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Ошибка"), message: Text(alertMessage))
         }
         .onAppear {
             getNotificationAsync()
         }
+    }
+    
+    func isValidValue(value: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = value as NSString
+            let results = regex.matches(in: value, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func canAddNotification(type: String) -> Bool {
+        if type == "Дата" {
+            return true
+        } else if type == "Моточасы" || type == "Пробег" {
+            if isValidValue(value: value1) {
+                if value2.isEmpty == false {
+                    if isValidValue(value: value2) && Int(value1)! > Int(value2)! {
+                        return true
+                    }
+                } else {
+                    return true
+                }
+            }
+        } else if type == "Топливо" {
+            if isValidValue(value: value1) {
+                return true
+            }
+        }
+        return false
     }
     
     func getNotificationAsync() {
@@ -113,7 +171,12 @@ struct AddTranspNotView: View {
     func addNotificationAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
+            if canAddNotification(type: type) {
+                addNotification(tid: String(tid), dataType: type, mode: "0", date: date, value1: value1, value2: value2, notification: notification)
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
+            }
             DispatchQueue.main.async {
                 isLoading = false
             }

@@ -12,7 +12,7 @@ struct CreateAccountView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @Binding var switcher: Views
     
-    @State var nick: String = ""
+    @State var nick: String = "A"
     @State var alertMessage: String = ""
     
     @State var isLoading: Bool = false
@@ -21,21 +21,29 @@ struct CreateAccountView: View {
     var body: some View {
         ZStack {
             VStack {
+                Spacer()
                 Text("Введите своё имя")
-                TextField("Ник"
+                    .font(.title.weight(.semibold))
+                Spacer()
+                TextField("Имя"
                           , text: $nick
                           , onEditingChanged: { _ in }
                           , onCommit: {
-                            
+                            UIApplication.shared.endEditing()
+                            addUserAsync()
                           })
+                    .disableAutocorrection(true)
+                    .font(.title3)
+                    .padding()
+                Spacer()
                 Button {
+                    UIApplication.shared.endEditing()
                     addUserAsync()
                 } label: {
                     Text("Продолжить")
+                        .font(.title3)
                 }
-            }
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("Ошибка"), message: Text(alertMessage))
+                Spacer()
             }
             if isLoading {
                 Rectangle()
@@ -45,17 +53,40 @@ struct CreateAccountView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
             }
         }
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("Ошибка"), message: Text(alertMessage))
+        }
+    }
+    
+    func isValidNick(nick: String) -> Bool {
+        do {
+            let regEx = "^[A-Za-z0-9._]{1,16}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = nick as NSString
+            let results = regex.matches(in: nick, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
     }
     
     func addUserAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            addUser(email: globalObj.email, nick: nick)
-            if alertMessage == "" {
-                writeToDocDir(filename: "pinInfo", text: globalObj.email + "\n" + globalObj.pin)
+            if isValidNick(nick: nick) {
+                addUser(email: globalObj.email, nick: nick)
+                if alertMessage == "" {
+                    writeToDocDir(filename: "pinInfo", text: globalObj.email + "\n" + globalObj.pin)
+                }
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
             }
             DispatchQueue.main.async {
-                authenticate()
                 if alertMessage == "" {
                     switcher = .addTransp
                 }
@@ -89,39 +120,6 @@ struct CreateAccountView: View {
         } else {
             alertMessage = "Ошибка"
             showAlert = true
-        }
-    }
-    
-    func authenticate() {
-        let context = LAContext()
-        var error: NSError?
-        
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            let reason = "Вы сможете осуществлять вход в приложение с помощью биометрии"
-            
-            switch context.biometryType {
-            case .faceID:
-                print("EnterPinView.authenticate(): faceID")
-                globalObj.biometryType = "faceID"
-            case .touchID:
-                print("EnterPinView.authenticate(): touchID")
-                globalObj.biometryType = "touchID"
-            default:
-                print("EnterPinView.authenticate(): none")
-                globalObj.biometryType = "none"
-            }
-            
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
-                DispatchQueue.main.async {
-                    if success {
-                        
-                    } else {
-                        
-                    }
-                }
-            }
-        } else {
-            globalObj.biometryType = "none"
         }
     }
 }

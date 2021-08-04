@@ -21,51 +21,56 @@ struct EnterPinView: View {
     var body: some View {
         ZStack {
             VStack {
+                Spacer()
                 Text(text)
+                    .font(.title.weight(.semibold))
+                    .multilineTextAlignment(.center)
                 Text(pin)
                     .onChange(of: pin) { pin in
-                        if pin.count == 4 {
-                            if pin == pinInfo[1] {
-                                switcher = .home
-                            } else {
-                                text = "Попробуйте снова"
+                        if pin.count == 5 {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                if pin == pinInfo[1] {
+                                    switcher = .home
+                                } else {
+                                    text = "Неверный пин"
+                                }
                             }
-                        } else {
-                            text = "Введите пин"
                         }
                     }
-                ForEach(buttonsWithBio, id: \.self) { row in
-                    HStack {
-                        ForEach(row, id: \.self) { item in
-                            Button(action: {
-                                switch item.rawValue {
-                                case "bio":
-                                    authenticate()
-                                case "del":
-                                    if pin != "" {
-                                        pin.removeLast()
-                                    }
-                                default:
-                                    pin.append(item.rawValue)
-                                }
-                            }, label: {
-                                if item.rawValue == "del" {
-                                    Image(systemName: "delete.left")
-                                } else if item.rawValue == "bio" {
-                                    if globalObj.biometryType == "faceID" {
-                                        Image(systemName: "faceid")
-                                    } else if globalObj.biometryType == "touchID" {
-                                        Image(systemName: "touchid")
-                                    } else {
-                                        Text("")
-                                    }
-                                } else {
-                                    Text(item.rawValue)
-                                }
-                            })
+                    .font(.title2)
+                    .frame(height: 45)
+                    .padding()
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 15) {
+                    ForEach(butNotBio, id: \.self) { value in
+                        Button {
+                            setPin(value: value)
+                        } label: {
+                            if value.rawValue == "delete.left" {
+                                Image(systemName: value.rawValue)
+                                    .font(.title)
+                                    .foregroundColor(.reverseColor)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 5, style: .circular)
+                                            .fill(Color.gray.opacity(0.3))
+                                            .frame(width: UIScreen.main.bounds.width / 4.5, height: UIScreen.main.bounds.width / 8)
+                                    )
+                                    .frame(width: UIScreen.main.bounds.width / 4.5, height: UIScreen.main.bounds.width / 8)
+                            } else if value.rawValue != "" {
+                                Text(value.rawValue)
+                                    .font(.title)
+                                    .foregroundColor(.reverseColor)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 5, style: .circular)
+                                            .fill(Color.gray.opacity(0.3))
+                                            .frame(width: UIScreen.main.bounds.width / 4.5, height: UIScreen.main.bounds.width / 8)
+                                    )
+                                    .frame(width: UIScreen.main.bounds.width / 4.5, height: UIScreen.main.bounds.width / 8)
+                            }
                         }
                     }
                 }
+                .padding()
+                Spacer()
             }
             if isLoading {
                 Rectangle()
@@ -78,6 +83,14 @@ struct EnterPinView: View {
         .onAppear {
             readPinInfoAsync()
             authenticate()
+        }
+    }
+    
+    func setPin(value: numPadButton) {
+        if value == .del && pin.count > 0 {
+            pin.removeLast()
+        } else {
+            pin.append(value.rawValue)
         }
     }
     

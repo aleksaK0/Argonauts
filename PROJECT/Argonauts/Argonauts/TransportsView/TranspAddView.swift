@@ -11,6 +11,7 @@ struct TranspAddView: View {
     @EnvironmentObject var globalObj: GlobalObj
     @Binding var isPresented: Bool
     
+    @State var alertMessage: String = ""
     @State var tid: Int = 0
     @State var nick: String = ""
     @State var producted: String = ""
@@ -20,16 +21,15 @@ struct TranspAddView: View {
     @State var osagoDate: Date = Date()
     @State var osagoLife: Date = Date()
     
+    @State var showAlert: Bool = false
+    @State var isLoading: Bool = false
+    @State var showTranspAddNot: Bool = false
+    
     @State var isOn1: Bool = false
     @State var isOn2: Bool = false
     @State var isOn3: Bool = false
     @State var isOn4: Bool = false
     @State var isOn5: Bool = false
-    
-    @State var showTranspAddNot: Bool = false
-    @State var showAlert: Bool = false
-    @State var alertMessage: String = ""
-    @State var isLoading: Bool = false
     
     var body: some View {
         ZStack {
@@ -38,8 +38,8 @@ struct TranspAddView: View {
                     .font(.system(size: 17, weight: .semibold, design: .default))
                     .padding([.top])
                 TextField("Ник", text: $nick)
-                    .padding([.leading, .trailing])
                     .disableAutocorrection(true)
+                    .padding([.leading, .trailing])
                 Text("Дополнительные поля")
                     .font(.system(size: 17, weight: .semibold, design: .default))
                 TextField("Год выпуска", text: $producted)
@@ -124,10 +124,66 @@ struct TranspAddView: View {
         )
     }
     
+    func isValidNick(nick: String) -> Bool {
+        do {
+            let regEx = "^[A-Za-z0-9._]{1,16}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = nick as NSString
+            let results = regex.matches(in: nick, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                 return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func isValidMileage(mileage: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = mileage as NSString
+            let results = regex.matches(in: mileage, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func isValidEngHour(engHour: String) -> Bool {
+        do {
+            let regEx = "^[0-9]{1,9}$"
+            let regex = try NSRegularExpression(pattern: regEx)
+            let nsString = engHour as NSString
+            let results = regex.matches(in: engHour, range: NSRange(location: 0, length: nsString.length))
+            if results.count != 1 {
+                return false
+            }
+            return true
+        } catch let error as NSError {
+            print("invalid regex: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    func canAddTransp() -> Bool {
+        if (producted.isEmpty || isValidYear(year: producted)) && (mileage.isEmpty || isValidMileage(mileage: mileage)) && (engHour.isEmpty || isValidEngHour(engHour: engHour)) && isValidNick(nick: nick) {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     func addTranspAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            if isValidYear(year: producted) || producted == "" {
+            if canAddTransp() {
                 var diagDateFormatted = ""
                 var osagoDateFormatted = ""
                 if isOn4 {
@@ -151,6 +207,9 @@ struct TranspAddView: View {
                         addNotification(tid: String(tid), dataType: "D", mode: "2", date: osagoDate, value1: "", value2: "", notification: "Истекает срок действия полиса ОСАГО")
                     }
                 }
+            } else {
+                alertMessage = "Введены некорректные данные"
+                showAlert = true
             }
             DispatchQueue.main.async {
                 if alertMessage == "" {
