@@ -21,6 +21,10 @@ struct AccountEditView: View {
         ZStack {
             VStack {
                 TextField("Имя", text: $nick)
+                    .disableAutocorrection(true)
+                    .font(.title3)
+                    .padding()
+                Spacer()
             }
             if isLoading {
                 Rectangle()
@@ -35,7 +39,7 @@ struct AccountEditView: View {
                                 Button(action: {
                                     showAccountEdit = false
                                 }, label: {
-                                    Text("Отменить")
+                                    Text("Отм.")
                                 }),
                             trailing:
                                 Button(action: {

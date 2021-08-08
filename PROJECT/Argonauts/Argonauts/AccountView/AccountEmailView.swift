@@ -12,54 +12,72 @@ struct AccountEmailView: View {
     @State var email: String
     @Binding var switcher: Views
     
+    @State var alertMessage: String = ""
+    @State var send: Int = -1
+    @State var selectedEmail: String = ""
+    @State var newEmail: String = ""
+    @State var code: String = ""
+    @State var sentCode: String = ""
+    @State var emails: [Email] = []
+    
     @State var isLoading: Bool = false
     @State var showAlert: Bool = false
     @State var showFields: Bool = false
     @State var codeSent: Bool = false
     @State var fileRemoved: Bool = false
     
-    @State var alertMessage: String = ""
-    @State var send: Int = -1
-    @State var selecEmail: String = ""
-    @State var newEmail: String = ""
-    @State var code: String = ""
-    @State var sentCode: String = ""
-    @State var emails: [Email] = []
-    
     var body: some View {
         ZStack {
             VStack {
                 if showFields {
                     TextField("Почта", text: $newEmail)
+                        .font(.title3)
+                        .disableAutocorrection(true)
+                        .padding([.leading, .trailing, .top])
                     if codeSent {
                         TextField("Код", text: $code)
+                            .onChange(of: code, perform: { value in
+                                if code.count > 4 {
+                                    let index = String.Index(utf16Offset: 3, in: code)
+                                    code = String(code[...index])
+                                }
+                            })
+                            .font(.title3)
+                            .keyboardType(.numberPad)
+                            .padding([.leading, .trailing, .top])
                         Button(action: {
 //                            if code == sentCode {
 //                                addEmailAsync()
 //                            }
                             if code == "1234" {
                                 addEmailAsync()
+                            } else {
+                                alertMessage = "Неверный код, попробуйте снова"
+                                showAlert = true
                             }
                         }, label: {
                             Text("Подтвердить")
+                                .font(.title3)
                         })
+                        .disabled(code.isEmpty)
                     } else {
                         Button(action: {
 //                            connectDeviceAsync()
                             codeSent = true
                         }, label: {
                             Text("Продолжить")
+                                .font(.title3)
                         })
+                        .disabled(newEmail.isEmpty)
                     }
                 }
                 List {
                     ForEach(emails, id: \.eid) { email in
                         HStack {
-                            Text(String(describing: email.email))
-                            Text(String(describing: email.send))
+                            Text(email.email)
                             Spacer()
                             Button(action: {
-                                selecEmail = email.email
+                                selectedEmail = email.email
                                 if email.send == 0 {
                                     send = 1
                                 } else {
@@ -68,6 +86,7 @@ struct AccountEmailView: View {
                                 changeEmailSendAsync()
                             }, label: {
                                 Image(systemName: email.send == 0 ? "envelope" : "envelope.fill")
+                                    .font(.title3)
                             })
                             .buttonStyle(BorderlessButtonStyle())
                         }
@@ -90,8 +109,10 @@ struct AccountEmailView: View {
                                 }, label: {
                                     if showFields {
                                         Image(systemName: "minus")
+                                            .font(.title2.weight(.semibold))
                                     } else {
                                         Image(systemName: "plus")
+                                            .font(.title2.weight(.semibold))
                                     }
                                 }))
         .alert(isPresented: $showAlert) {
@@ -133,7 +154,10 @@ struct AccountEmailView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             addEmail(email: email, newEmail: newEmail)
             DispatchQueue.main.async {
-                codeSent = false
+                if alertMessage == "" {
+                    codeSent = false
+                    newEmail = ""
+                }
                 isLoading = false
             }
         }
@@ -179,7 +203,7 @@ struct AccountEmailView: View {
     func changeEmailSendAsync() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
-            changeEmailSend(email: selecEmail, send: String(send))
+            changeEmailSend(email: selectedEmail, send: String(send))
             emails = []
             getEmail(email: globalObj.email)
             DispatchQueue.main.async {

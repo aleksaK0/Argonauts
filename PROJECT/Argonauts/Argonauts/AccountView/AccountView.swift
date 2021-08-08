@@ -21,9 +21,10 @@ struct AccountView: View {
     @State var nick: String = ""
     @State var selection: String? = nil
     
+    @State var preferences: [String] = ["Почта"]
+    
     var body: some View {
         ZStack {
-//            ScrollView(showsIndicators: false) {
             VStack {
                 NavigationLink(destination: AccountEmailView(email: globalObj.email, switcher: $switcher).environmentObject(globalObj), tag: "Почта", selection: $selection, label: { EmptyView() })
                 HStack {
@@ -32,22 +33,32 @@ struct AccountView: View {
                         showAccountEdit = true
                     }, label: {
                         Text("Изм.")
+                            .font(.title3)
                     })
                 }
-                .padding([.leading, .trailing])
+                .padding()
+                Spacer()
                 Text(nick)
+                    .font(.title.weight(.semibold))
                 Text(globalObj.email)
-                Button(action: {
-                    selection = "Почта"
-                }, label: {
-                    Text("Почта")
-                })
+                    .font(.title2)
+                List {
+                    ForEach(preferences, id: \.self) { pref in
+                        Button {
+                            selection = pref
+                        } label: {
+                            Text(pref)
+                        }
+                    }
+                }
                 Button(action: {
                     alertMessage = "Вы уверены, что хотите выйти из аккаунта?"
                     showAlert = true
                 }, label: {
                     Text("Выйти")
+                        .font(.title3)
                 })
+                .padding()
             }
             if isLoading {
                 Rectangle()
